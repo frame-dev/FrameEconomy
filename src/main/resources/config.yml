@@ -1,0 +1,14 @@
+#MySQL Connection!
+MySQL:
+  Host: ' '
+  User: ' '
+  Password: ' '
+  Database: ' '
+  Port: 3306
+  Use: false
+Currency:
+  Plural: '$'
+  Singular: '$'
+Economy:
+  Activate: false
+  MaxBalance: 1000000

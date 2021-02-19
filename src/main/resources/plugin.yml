@@ -1,0 +1,17 @@
+name: FrameEconomy
+version: @version@
+description: Money System works with Vault
+main: de.framedev.frameeconomy.main.Main
+api-version: 1.16
+depend: [ Vault ]
+authors: [ FrameDev ]
+website: https://framedev.stream
+
+commands:
+  pay:
+  balance:
+    aliases:
+      - bal
+  economy:
+    aliases:
+      - eco
