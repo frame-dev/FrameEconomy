@@ -7,7 +7,7 @@ repositories {<br>
 			maven { url 'https://jitpack.io' }<br>
 }<br>
 dependencies {<br>
-	        implementation 'com.github.frame-dev:FrameEconomy:Tag'<br>
+	        implementation 'com.github.frame-dev:FrameEconomy:LATEST'<br>
 }<br>
 </body>
 </html>
