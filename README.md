@@ -1,4 +1,7 @@
 # FrameEconomy
+<!DOCTYPE html>
+<html lang="en-US">
+	<body>
 Gradle:
 
 repositories {
@@ -7,3 +10,5 @@ repositories {
 dependencies {
 	        implementation 'com.github.frame-dev:FrameEconomy:Tag'
 }
+</body>
+</html>
