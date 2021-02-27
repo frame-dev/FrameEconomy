@@ -1,5 +1,6 @@
 # FrameEconomy
 Gradle:
+```text
 repositories {
 	maven { url 'https://jitpack.io' }
 }
@@ -19,3 +20,4 @@ Maven:
 	<artifactId>FrameEconomy</artifactId>
 	<version>LATEST</version>
   </dependency>
+  ```
