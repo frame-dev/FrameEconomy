@@ -33,7 +33,7 @@ public class EcoCMD implements CommandExecutor, TabCompleter {
         if(args[0].equalsIgnoreCase("set")) {
             if(args.length == 2) {
                 if(sender instanceof Player) {
-                    if(sender.hasPermission("frameeconomy.set")) {
+                    if(sender.hasPermission("frameeconomy.eco.set")) {
                         Player player = (Player) sender;
                         double amount = Double.parseDouble(args[1]);
                         plugin.getVaultManager().getEco().withdrawPlayer(player, plugin.getVaultManager().getEco().getBalance(player));
@@ -46,7 +46,7 @@ public class EcoCMD implements CommandExecutor, TabCompleter {
                     sender.sendMessage("§cOnly Player can use this Command!");
                 }
             } else if(args.length == 3) {
-                if(sender.hasPermission("frameeconomy.set.others")) {
+                if(sender.hasPermission("frameeconomy.eco.set.others")) {
                     Player player = Bukkit.getPlayer(args[2]);
                     double amount = Double.parseDouble(args[1]);
                     if (player != null) {

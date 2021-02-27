@@ -15,3 +15,26 @@ commands:
   economy:
     aliases:
       - eco
+
+permissions:
+  frameeconomy.*:
+    children:
+      frameeconomy.balance: true
+      frameeconomy.balance.others: true
+      frameeconomy.pay: true
+      frameeconomy.eco.set: true
+      frameeconomy.eco.set.others: true
+  frameeconomy.balance:
+    default: op
+  frameeconomy.balance.others:
+    default: op
+    children:
+      frameeconomy.balance: true
+  frameeconomy.pay:
+    default: op
+  frameeconomy.eco.set:
+    default: op
+  frameeconomy.eco.set.others:
+    default: op
+    children:
+      frameeconomy.eco.set: true
