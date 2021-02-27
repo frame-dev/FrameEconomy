@@ -1,5 +1,5 @@
 # FrameEconomy
-Gradle:<br>
+Gradle:
 repositories {
 	maven { url 'https://jitpack.io' }
 }
