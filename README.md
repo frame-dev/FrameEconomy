@@ -1,25 +1,21 @@
 # FrameEconomy
-<!DOCTYPE html>
-<html lang="en-US">
-	<body>
 Gradle:<br>
-repositories {<br>
-			maven { url 'https://jitpack.io' }<br>
-}<br>
-dependencies {<br>
-	        implementation 'com.github.frame-dev:FrameEconomy:LATEST'<br>
-}<br>
-		<p>Maven: <br>
-		<repositories><br>
-		  <repository><br>
-		    <id>jitpack.io</id><br>
-		    <url>https://jitpack.io</url><br>
-		  </repository><br>
-	       </repositories><br>
-	       <dependency><br>
-	         <groupId>com.github.frame-dev</groupId><br>
-	         <artifactId>FrameEconomy</artifactId><br>
-	         <version>LATEST</version><br>
-			</dependency><br></p>
-</body>
-</html>
+repositories {
+	maven { url 'https://jitpack.io' }
+}
+dependencies {
+	implementation 'com.github.frame-dev:FrameEconomy:LATEST'<br>
+}
+Maven:
+  <repositories>
+    <repository>
+	<id>jitpack.io</id>
+	<url>https://jitpack.io</url>
+    </repository>
+  </repositories>
+  
+  <dependency>
+	<groupId>com.github.frame-dev</groupId>
+	<artifactId>FrameEconomy</artifactId>
+	<version>LATEST</version>
+  </dependency>
