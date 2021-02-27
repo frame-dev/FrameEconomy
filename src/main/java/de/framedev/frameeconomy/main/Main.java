@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.logging.Level;
 
@@ -35,6 +36,13 @@ public final class Main extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(this, this);
 
         getLogger().log(Level.INFO, "Enabled!");
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (vaultManager.getEco() != null)
+                    getLogger().log(Level.INFO, "Connect to Vault API!");
+            }
+        }.runTaskLater(this, 60);
     }
 
     @Override
