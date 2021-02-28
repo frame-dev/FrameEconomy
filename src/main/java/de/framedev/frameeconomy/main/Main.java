@@ -5,6 +5,7 @@ import de.framedev.frameeconomy.commands.EcoCMD;
 import de.framedev.frameeconomy.commands.PayCMD;
 import de.framedev.frameeconomy.mysql.MySQL;
 import de.framedev.frameeconomy.vault.VaultManager;
+import frameeconomy.VaultProvider;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -18,17 +19,23 @@ public final class Main extends JavaPlugin implements Listener {
     private static Main instance;
 
     private VaultManager vaultManager;
+    private VaultProvider vaultProvider;
 
     @Override
     public void onEnable() {
         instance = this;
 
-        getConfig().options().copyDefaults(true);
+        getConfig().options().copyDefaults();
         saveDefaultConfig();
+        reloadConfig();
+        saveConfig();
 
         new MySQL();
 
         this.vaultManager = new VaultManager(this);
+        this.vaultProvider = new VaultProvider();
+        if (getConfig().getBoolean("PayLoad.Use"))
+            vaultProvider.runnable();
         new PayCMD(this);
         new BalanceCMD(this);
         new EcoCMD(this);
@@ -48,6 +55,10 @@ public final class Main extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         getLogger().log(Level.INFO, "Disabled!");
+    }
+
+    public VaultProvider getVaultProvider() {
+        return vaultProvider;
     }
 
     @EventHandler

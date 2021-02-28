@@ -12,3 +12,10 @@ Currency:
 Economy:
   Activate: false
   MaxBalance: 1000000
+PayLoad:
+  Use: false
+  Time:
+    Sec: 0
+    Min: 30
+    Hour: 0
+    Day: 0
