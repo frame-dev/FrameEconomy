@@ -75,7 +75,7 @@ public class MySQL {
         if (con == null) {
             close();
             try {
-                con = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, user, password);
+                con = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database + "?useUnicode=yes&characterEncoding=UTF-8&useSSL=false", user, password);
                 con.setNetworkTimeout(Executors.newFixedThreadPool(100), 1000000);
                 con.createStatement().executeUpdate("SET GLOBAL max_connections=1200;");
                 return con;
@@ -85,7 +85,7 @@ public class MySQL {
         } else {
             close();
             try {
-                con = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, user, password);
+                con = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database + "?useUnicode=yes&characterEncoding=UTF-8&useSSL=false", user, password);
                 con.setNetworkTimeout(Executors.newFixedThreadPool(100), 1000000);
                 con.createStatement().executeUpdate("SET GLOBAL max_connections=1200;");
                 return con;
@@ -100,7 +100,7 @@ public class MySQL {
     public static void connect() {
         if (con == null) {
             try {
-                con = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, user, password);
+                con = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database + "?useUnicode=yes&characterEncoding=UTF-8&useSSL=false", user, password);
                 con.setNetworkTimeout(Executors.newFixedThreadPool(100), 1000000);
                 con.createStatement().executeUpdate("SET GLOBAL max_connections=1200;");
                 Bukkit.getConsoleSender().sendMessage(MySQLPrefix + "-Verbindung wurde aufgebaut!");

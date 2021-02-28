@@ -59,6 +59,8 @@ public class MySQLManager {
                         return (double) SQL.get(tableName, "Money", "Player", player.getUniqueId().toString());
                     }
                 }
+            } else {
+                SQL.createTable(tableName, "Player TEXT(256)", "Money DOUBLE", "BankBalance DOUBLE", "BankName TEXT", "BankOwner TEXT", "BankMembers TEXT");
             }
         } else {
             if (SQL.isTableExists(tableName)) {
@@ -67,6 +69,8 @@ public class MySQLManager {
                         return (double) SQL.get(tableName, "Money", "Player", player.getName());
                     }
                 }
+            } else {
+                SQL.createTable(tableName, "Player TEXT(256)", "Money DOUBLE", "BankBalance DOUBLE", "BankName TEXT", "BankOwner TEXT", "BankMembers TEXT");
             }
         }
         return 0.0D;
