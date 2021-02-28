@@ -31,27 +31,27 @@ class VaultProvider {
     }
 
 
-    companion object {
-        fun payLoad() {
-            for (offlinePlayer in Bukkit.getOfflinePlayers()) {
-                Main.getInstance().vaultManager.eco.depositPlayer(offlinePlayer, 100.toDouble())
-            }
+    fun payLoad() {
+        for (offlinePlayer in Bukkit.getOfflinePlayers()) {
+            economy.depositPlayer(offlinePlayer, 100.toDouble())
         }
     }
 
-    fun ticksToSec(sec: Long): Long {
-        return sec * 20
-    }
+    companion object {
+        fun ticksToSec(sec: Long): Long {
+            return sec * 20
+        }
 
-    fun ticksToMin(min: Long): Long {
-        return min * 60 * 20
-    }
+        fun ticksToMin(min: Long): Long {
+            return min * 60 * 20
+        }
 
-    fun ticksToHour(hour: Long): Long {
-        return hour * 60 * 60 * 20
-    }
+        fun ticksToHour(hour: Long): Long {
+            return hour * 60 * 60 * 20
+        }
 
-    fun ticksToDay(day: Long): Long {
-        return day * 24 * 60 * 60 * 20
+        fun ticksToDay(day: Long): Long {
+            return day * 24 * 60 * 60 * 20
+        }
     }
 }
