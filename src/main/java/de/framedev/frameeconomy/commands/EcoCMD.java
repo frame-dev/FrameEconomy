@@ -58,7 +58,7 @@ public class EcoCMD implements CommandExecutor, TabCompleter {
                         sender.sendMessage("§aThis Player isn't Online! §6" + args[2]);
                     }
                 } else {
-                    sender.sendMessage("§cNo Permissions!");
+                    sender.sendMessage("§cNo Permissions!" );
                 }
             }
         }
