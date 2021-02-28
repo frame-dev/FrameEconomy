@@ -6,6 +6,8 @@ import de.framedev.frameeconomy.commands.PayCMD;
 import de.framedev.frameeconomy.mysql.MySQL;
 import de.framedev.frameeconomy.vault.VaultManager;
 import frameeconomy.VaultProvider;
+
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -58,6 +60,7 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     public VaultProvider getVaultProvider() {
+        Bukkit.getConsoleSender().sendMessage("hi");
         return vaultProvider;
     }
 

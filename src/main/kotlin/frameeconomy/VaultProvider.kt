@@ -31,6 +31,9 @@ class VaultProvider {
     }
 
 
+    /**
+     * Get Economy PayLoad
+     */
     fun payLoad() {
         for (offlinePlayer in Bukkit.getOfflinePlayers()) {
             economy.depositPlayer(offlinePlayer, 100.toDouble())
