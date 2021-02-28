@@ -5,7 +5,7 @@ repositories {
 	maven { url 'https://jitpack.io' }
 }
 dependencies {
-	implementation 'com.github.frame-dev:FrameEconomy:LATEST'<br>
+	implementation 'com.github.frame-dev:FrameEconomy:LATEST'
 }
 
 Maven:
