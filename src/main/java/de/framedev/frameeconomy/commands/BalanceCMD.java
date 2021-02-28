@@ -7,6 +7,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.logging.Level;
+
 /**
  * This Plugin was Created by FrameDev
  * Package : de.framedev.frameeconomy.commands
@@ -22,6 +24,7 @@ public class BalanceCMD implements CommandExecutor {
     public BalanceCMD(Main plugin) {
         this.plugin = plugin;
         plugin.getCommand("balance").setExecutor(this::onCommand);
+        plugin.getLogger().log(Level.INFO,"Loaded");
     }
 
     @Override

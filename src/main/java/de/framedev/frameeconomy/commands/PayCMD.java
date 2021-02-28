@@ -41,10 +41,13 @@ public class PayCMD implements CommandExecutor, TabCompleter {
                     Player target = Bukkit.getPlayer(args[1]);
                     if (target != null) {
                         if (plugin.getVaultManager().getEco().has(player, amount)) {
-                            plugin.getVaultManager().getEco().depositPlayer(target, amount);
-                            plugin.getVaultManager().getEco().withdrawPlayer(player, amount);
-                            player.sendMessage("§aYou give §6" + target.getName() + " " + amount + plugin.getVaultManager().getEco().currencyNamePlural());
-                            target.sendMessage("§aYou got from §6" + player.getName() + " " + amount + plugin.getVaultManager().getEco().currencyNamePlural());
+                            boolean[] success = {false,false};
+                            success[0] = plugin.getVaultManager().getEco().depositPlayer(target, amount).transactionSuccess();
+                            success[1] = plugin.getVaultManager().getEco().withdrawPlayer(player, amount).transactionSuccess();
+                            if(success[0] && success[1]) {
+                                player.sendMessage("§aYou give §6" + target.getName() + " " + amount + plugin.getVaultManager().getEco().currencyNamePlural());
+                                target.sendMessage("§aYou got from §6" + player.getName() + " " + amount + plugin.getVaultManager().getEco().currencyNamePlural());
+                            }
                         } else {
                             player.sendMessage("§cNot enought Money!");
                         }
