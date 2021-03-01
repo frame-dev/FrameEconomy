@@ -17,17 +17,32 @@ class VaultProvider {
     var economy: Economy = Main.getInstance().vaultManager.eco
 
     fun runnable() {
-        var ticksSec = ticksToSec(Main.getInstance().config.getLong("PayLoad.Time.Sec"))
-        var ticksMin = ticksToMin(Main.getInstance().config.getLong("PayLoad.Time.Min"))
-        var ticksHour = ticksToHour(Main.getInstance().config.getLong("PayLoad.Time.Hour"))
-        var ticksDay = ticksToDay(Main.getInstance().config.getLong("PayLoad.Time.Day"))
+        var ticksSec = Ticks.secToTicks(Main.getInstance().config.getLong("PayLoad.Time.Sec"))
+        var ticksMin = Ticks.minToTicks(Main.getInstance().config.getLong("PayLoad.Time.Min"))
+        var ticksHour = Ticks.hourToTicks(Main.getInstance().config.getLong("PayLoad.Time.Hour"))
+        var ticksDay = Ticks.dayToTicks(Main.getInstance().config.getLong("PayLoad.Time.Day"))
         var ticks = ticksSec + ticksMin + ticksHour + ticksDay
-        object : BukkitRunnable() {
-            override fun run() {
-                payLoad()
-                println("PayLoad")
-            }
-        }.runTaskTimer(Main.getInstance(), 0, ticks)
+        if(Main.getInstance().config.getBoolean("PayLoad.Use")) {
+            object : BukkitRunnable() {
+                override fun run() {
+                    payLoad()
+                    println("PayLoad")
+                }
+            }.runTaskTimer(Main.getInstance(), 0, ticks)
+        }
+        var ticksSecInt = Ticks.secToTicks(Main.getInstance().config.getLong("Interest.Time.Sec"))
+        var ticksMinInt = Ticks.secToTicks(Main.getInstance().config.getLong("Interest.Time.Min"))
+        var ticksHourInt = Ticks.secToTicks(Main.getInstance().config.getLong("Interest.Time.Hour"))
+        var ticksDayInt = Ticks.secToTicks(Main.getInstance().config.getLong("Interest.Time.Day"))
+        var ticksInt = ticksSecInt + ticksMinInt + ticksHourInt + ticksDayInt
+        if(Main.getInstance().config.getBoolean("Interest.Use")) {
+            object : BukkitRunnable() {
+                override fun run() {
+                    interest()
+                    println("Interest")
+                }
+            }.runTaskTimer(Main.getInstance(), 0, ticksInt)
+        }
     }
 
 
@@ -40,21 +55,9 @@ class VaultProvider {
         }
     }
 
-    companion object {
-        fun ticksToSec(sec: Long): Long {
-            return sec * 20
-        }
-
-        fun ticksToMin(min: Long): Long {
-            return min * 60 * 20
-        }
-
-        fun ticksToHour(hour: Long): Long {
-            return hour * 60 * 60 * 20
-        }
-
-        fun ticksToDay(day: Long): Long {
-            return day * 24 * 60 * 60 * 20
+    fun interest() {
+        for(offlinePlayer in Bukkit.getOfflinePlayers()) {
+            economy.withdrawPlayer(offlinePlayer,0.125)
         }
     }
 }

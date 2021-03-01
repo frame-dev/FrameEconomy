@@ -36,8 +36,7 @@ public final class Main extends JavaPlugin implements Listener {
 
         this.vaultManager = new VaultManager(this);
         this.vaultProvider = new VaultProvider();
-        if (getConfig().getBoolean("PayLoad.Use"))
-            vaultProvider.runnable();
+        vaultProvider.runnable();
         new PayCMD(this);
         new BalanceCMD(this);
         new EcoCMD(this);

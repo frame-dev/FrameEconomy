@@ -1,9 +1,9 @@
 #MySQL Connection!
 MySQL:
-  Host: ' '
-  User: ' '
-  Password: ' '
-  Database: ' '
+  Host: 'localhost'
+  User: 'root'
+  Password: 'password'
+  Database: 'database'
   Port: 3306
   Use: false
 Currency:
@@ -18,4 +18,11 @@ PayLoad:
     Sec: 0
     Min: 30
     Hour: 0
+    Day: 0
+Interest:
+  Use: false
+  Time:
+    Sec: 0
+    Min: 0
+    Hour: 1
     Day: 0
