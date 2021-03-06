@@ -2,6 +2,7 @@ package de.framedev.frameeconomy.commands;
 
 import de.framedev.frameeconomy.main.Main;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -42,7 +43,7 @@ public class BalanceCMD implements CommandExecutor {
             }
         } else if(args.length == 1) {
             if(sender.hasPermission("frameeconomy.balance.others")) {
-                Player player = Bukkit.getPlayer(args[0]);
+                OfflinePlayer player = Bukkit.getOfflinePlayer(args[0]);
                 if(player != null) {
                     sender.sendMessage("§aMoney from §6" + player.getName() + " §ais §6" + plugin.getVaultManager().getEco().getBalance(player) + plugin.getVaultManager().getEco().currencyNamePlural());
                 } else {
