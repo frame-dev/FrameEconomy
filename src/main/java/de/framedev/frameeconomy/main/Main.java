@@ -26,7 +26,7 @@ public final class Main extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         instance = this;
-
+        
         getConfig().options().copyDefaults();
         saveDefaultConfig();
         reloadConfig();
@@ -37,6 +37,7 @@ public final class Main extends JavaPlugin implements Listener {
         this.vaultManager = new VaultManager(this);
         this.vaultProvider = new VaultProvider();
         vaultProvider.runnable();
+        getLogger().log(Level.INFO,"Runnable Started!");
         new PayCMD(this);
         new BalanceCMD(this);
         new EcoCMD(this);
@@ -59,7 +60,6 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     public VaultProvider getVaultProvider() {
-        Bukkit.getConsoleSender().sendMessage("hi");
         return vaultProvider;
     }
 

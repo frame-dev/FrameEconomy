@@ -1,0 +1,28 @@
+#MySQL Connection!
+MySQL:
+  Host: 'localhost'
+  User: 'root'
+  Password: 'password'
+  Database: 'database'
+  Port: 3306
+  Use: false
+Currency:
+  Plural: '$'
+  Singular: '$'
+Economy:
+  Activate: false
+  MaxBalance: 1000000
+PayLoad:
+  Use: false
+  Time:
+    Sec: 0
+    Min: 30
+    Hour: 0
+    Day: 0
+Interest:
+  Use: false
+  Time:
+    Sec: 0
+    Min: 0
+    Hour: 1
+    Day: 0

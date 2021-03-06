@@ -32,9 +32,9 @@ class VaultProvider {
             }.runTaskTimer(Main.getInstance(), 0, ticks)
         }
         var ticksSecInt = Ticks.secToTicks(Main.getInstance().config.getLong("Interest.Time.Sec"))
-        var ticksMinInt = Ticks.minToTicks(Main.getInstance().config.getLong("Interest.Time.Min"))
-        var ticksHourInt = Ticks.hourToTicks(Main.getInstance().config.getLong("Interest.Time.Hour"))
-        var ticksDayInt = Ticks.dayToTicks(Main.getInstance().config.getLong("Interest.Time.Day"))
+        var ticksMinInt = Ticks.secToTicks(Main.getInstance().config.getLong("Interest.Time.Min"))
+        var ticksHourInt = Ticks.secToTicks(Main.getInstance().config.getLong("Interest.Time.Hour"))
+        var ticksDayInt = Ticks.secToTicks(Main.getInstance().config.getLong("Interest.Time.Day"))
         var ticksInt = ticksSecInt + ticksMinInt + ticksHourInt + ticksDayInt
         if(Main.getInstance().config.getBoolean("Interest.Use")) {
             object : BukkitRunnable() {
