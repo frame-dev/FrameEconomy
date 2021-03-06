@@ -5,7 +5,7 @@ repositories {
 	maven { url 'https://jitpack.io' }
 }
 dependencies {
-	implementation 'com.github.frame-dev:FrameEconomy:LATEST'
+	implementation 'com.github.frame-dev:FrameEconomy:1.0'
 }
 
 Maven:
@@ -19,6 +19,6 @@ Maven:
 <dependency>
 	<groupId>com.github.frame-dev</groupId>
 	<artifactId>FrameEconomy</artifactId>
-	<version>LATEST</version>
+	<version>1.0</version>
 </dependency>
 ```
