@@ -1,9 +1,11 @@
 package de.framedev.frameeconomy.mysql;
 
 import de.framedev.frameeconomy.main.Main;
+import de.framedev.frameeconomy.utils.PasswordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
+
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -138,7 +140,8 @@ public class MySQL {
         public MySQLConnection(String host, String user, String password, String database, String port) {
             this.host = host;
             this.user = user;
-            this.password = password;
+            String salt = PasswordUtils.getSalt(30);
+            this.password = PasswordUtils.generateSecurePassword(password,salt);
             this.database = database;
             this.port = port;
         }

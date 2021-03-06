@@ -29,7 +29,7 @@ public class VaultManager {
         if(Bukkit.getServer().getOnlineMode()) {
             if(!cfgData.contains("accounts")) {
                 ArrayList<String> accounts = new ArrayList<>();
-                accounts.add("14555508-6819-4434-aa6a-e5ce1509ea35");
+                accounts.add("2f8f4d80-277a-4ee0-9224-3257e88ba0dc");
                 cfgData.set("accounts",accounts);
                 try {
                     cfgData.save(fileData);
@@ -40,7 +40,7 @@ public class VaultManager {
         } else {
             if(!cfgData.contains("accounts")) {
                 ArrayList<String> accounts = new ArrayList<>();
-                accounts.add("sambakuchen");
+                accounts.add("FramePlays");
                 cfgData.set("accounts",accounts);
                 try {
                     cfgData.save(fileData);

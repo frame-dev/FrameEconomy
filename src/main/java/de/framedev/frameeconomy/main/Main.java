@@ -21,7 +21,7 @@ public final class Main extends JavaPlugin implements Listener {
     private static Main instance;
 
     private VaultManager vaultManager;
-    private VaultProvider vaultProvider;
+    private static VaultProvider vaultProvider;
 
     @Override
     public void onEnable() {
@@ -35,9 +35,7 @@ public final class Main extends JavaPlugin implements Listener {
         new MySQL();
 
         this.vaultManager = new VaultManager(this);
-        this.vaultProvider = new VaultProvider();
-        vaultProvider.runnable();
-        getLogger().log(Level.INFO,"Runnable Started!");
+        vaultProvider = new VaultProvider(this);
         new PayCMD(this);
         new BalanceCMD(this);
         new EcoCMD(this);
@@ -59,7 +57,7 @@ public final class Main extends JavaPlugin implements Listener {
         getLogger().log(Level.INFO, "Disabled!");
     }
 
-    public VaultProvider getVaultProvider() {
+    public static VaultProvider getVaultProvider() {
         return vaultProvider;
     }
 
