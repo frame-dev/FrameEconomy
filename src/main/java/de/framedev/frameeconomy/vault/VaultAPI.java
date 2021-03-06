@@ -48,7 +48,7 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public String format(double v) {
-        return String.valueOf(v);
+        return String.format("%.6f",v);
     }
 
     @Override

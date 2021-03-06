@@ -31,11 +31,11 @@ public class MySQLManager {
                 if (SQL.exists(tableName, "Player", player.getUniqueId().toString())) {
                     SQL.updateData(tableName, "Money", "'" + amount + "'", "Player = '" + player.getUniqueId().toString() + "'");
                 } else {
-                    SQL.insertData(tableName, "'" + player.getUniqueId().toString() + "','" + amount + "'", "Player", "Money");
+                    SQL.insertData(tableName, "'" + player.getUniqueId().toString() + "','" + player.getName() + "','" + amount + "'", "Player","Name","Money");
                 }
             } else {
-                SQL.createTable(tableName, "Player TEXT(256)", "Money DOUBLE", "BankBalance DOUBLE", "BankName TEXT", "BankOwner TEXT", "BankMembers TEXT");
-                SQL.insertData(tableName, "'" + player.getUniqueId().toString() + "','" + amount + "'", "Player", "Money");
+                SQL.createTable(tableName, "Player TEXT(256)","Name TEXT(255)", "Money DOUBLE", "BankBalance DOUBLE", "BankName TEXT", "BankOwner TEXT", "BankMembers TEXT");
+                SQL.insertData(tableName, "'" + player.getUniqueId().toString() + "','" + player.getName() + "','" + amount + "'", "Player","Name","Money");
             }
         } else {
             if (SQL.isTableExists(tableName)) {
@@ -45,7 +45,7 @@ public class MySQLManager {
                     SQL.insertData(tableName, "'" + player.getName() + "','" + amount + "'", "Player", "Money");
                 }
             } else {
-                SQL.createTable(tableName, "Player TEXT(256)", "Money DOUBLE", "BankBalance DOUBLE", "BankName TEXT", "BankOwner TEXT", "BankMembers TEXT");
+                SQL.createTable(tableName, "Player TEXT(256)","Name TEXT(255)", "Money DOUBLE", "BankBalance DOUBLE", "BankName TEXT", "BankOwner TEXT", "BankMembers TEXT");
                 SQL.insertData(tableName, "'" + player.getName() + "','" + amount + "'", "Player", "Money");
             }
         }
@@ -60,7 +60,7 @@ public class MySQLManager {
                     }
                 }
             } else {
-                SQL.createTable(tableName, "Player TEXT(256)", "Money DOUBLE", "BankBalance DOUBLE", "BankName TEXT", "BankOwner TEXT", "BankMembers TEXT");
+                SQL.createTable(tableName, "Player TEXT(256)","Name TEXT(255)", "Money DOUBLE", "BankBalance DOUBLE", "BankName TEXT", "BankOwner TEXT", "BankMembers TEXT");
             }
         } else {
             if (SQL.isTableExists(tableName)) {
@@ -70,7 +70,7 @@ public class MySQLManager {
                     }
                 }
             } else {
-                SQL.createTable(tableName, "Player TEXT(256)", "Money DOUBLE", "BankBalance DOUBLE", "BankName TEXT", "BankOwner TEXT", "BankMembers TEXT");
+                SQL.createTable(tableName, "Player TEXT(256)","Name TEXT(255)", "Money DOUBLE", "BankBalance DOUBLE", "BankName TEXT", "BankOwner TEXT", "BankMembers TEXT");
             }
         }
         return 0.0D;
@@ -118,7 +118,7 @@ public class MySQLManager {
                 }
             }
         } else {
-            SQL.createTable(tableName, "Player TEXT(256)", "Money DOUBLE", "BankBalance DOUBLE", "BankName TEXT", "BankOwner TEXT", "BankMembers TEXT");
+            SQL.createTable(tableName, "Player TEXT(256)","Name TEXT(255)", "Money DOUBLE", "BankBalance DOUBLE", "BankName TEXT", "BankOwner TEXT", "BankMembers TEXT");
             if (isOnlineMode()) {
                 SQL.insertData(tableName, "'" + player.getUniqueId().toString() + "','" + bankName + "','" + player.getUniqueId().toString() + "'", "Player", "BankName", "BankOwner");
             } else {

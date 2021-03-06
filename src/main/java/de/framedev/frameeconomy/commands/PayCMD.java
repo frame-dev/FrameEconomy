@@ -38,6 +38,7 @@ public class PayCMD implements CommandExecutor, TabCompleter {
                 if(sender.hasPermission("frameeconomy.pay")) {
                     Player player = (Player) sender;
                     double amount = Double.parseDouble(args[0]);
+                    amount = Double.parseDouble(String.format("%.4f",amount));
                     Player target = Bukkit.getPlayer(args[1]);
                     if (target != null) {
                         if (plugin.getVaultManager().getEco().has(player, amount)) {
@@ -61,6 +62,38 @@ public class PayCMD implements CommandExecutor, TabCompleter {
                 sender.sendMessage("§cOnly Player can use this Command!");
             }
 
+        } else if(args.length == 3) {
+            double betrag;
+            if(sender instanceof Player) {
+                if (sender.hasPermission("frameeconomy.pay")) {
+                    Player player = (Player) sender;
+                    double amount = Double.parseDouble(args[0]);
+                    double percent = Double.parseDouble(args[2]);
+                    betrag = amount;
+                    Player target = Bukkit.getPlayer(args[1]);
+                    double sum = Math.round(betrag * percent);
+                    sum /= 100.0;
+                    if (target != null) {
+                        if (plugin.getVaultManager().getEco().has(player, amount)) {
+                            boolean[] success = {false,false};
+                            amount = Double.parseDouble(String.format("%.4f",amount + sum));
+                            success[0] = plugin.getVaultManager().getEco().depositPlayer(target, amount).transactionSuccess();
+                            success[1] = plugin.getVaultManager().getEco().withdrawPlayer(player, amount).transactionSuccess();
+                            if(success[0] && success[1]) {
+                                player.sendMessage("§aPercent : §6" + sum);
+                                player.sendMessage("§aYou give §6" + target.getName() + " " + amount + plugin.getVaultManager().getEco().currencyNamePlural());
+                                target.sendMessage("§aYou got from §6" + player.getName() + " " + amount + plugin.getVaultManager().getEco().currencyNamePlural());
+                            }
+                        } else {
+                            player.sendMessage("§cNot enought Money!");
+                        }
+                    } else {
+                        player.sendMessage("§cThis Player isn't Online!");
+                    }
+                } else {
+                    sender.sendMessage("§cNo Permissions!");
+                }
+            }
         }
         return false;
     }
