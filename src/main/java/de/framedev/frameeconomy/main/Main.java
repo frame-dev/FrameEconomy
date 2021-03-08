@@ -4,10 +4,9 @@ import de.framedev.frameeconomy.commands.BalanceCMD;
 import de.framedev.frameeconomy.commands.EcoCMD;
 import de.framedev.frameeconomy.commands.PayCMD;
 import de.framedev.frameeconomy.mysql.MySQL;
+import de.framedev.frameeconomy.mysql.SQLLite;
 import de.framedev.frameeconomy.vault.VaultManager;
 import frameeconomy.VaultProvider;
-
-import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -32,7 +31,10 @@ public final class Main extends JavaPlugin implements Listener {
         reloadConfig();
         saveConfig();
 
-        new MySQL();
+        if(isMysql()) {
+            new MySQL();
+        } else if(isSQL())
+            new SQLLite(getConfig().getString("SQLite.Path"),getConfig().getString("SQLite.FileName"));
 
         this.vaultManager = new VaultManager(this);
         vaultProvider = new VaultProvider(this);
@@ -75,6 +77,10 @@ public final class Main extends JavaPlugin implements Listener {
 
     public static Main getInstance() {
         return instance;
+    }
+
+    public boolean isSQL() {
+        return getConfig().getBoolean("SQLite.Use");
     }
 
     public boolean isMysql() {

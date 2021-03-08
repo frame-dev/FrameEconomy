@@ -6,6 +6,10 @@ MySQL:
   Database: 'database'
   Port: 3306
   Use: false
+SQLite:
+  Path: 'plugins/FrameEconomy/money'
+  FileName: 'database'
+  Use: false
 Currency:
   Plural: '$'
   Singular: '$'
