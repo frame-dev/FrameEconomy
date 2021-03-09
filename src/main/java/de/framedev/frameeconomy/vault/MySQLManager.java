@@ -182,4 +182,44 @@ public class MySQLManager {
         return false;
     }
 
+    protected void createAccount(OfflinePlayer player) {
+        if(SQL.isTableExists("frameeconomy_accounts")) {
+            if(isOnlineMode()) {
+                if (!SQL.exists("frameeconomy_accounts", "uuid","" + player.getUniqueId())) {
+                    SQL.insertData("frameeconomy_accounts","'" + player.getName() + "','" + player.getUniqueId() + "'","name","uuid");
+                }
+            } else {
+                if (!SQL.exists("frameeconomy_accounts", "name","" + player.getName())) {
+                    SQL.insertData("frameeconomy_accounts","'" + player.getName() + "'","name");
+                }
+            }
+        } else {
+            SQL.createTable("frameeconomy_accounts","name TEXT(255)","uuid VARCHAR(2003)");
+            if(isOnlineMode()) {
+                if (!SQL.exists("frameeconomy_accounts", "uuid","" + player.getUniqueId())) {
+                    SQL.insertData("frameeconomy_accounts","'" + player.getName() + "','" + player.getUniqueId() + "'","name","uuid");
+                }
+            } else {
+                if (!SQL.exists("frameeconomy_accounts", "name","" + player.getName())) {
+                    SQL.insertData("frameeconomy_accounts","'" + player.getName() + "'","name");
+                }
+            }
+        }
+    }
+
+    protected boolean hasAccount(OfflinePlayer player) {
+        if(SQL.isTableExists("frameeconomy_accounts")) {
+            if(isOnlineMode()) {
+                if (SQL.exists("frameeconomy_accounts", "uuid","" + player.getUniqueId())) {
+                    return true;
+                }
+            } else {
+                if (SQL.exists("frameeconomy_accounts", "name","" + player.getName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }

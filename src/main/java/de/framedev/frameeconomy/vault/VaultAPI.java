@@ -91,6 +91,9 @@ public class VaultAPI extends AbstractEconomy {
         File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
         FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
         if (Bukkit.getServer().getOnlineMode()) {
+            if(Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
+                return new MySQLManager().hasAccount(Bukkit.getOfflinePlayer(s));
+            }
             if (cfg.getStringList("accounts").contains(Bukkit.getOfflinePlayer(s).getUniqueId().toString())) {
                 return true;
             }
@@ -357,13 +360,21 @@ public class VaultAPI extends AbstractEconomy {
             File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
             FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
             if (Bukkit.getServer().getOnlineMode()) {
-                List<String> accounts = cfg.getStringList("accounts");
-                accounts.add(Bukkit.getOfflinePlayer(s).getUniqueId().toString());
-                cfg.set("accounts", accounts);
+                if(Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
+                    new MySQLManager().createAccount(Bukkit.getOfflinePlayer(s));
+                } else {
+                    List<String> accounts = cfg.getStringList("accounts");
+                    accounts.add(Bukkit.getOfflinePlayer(s).getUniqueId().toString());
+                    cfg.set("accounts", accounts);
+                }
             } else {
-                List<String> accounts = cfg.getStringList("accounts");
-                accounts.add(Bukkit.getOfflinePlayer(s).getName());
-                cfg.set("accounts", accounts);
+                if(Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
+                    new MySQLManager().createAccount(Bukkit.getOfflinePlayer(s));
+                } else {
+                    List<String> accounts = cfg.getStringList("accounts");
+                    accounts.add(Bukkit.getOfflinePlayer(s).getName());
+                    cfg.set("accounts", accounts);
+                }
             }
             try {
                 cfg.save(file);

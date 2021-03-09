@@ -14,8 +14,7 @@ Currency:
   Plural: '$'
   Singular: '$'
 Economy:
-  Activate: false
-  MaxBalance: 1000000
+  MaxBalance: 1000000000
 PayLoad:
   Use: false
   Time:
