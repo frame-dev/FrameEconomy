@@ -22,6 +22,8 @@ public final class Main extends JavaPlugin implements Listener {
     private VaultManager vaultManager;
     private static VaultProvider vaultProvider;
 
+    private String prefix = null;
+
     @Override
     public void onEnable() {
         instance = this;
@@ -31,10 +33,15 @@ public final class Main extends JavaPlugin implements Listener {
         reloadConfig();
         saveConfig();
 
+        prefix = getPrefix();
+
         if(isMysql()) {
             new MySQL();
-        } else if(isSQL())
-            new SQLLite(getConfig().getString("SQLite.Path"),getConfig().getString("SQLite.FileName"));
+            getLogger().log(Level.INFO, "MySQL Enabled!");
+        } else if(isSQL()) {
+            new SQLLite(getConfig().getString("SQLite.Path"), getConfig().getString("SQLite.FileName"));
+            getLogger().log(Level.INFO, "SQLite Enabled!");
+        }
 
         this.vaultManager = new VaultManager(this);
         vaultProvider = new VaultProvider(this);
@@ -52,6 +59,15 @@ public final class Main extends JavaPlugin implements Listener {
                     getLogger().log(Level.INFO, "Connect to Vault API!");
             }
         }.runTaskLater(this, 60);
+    }
+
+    private String getPrefix() {
+        String prefix = getConfig().getString("Prefix");
+        if(prefix.contains("&"))
+            prefix = prefix.replace('&','§');
+        if(prefix.contains(">>"))
+            prefix = prefix.replace(">>", "»");
+        return prefix;
     }
 
     @Override
