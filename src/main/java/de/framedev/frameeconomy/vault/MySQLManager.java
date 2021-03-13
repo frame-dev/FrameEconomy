@@ -196,13 +196,13 @@ public class MySQLManager {
     protected void addBankMoney(String name, double amount) {
         double money = getBankMoney(name);
         money += amount;
-        setBankMoney(name, amount);
+        setBankMoney(name, money);
     }
 
     protected void removeBankMoney(String name, double amount) {
         double money = getBankMoney(name);
         money -= amount;
-        setBankMoney(name, amount);
+        setBankMoney(name, money);
     }
 
     protected boolean isBankOwner(String name, OfflinePlayer player) {
@@ -310,7 +310,6 @@ public class MySQLManager {
                     if (players.contains(player.getName())) {
                         players.remove(player.getName());
                     }
-                    System.out.println(players);
                     if (isOnlineMode()) {
                         SQL.updateData(tableName, "BankOwner", "'" + null + "'", "Player = '" + player.getUniqueId().toString() + "'");
                         SQL.updateData(tableName, "BankName", "'" + null + "'", "Player = '" + player.getUniqueId().toString() + "'");

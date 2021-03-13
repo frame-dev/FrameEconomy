@@ -4,6 +4,8 @@ import de.framedev.frameeconomy.commands.BalanceCMD;
 import de.framedev.frameeconomy.commands.BankCMD;
 import de.framedev.frameeconomy.commands.EcoCMD;
 import de.framedev.frameeconomy.commands.PayCMD;
+import de.framedev.frameeconomy.mongodb.BackendManager;
+import de.framedev.frameeconomy.mongodb.MongoManager;
 import de.framedev.frameeconomy.mysql.MySQL;
 import de.framedev.frameeconomy.mysql.SQLLite;
 import de.framedev.frameeconomy.vault.MySQLManager;
@@ -27,6 +29,8 @@ public final class Main extends JavaPlugin implements Listener {
 
     private VaultManager vaultManager;
     private static VaultProvider vaultProvider;
+    private MongoManager mongoManager;
+    private BackendManager backendManager;
 
     private String prefix = null;
 
@@ -86,6 +90,14 @@ public final class Main extends JavaPlugin implements Listener {
         return vaultProvider;
     }
 
+    public BackendManager getBackendManager() {
+        return backendManager;
+    }
+
+    public MongoManager getMongoManager() {
+        return mongoManager;
+    }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (vaultManager != null) {
@@ -108,5 +120,9 @@ public final class Main extends JavaPlugin implements Listener {
 
     public boolean isMysql() {
         return getConfig().getBoolean("MySQL.Use");
+    }
+
+    public boolean isMongoDb() {
+        return getConfig().getBoolean("MongoDB.Use");
     }
 }
