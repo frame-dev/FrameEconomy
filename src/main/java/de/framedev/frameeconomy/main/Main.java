@@ -7,11 +7,15 @@ import de.framedev.frameeconomy.mysql.MySQL;
 import de.framedev.frameeconomy.mysql.SQLLite;
 import de.framedev.frameeconomy.vault.VaultManager;
 import frameeconomy.VaultProvider;
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;
 
@@ -73,6 +77,19 @@ public final class Main extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         getLogger().log(Level.INFO, "Disabled!");
+    }
+
+    @Override
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        if(command.getName().equalsIgnoreCase("bank")) {
+            vaultManager.getEco().createBank("data", Bukkit.getOfflinePlayer("FramePlays5771"));
+            vaultManager.getEco().bankDeposit("data",100d);
+            sender.sendMessage("Successfully");
+            vaultManager.addBankMember("data", Bukkit.getOfflinePlayer("FramePlays"));
+            sender.sendMessage(String.valueOf(vaultManager.getEco().isBankMember("data", Bukkit.getOfflinePlayer("FramePlays")).transactionSuccess()));
+            sender.sendMessage(String.valueOf(vaultManager.getEco().bankBalance("data").balance));
+        }
+        return super.onCommand(sender, command, label, args);
     }
 
     public static VaultProvider getVaultProvider() {

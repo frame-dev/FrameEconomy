@@ -18,6 +18,7 @@ commands:
   balancetop:
     aliases:
       - baltop
+  bank:
 permissions:
   frameeconomy.*:
     children:

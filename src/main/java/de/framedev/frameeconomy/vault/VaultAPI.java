@@ -328,13 +328,18 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public EconomyResponse isBankMember(String name, String player) {
-        File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
-        FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-        if (!cfg.contains("Banks." + name + ".members"))
-            return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Doesn't have any Members!");
-        List<String> players = cfg.getStringList("Banks." + name + ".members");
-        if (!players.contains(player))
-            return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Isn't a member");
+        if(Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
+            if(!new MySQLManager().isBankMember(name, Bukkit.getOfflinePlayer(player)))
+                return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Isn't a member");
+        } else {
+            File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
+            FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
+            if (!cfg.contains("Banks." + name + ".members"))
+                return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Doesn't have any Members!");
+            List<String> players = cfg.getStringList("Banks." + name + ".members");
+            if (!players.contains(player))
+                return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Isn't a member");
+        }
         return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.SUCCESS, "");
     }
 

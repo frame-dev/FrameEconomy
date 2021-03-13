@@ -3,6 +3,7 @@ package de.framedev.frameeconomy.vault;
 import de.framedev.frameeconomy.main.Main;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -55,6 +56,10 @@ public class VaultManager {
             if (!eco.hasAccount(p.getName()))
                 eco.createPlayerAccount(p.getName());
         }
+    }
+
+    public void addBankMember(String bankName, OfflinePlayer player) {
+        new MySQLManager().addBankMember(bankName,player);
     }
 
     public Economy getEco() {
