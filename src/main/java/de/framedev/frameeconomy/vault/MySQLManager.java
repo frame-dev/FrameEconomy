@@ -224,13 +224,17 @@ public class MySQLManager {
                 ResultSet resultSet = null;
                 if (isOnlineMode()) {
                     resultSet = statement.executeQuery("SELECT * FROM " + tableName + " WHERE Player = '" + player.getUniqueId().toString() + "';");
-                    if (resultSet.getString("BankName").equalsIgnoreCase(name) && resultSet.getString("BankOwner").equalsIgnoreCase(player.getUniqueId().toString())) {
-                        return true;
+                    if(resultSet.next()) {
+                        if (resultSet.getString("BankName").equalsIgnoreCase(name) && resultSet.getString("BankOwner").equalsIgnoreCase(player.getUniqueId().toString())) {
+                            return true;
+                        }
                     }
                 } else {
                     resultSet = statement.executeQuery("SELECT * FROM " + tableName + " WHERE Player = '" + player.getName() + "';");
-                    if (resultSet.getString("BankName").equalsIgnoreCase(name) && resultSet.getString("BankOwner").equalsIgnoreCase(player.getName())) {
-                        return true;
+                    if(resultSet.next()) {
+                        if (resultSet.getString("BankName").equalsIgnoreCase(name) && resultSet.getString("BankOwner").equalsIgnoreCase(player.getName())) {
+                            return true;
+                        }
                     }
                 }
             }

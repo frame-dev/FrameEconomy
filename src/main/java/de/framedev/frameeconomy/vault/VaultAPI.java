@@ -301,28 +301,34 @@ public class VaultAPI extends AbstractEconomy {
             double balance = new MySQLManager().getBankMoney(name);
             balance += amount;
             new MySQLManager().setBankMoney(name, balance);
+            return new EconomyResponse(amount, balance, EconomyResponse.ResponseType.SUCCESS, "");
+        } else {
+            File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
+            FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
+            double balance = bankBalance(name).amount;
+            balance += amount;
+            cfg.set("Banks." + name + ".balance", balance);
+            try {
+                cfg.save(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }return new EconomyResponse(amount, balance, EconomyResponse.ResponseType.SUCCESS, "");
         }
-        File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
-        FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-        double balance = bankBalance(name).amount;
-        balance += amount;
-        cfg.set("Banks." + name + ".balance", balance);
-        try {
-            cfg.save(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return new EconomyResponse(amount, balance, EconomyResponse.ResponseType.SUCCESS, "");
     }
 
     @Override
     public EconomyResponse isBankOwner(String name, String player) {
-        File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
-        FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-        if (!cfg.contains("Banks." + name + ".Owner"))
-            return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Doesn't Exsits");
-        if (!player.equalsIgnoreCase(cfg.getString("Banks." + name + ".Owner")))
-            return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Isn't the Owner");
+        if(Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
+            if(!new MySQLManager().isBankOwner(name,Bukkit.getOfflinePlayer(player)))
+                return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Isn't the Owner");
+        } else {
+            File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
+            FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
+            if (!cfg.contains("Banks." + name + ".Owner"))
+                return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Doesn't Exsits");
+            if (!player.equalsIgnoreCase(cfg.getString("Banks." + name + ".Owner")))
+                return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Isn't the Owner");
+        }
         return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.SUCCESS, "");
     }
 
@@ -347,19 +353,20 @@ public class VaultAPI extends AbstractEconomy {
     public List<String> getBanks() {
         if(Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
             return new MySQLManager().getBanks();
-        }
-        File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
-        FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-        List<String> banks = new ArrayList<>();
-        ConfigurationSection cs = cfg.getConfigurationSection("Banks");
-        if (cs != null) {
-            for (String s : cs.getKeys(false)) {
-                if (s != null) {
-                    banks.add(s);
+        } else {
+            File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
+            FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
+            List<String> banks = new ArrayList<>();
+            ConfigurationSection cs = cfg.getConfigurationSection("Banks");
+            if (cs != null) {
+                for (String s : cs.getKeys(false)) {
+                    if (s != null) {
+                        banks.add(s);
+                    }
                 }
             }
+            return banks;
         }
-        return banks;
     }
 
     @Override
