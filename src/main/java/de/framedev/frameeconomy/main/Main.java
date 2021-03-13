@@ -1,10 +1,12 @@
 package de.framedev.frameeconomy.main;
 
 import de.framedev.frameeconomy.commands.BalanceCMD;
+import de.framedev.frameeconomy.commands.BankCMD;
 import de.framedev.frameeconomy.commands.EcoCMD;
 import de.framedev.frameeconomy.commands.PayCMD;
 import de.framedev.frameeconomy.mysql.MySQL;
 import de.framedev.frameeconomy.mysql.SQLLite;
+import de.framedev.frameeconomy.vault.MySQLManager;
 import de.framedev.frameeconomy.vault.VaultManager;
 import frameeconomy.VaultProvider;
 import org.bukkit.Bukkit;
@@ -52,6 +54,7 @@ public final class Main extends JavaPlugin implements Listener {
         new PayCMD(this);
         new BalanceCMD(this);
         new EcoCMD(this);
+        new BankCMD(this);
 
         getServer().getPluginManager().registerEvents(this, this);
 
@@ -65,7 +68,7 @@ public final class Main extends JavaPlugin implements Listener {
         }.runTaskLater(this, 60);
     }
 
-    private String getPrefix() {
+    public String getPrefix() {
         String prefix = getConfig().getString("Prefix");
         if(prefix.contains("&"))
             prefix = prefix.replace('&','§');
@@ -77,19 +80,6 @@ public final class Main extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         getLogger().log(Level.INFO, "Disabled!");
-    }
-
-    @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if(command.getName().equalsIgnoreCase("bank")) {
-            vaultManager.getEco().createBank("data", Bukkit.getOfflinePlayer("FramePlays5771"));
-            vaultManager.getEco().bankDeposit("data",100d);
-            sender.sendMessage("Successfully");
-            vaultManager.addBankMember("data", Bukkit.getOfflinePlayer("FramePlays"));
-            sender.sendMessage(String.valueOf(vaultManager.getEco().isBankMember("data", Bukkit.getOfflinePlayer("FramePlays")).transactionSuccess()));
-            sender.sendMessage(String.valueOf(vaultManager.getEco().bankBalance("data").balance));
-        }
-        return super.onCommand(sender, command, label, args);
     }
 
     public static VaultProvider getVaultProvider() {

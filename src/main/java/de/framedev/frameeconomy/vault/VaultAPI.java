@@ -345,6 +345,9 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public List<String> getBanks() {
+        if(Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
+            return new MySQLManager().getBanks();
+        }
         File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
         FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
         List<String> banks = new ArrayList<>();

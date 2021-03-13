@@ -8,7 +8,6 @@ import de.framedev.frameeconomy.mysql.SQL;
 import de.framedev.frameeconomy.mysql.SQLLite;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 
 import java.lang.reflect.Type;
 import java.sql.ResultSet;
@@ -16,6 +15,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * This Plugin was Created by FrameDev
@@ -292,6 +292,72 @@ public class MySQLManager {
         return false;
     }
 
+    public void removeBankMember(String bankName, OfflinePlayer player) {
+        List<String> pls = new ArrayList<>();
+        List<String> members = new ArrayList<>();
+        if (SQL.isTableExists(tableName)) {
+            if (SQL.exists(tableName, "BankName", bankName)) {
+                if (SQL.get(tableName, "BankMembers", "BankName", bankName) != null) {
+                    Type type = new TypeToken<List<String>>() {
+                    }.getType();
+                    List<String> players = new Gson().fromJson((String) SQL.get(tableName, "BankMembers", "BankName", bankName), type);
+                    if (players.contains(player.getName())) {
+                        players.remove(player.getName());
+                    }
+                    System.out.println(players);
+                    if (isOnlineMode()) {
+                        SQL.updateData(tableName, "BankOwner", "'" + null + "'", "Player = '" + player.getUniqueId().toString() + "'");
+                        SQL.updateData(tableName, "BankName", "'" + null + "'", "Player = '" + player.getUniqueId().toString() + "'");
+                        SQL.updateData(tableName,"BankBalance","'" + null + "'","Player = '" + player.getUniqueId().toString() + "'");
+                        SQL.updateData(tableName,"BankMembers","'" + null + "'","Player = '" + player.getUniqueId().toString() + "'");
+                    } else {
+                        SQL.updateData(tableName, "BankOwner", "'" + null + "'", "Player = '" + player.getName() + "'");
+                        SQL.updateData(tableName, "BankName", "'" + null + "'", "Player = '" + player.getName() + "'");
+                        SQL.updateData(tableName,"BankBalance","'" + null + "'","Player = '" + player.getName() + "'");
+                        SQL.updateData(tableName,"BankMembers","'" + null + "'","Player = '" + player.getName() + "'");
+                    }
+                    members.addAll(players);
+                    if(Main.getInstance().isMysql()) {
+                        try {
+                            Statement statement = MySQL.getConnection().createStatement();
+                            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName + " WHERE BankName ='" + bankName + "';");
+                            while (resultSet.next()) {
+                                resultSet.updateString("BankMembers",new Gson().toJson(players));
+                            }
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        } finally {
+                            MySQL.close();
+                        }
+                    } else if(Main.getInstance().isSQL()) {
+                        try {
+                            Statement statement = SQLLite.connect().createStatement();
+                            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName + " WHERE BankName ='" + bankName + "';");
+                            while (resultSet.next()) {
+                                pls.add(resultSet.getString("Player"));
+                            }
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        } finally {
+                            SQLLite.close();
+                        }
+                    }
+                }
+            }
+            if(Main.getInstance().isSQL()) {
+                if (SQL.isTableExists(tableName)) {
+                    if (SQL.exists(tableName, "BankName", bankName)) {
+                        if (SQL.get(tableName, "BankMembers", "BankName", bankName) != null) {
+                            for (String players : pls) {
+                                SQL.updateData(tableName,"BankMembers","'" + new Gson().toJson(members) + "'","Player = '" + players + "'");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     protected void createAccount(OfflinePlayer player) {
         if (!SQL.isTableExists("frameeconomy_accounts")) {
             SQL.createTable("frameeconomy_accounts", "name TEXT(255)", "uuid VARCHAR(2003)");
@@ -322,4 +388,46 @@ public class MySQLManager {
         return false;
     }
 
+    public List<String> getBankMembers(String bankName) {
+        if (SQL.isTableExists(tableName)) {
+            if (SQL.exists(tableName, "BankName", bankName)) {
+                if (SQL.get(tableName, "BankMembers", "BankName", bankName) != null) {
+                    Type type = new TypeToken<List<String>>() {
+                    }.getType();
+                    List<String> players = new Gson().fromJson((String) SQL.get(tableName, "BankMembers", "BankName", bankName), type);
+                    return players;
+                }
+            }
+        }
+        return null;
+    }
+
+    protected List<String> getBanks() {
+        List<String> banks = new ArrayList<>();
+        if(SQL.isTableExists(tableName)) {
+            try {
+                if(Main.getInstance().isMysql()) {
+                    Statement statement = MySQL.getConnection().createStatement();
+                    ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName + " WHERE BankName IS NOT NULL");
+                    while (resultSet.next()) {
+                        banks.add(resultSet.getString("BankName"));
+                    }
+                } else if(Main.getInstance().isSQL()) {
+                    Statement statement = SQLLite.connect().createStatement();
+                    ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName + " WHERE BankName IS NOT NULL");
+                    while (resultSet.next()) {
+                        banks.add(resultSet.getString("BankName"));
+                    }
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            } finally {
+                if(Main.getInstance().isMysql())
+                    MySQL.close();
+                if(Main.getInstance().isSQL())
+                    SQLLite.close();
+            }
+        }
+        return banks;
+    }
 }

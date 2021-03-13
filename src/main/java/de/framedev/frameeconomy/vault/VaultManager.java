@@ -12,6 +12,7 @@ import org.bukkit.plugin.ServicePriority;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class VaultManager {
 
@@ -60,6 +61,14 @@ public class VaultManager {
 
     public void addBankMember(String bankName, OfflinePlayer player) {
         new MySQLManager().addBankMember(bankName,player);
+    }
+
+    public void removeBankMember(String bankName, OfflinePlayer player) {
+        new MySQLManager().removeBankMember(bankName,player);
+    }
+
+    public List<String> getBankMembers(String bankName) {
+        return new MySQLManager().getBankMembers(bankName);
     }
 
     public Economy getEco() {
