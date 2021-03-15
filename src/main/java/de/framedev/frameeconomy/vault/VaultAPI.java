@@ -391,6 +391,7 @@ public class VaultAPI extends AbstractEconomy {
                 if (((String)Main.getInstance().getBackendManager().get(offlinePlayer, "bankowner", "eco")).equalsIgnoreCase(offlinePlayer.getUniqueId().toString()))
                     data.add((String) Main.getInstance().getBackendManager().get(offlinePlayer, "bankname", "eco"));
             }
+            System.out.println(data);
             return data;
         } else {
             File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");

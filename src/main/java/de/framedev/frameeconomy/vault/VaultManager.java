@@ -67,6 +67,8 @@ public class VaultManager {
             List<String> users = (List<String>) Main.getInstance().getBackendManager().getObject("bankname", bankName, "bankmembers", "eco");
             if (!users.contains(player.getName()))
                 users.add(player.getName());
+            Main.getInstance().getBackendManager().updateUser(player,"bankname",bankName,"eco");
+            Main.getInstance().getBackendManager().updateUser(player,"bankmembers", users,"eco");
             Main.getInstance().getBackendManager().updataData("bankname", bankName, "bankmembers", users, "eco");
         }
     }
@@ -78,6 +80,8 @@ public class VaultManager {
             List<String> users = (List<String>) Main.getInstance().getBackendManager().getObject("bankname", bankName, "bankmembers", "eco");
             if (users.contains(player.getName()))
                 users.remove(player.getName());
+            Main.getInstance().getBackendManager().updateUser(player,"bankname","","eco");
+            Main.getInstance().getBackendManager().updateUser(player,"bankmembers", users,"eco");
             Main.getInstance().getBackendManager().updataData("bankname", bankName, "bankmembers", users, "eco");
         }
     }

@@ -18,6 +18,8 @@ import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -25,6 +27,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 
 public final class Main extends JavaPlugin implements Listener {
@@ -42,10 +48,16 @@ public final class Main extends JavaPlugin implements Listener {
     public void onEnable() {
         instance = this;
         
-        getConfig().options().copyDefaults();
+        getConfig().options().copyDefaults(true);
         saveDefaultConfig();
+        saveDefaultConfigValues();
         reloadConfig();
         saveConfig();
+        try {
+            reloadCustomConfig();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
         prefix = getPrefix();
 
@@ -95,6 +107,39 @@ public final class Main extends JavaPlugin implements Listener {
         }.runTaskLater(this, 60);
     }
 
+    public void reloadCustomConfig() throws UnsupportedEncodingException {
+        // Look for defaults in the jar
+        Reader defConfigStream = new InputStreamReader(this.getResource("config.yml"), "UTF8");
+        if (defConfigStream != null) {
+            YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+            getConfig().setDefaults(defConfig);
+        }
+    }
+
+    public File badWordsFile;
+    public FileConfiguration badWordsData;
+
+    public void saveDefaultConfigValues() {
+        badWordsFile = new File(getDataFolder() + "config.yml");
+        badWordsData = YamlConfiguration.loadConfiguration(badWordsFile);
+        //Defaults in jar
+        Reader defConfigStream = null;
+        try {
+            defConfigStream = new InputStreamReader(getResource("config.yml"), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        if (defConfigStream != null) {
+            YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+            badWordsData.setDefaults(defConfig);
+            //Copy default values
+            badWordsData.options().copyDefaults(true);
+            this.saveConfig();
+            //OR use this to copy default values
+            //this.saveDefaultConfig();
+        }
+    }
+
     public String getPrefix() {
         String prefix = getConfig().getString("Prefix");
         if(prefix.contains("&"))
@@ -128,6 +173,7 @@ public final class Main extends JavaPlugin implements Listener {
                 vaultManager.getEco().createPlayerAccount(event.getPlayer());
         }
         if(isMongoDb()) {
+            if(!backendManager.exists(event.getPlayer(),"uuid","eco"))
             backendManager.createUser(event.getPlayer(), "eco");
         }
     }
