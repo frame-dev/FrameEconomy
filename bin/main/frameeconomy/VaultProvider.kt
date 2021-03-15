@@ -5,6 +5,7 @@ import net.milkbowl.vault.economy.Economy
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.scheduler.BukkitRunnable
+import java.util.logging.Level
 
 /**
  * This Plugin was Created by FrameDev
@@ -13,11 +14,16 @@ import org.bukkit.scheduler.BukkitRunnable
  * Project: FrameEconomy
  * Copyrighted by FrameDev
  */
-class VaultProvider {
+open class VaultProvider {
 
     var economy: Economy = Main.getInstance().vaultManager.eco
 
-    fun runnable() {
+    constructor(plugin : Main) {
+        plugin.logger.log(Level.INFO,"Runnable started!")
+        runnable()
+    }
+
+    private fun runnable() {
         var ticksSec = Ticks.secToTicks(Main.getInstance().config.getLong("PayLoad.Time.Sec"))
         var ticksMin = Ticks.minToTicks(Main.getInstance().config.getLong("PayLoad.Time.Min"))
         var ticksHour = Ticks.hourToTicks(Main.getInstance().config.getLong("PayLoad.Time.Hour"))
@@ -27,20 +33,18 @@ class VaultProvider {
             object : BukkitRunnable() {
                 override fun run() {
                     payLoad()
-                    println("PayLoad")
                 }
             }.runTaskTimer(Main.getInstance(), 0, ticks)
         }
         var ticksSecInt = Ticks.secToTicks(Main.getInstance().config.getLong("Interest.Time.Sec"))
-        var ticksMinInt = Ticks.secToTicks(Main.getInstance().config.getLong("Interest.Time.Min"))
-        var ticksHourInt = Ticks.secToTicks(Main.getInstance().config.getLong("Interest.Time.Hour"))
-        var ticksDayInt = Ticks.secToTicks(Main.getInstance().config.getLong("Interest.Time.Day"))
+        var ticksMinInt = Ticks.minToTicks(Main.getInstance().config.getLong("Interest.Time.Min"))
+        var ticksHourInt = Ticks.hourToTicks(Main.getInstance().config.getLong("Interest.Time.Hour"))
+        var ticksDayInt = Ticks.dayToTicks(Main.getInstance().config.getLong("Interest.Time.Day"))
         var ticksInt = ticksSecInt + ticksMinInt + ticksHourInt + ticksDayInt
         if(Main.getInstance().config.getBoolean("Interest.Use")) {
             object : BukkitRunnable() {
                 override fun run() {
                     interest()
-                    println("Interest")
                 }
             }.runTaskTimer(Main.getInstance(), 0, ticksInt)
         }
@@ -50,13 +54,13 @@ class VaultProvider {
     /**
      * Get Economy PayLoad
      */
-    fun payLoad() {
+    open fun payLoad() {
         for (offlinePlayer in Bukkit.getOfflinePlayers()) {
             economy.depositPlayer(offlinePlayer, 100.toDouble())
         }
     }
 
-    fun interest() {
+    open fun interest() {
         for(offlinePlayer in Bukkit.getOfflinePlayers()) {
             economy.withdrawPlayer(offlinePlayer,0.125)
         }
@@ -66,11 +70,11 @@ class VaultProvider {
      * Get Economy PayLoad
      * @param offlinePlayer the OfflinePlayer
      */
-    fun payLoad(offlinePlayer: OfflinePlayer) {
+    open fun payLoad(offlinePlayer: OfflinePlayer) {
         economy.depositPlayer(offlinePlayer, 100.toDouble())
     }
 
-    fun interest(offlinePlayer: OfflinePlayer) {
+    open fun interest(offlinePlayer: OfflinePlayer) {
         economy.withdrawPlayer(offlinePlayer,0.125)
     }
 }

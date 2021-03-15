@@ -15,6 +15,10 @@ commands:
   economy:
     aliases:
       - eco
+  balancetop:
+    aliases:
+      - baltop
+  bank:
 permissions:
   frameeconomy.*:
     children:

@@ -7,12 +7,19 @@ package frameeconomy
  * Project: FrameEconomy
  * Copyrighted by FrameDev
  */
+
+/**
+ * This Enum is for Ticks to Calculate Ticks in Sec/Min/Hour/Day/Week/Month/Year
+ */
 enum class Ticks(val i: Long) {
 
     SEC(20*1),
     MIN(20*60),
     HOUR(20*60*60),
-    DAY(20*60*60*24);
+    DAY(20*60*60*24),
+    WEEK(20*60*60*24*7),
+    MONTH(20*60*60*24*7*4),
+    YEAR(20*60*60*24*7*4*12);
 
     companion object {
         fun secToTicks(sec: Long): Long {

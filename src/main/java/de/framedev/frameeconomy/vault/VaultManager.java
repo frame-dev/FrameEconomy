@@ -17,10 +17,11 @@ import java.util.List;
 public class VaultManager {
 
     private final Economy eco;
+
     public VaultManager(Main plugin) {
-        File fileData = new File(Main.getInstance().getDataFolder() + "/money","eco.yml");
+        File fileData = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
         FileConfiguration cfgData = YamlConfiguration.loadConfiguration(fileData);
-        if(!fileData.exists()) {
+        if (!fileData.exists()) {
             fileData.getParentFile().mkdirs();
             try {
                 fileData.createNewFile();
@@ -28,11 +29,11 @@ public class VaultManager {
                 e.printStackTrace();
             }
         }
-        if(Bukkit.getServer().getOnlineMode()) {
-            if(!cfgData.contains("accounts")) {
+        if (Bukkit.getServer().getOnlineMode()) {
+            if (!cfgData.contains("accounts")) {
                 ArrayList<String> accounts = new ArrayList<>();
                 accounts.add("2f8f4d80-277a-4ee0-9224-3257e88ba0dc");
-                cfgData.set("accounts",accounts);
+                cfgData.set("accounts", accounts);
                 try {
                     cfgData.save(fileData);
                 } catch (IOException e) {
@@ -40,10 +41,10 @@ public class VaultManager {
                 }
             }
         } else {
-            if(!cfgData.contains("accounts")) {
+            if (!cfgData.contains("accounts")) {
                 ArrayList<String> accounts = new ArrayList<>();
                 accounts.add("FramePlays");
-                cfgData.set("accounts",accounts);
+                cfgData.set("accounts", accounts);
                 try {
                     cfgData.save(fileData);
                 } catch (IOException e) {
@@ -51,7 +52,7 @@ public class VaultManager {
                 }
             }
         }
-        plugin.getServer().getServicesManager().register(Economy.class,new VaultAPI(),plugin, ServicePriority.High);
+        plugin.getServer().getServicesManager().register(Economy.class, new VaultAPI(), plugin, ServicePriority.High);
         eco = new VaultAPI();
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (!eco.hasAccount(p.getName()))
@@ -60,16 +61,36 @@ public class VaultManager {
     }
 
     public void addBankMember(String bankName, OfflinePlayer player) {
-        new MySQLManager().addBankMember(bankName,player);
+        if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
+            new MySQLManager().addBankMember(bankName, player);
+        } else if (Main.getInstance().isMongoDb()) {
+            List<String> users = (List<String>) Main.getInstance().getBackendManager().getObject("bankname", bankName, "bankmembers", "eco");
+            if (!users.contains(player.getName()))
+                users.add(player.getName());
+            Main.getInstance().getBackendManager().updataData("bankname", bankName, "bankmembers", users, "eco");
+        }
     }
 
     public void removeBankMember(String bankName, OfflinePlayer player) {
-        new MySQLManager().removeBankMember(bankName,player);
+        if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
+            new MySQLManager().removeBankMember(bankName, player);
+        } else if (Main.getInstance().isMongoDb()) {
+            List<String> users = (List<String>) Main.getInstance().getBackendManager().getObject("bankname", bankName, "bankmembers", "eco");
+            if (users.contains(player.getName()))
+                users.remove(player.getName());
+            Main.getInstance().getBackendManager().updataData("bankname", bankName, "bankmembers", users, "eco");
+        }
     }
 
     public List<String> getBankMembers(String bankName) {
-        return new MySQLManager().getBankMembers(bankName);
+        if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
+            return new MySQLManager().getBankMembers(bankName);
+        } else if (Main.getInstance().isMongoDb()) {
+            return (List<String>) Main.getInstance().getBackendManager().getObject("bankname",bankName,"bankmembers","eco");
+        }
+        return null;
     }
+
 
     public Economy getEco() {
         return eco;

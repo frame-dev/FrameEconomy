@@ -1,3 +1,5 @@
+Prefix: '&6[&aFrame&bEconomy&6] &c>> &7'
+
 #MySQL Connection!
 MySQL:
   Host: 'localhost'
@@ -6,12 +8,15 @@ MySQL:
   Database: 'database'
   Port: 3306
   Use: false
+SQLite:
+  Path: 'plugins/FrameEconomy/money'
+  FileName: 'database'
+  Use: false
 Currency:
   Plural: '$'
   Singular: '$'
 Economy:
-  Activate: false
-  MaxBalance: 1000000
+  MaxBalance: 1000000000
 PayLoad:
   Use: false
   Time:

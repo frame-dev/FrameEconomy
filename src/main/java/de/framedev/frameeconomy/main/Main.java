@@ -1,5 +1,8 @@
 package de.framedev.frameeconomy.main;
 
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
 import de.framedev.frameeconomy.commands.BalanceCMD;
 import de.framedev.frameeconomy.commands.BankCMD;
 import de.framedev.frameeconomy.commands.EcoCMD;
@@ -11,6 +14,7 @@ import de.framedev.frameeconomy.mysql.SQLLite;
 import de.framedev.frameeconomy.vault.MySQLManager;
 import de.framedev.frameeconomy.vault.VaultManager;
 import frameeconomy.VaultProvider;
+import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -60,6 +64,25 @@ public final class Main extends JavaPlugin implements Listener {
         new EcoCMD(this);
         new BankCMD(this);
 
+
+        if(isMongoDb()) {
+            if(getConfig().getBoolean("MongoDB.Localhost")) {
+                this.mongoManager = new MongoManager();
+                mongoManager.connectLocalHost();
+                this.backendManager = new BackendManager(this);
+            } else if(getConfig().getBoolean("MongoDB.Normal")) {
+                this.mongoManager = new MongoManager();
+                mongoManager.connect();
+                this.backendManager = new BackendManager(this);
+            }
+        }
+        /*for(Document document : backendManager.getAllDocuments("eco")) {
+            Document doc = new Document("bank",120.0);
+            MongoCollection mongoCollection = mongoManager.getDatabase().getCollection("eco");
+            Document updateObject = new Document("$set", doc);
+            mongoCollection.updateOne(Filters.eq("uuid",document.getString("uuid")), updateObject);
+        }*/
+
         getServer().getPluginManager().registerEvents(this, this);
 
         getLogger().log(Level.INFO, "Enabled!");
@@ -103,6 +126,9 @@ public final class Main extends JavaPlugin implements Listener {
         if (vaultManager != null) {
             if (!vaultManager.getEco().hasAccount(event.getPlayer()))
                 vaultManager.getEco().createPlayerAccount(event.getPlayer());
+        }
+        if(isMongoDb()) {
+            backendManager.createUser(event.getPlayer(), "eco");
         }
     }
 
