@@ -28,6 +28,9 @@ public class BackendManager {
     public enum DATA {
         NAME("name"),
         MONEY("money"),
+        BANKNAME("bankname"),
+        BANKMEMBERS("bankmembers"),
+        BANKOWNER("bankowner"),
         BANK("bank"),
         CREATEDATE("createDate"),
         LASTLOGIN("lastLogin"),

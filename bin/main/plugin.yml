@@ -24,9 +24,14 @@ permissions:
     children:
       frameeconomy.balance: true
       frameeconomy.balance.others: true
+      frameeconomy.balancetop: true
       frameeconomy.pay: true
       frameeconomy.eco.set: true
       frameeconomy.eco.set.others: true
+      frameeconomy.bank.create: true
+      frameeconomy.bank.balance: true
+      frameeconomy.bank.deposit: true
+      frameeconomy.bank.withdraw: true
   frameeconomy.balance:
     default: op
   frameeconomy.balance.others:
@@ -41,3 +46,13 @@ permissions:
     default: op
     children:
       frameeconomy.eco.set: true
+  frameeconomy.balancetop:
+    default: op
+  frameeconomy.bank.create:
+    default: op
+  frameeconomy.bank.balance:
+    default: op
+  frameeconomy.bank.deposit:
+    default: op
+  frameeconomy.bank.withdraw:
+    default: op

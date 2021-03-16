@@ -12,6 +12,15 @@ SQLite:
   Path: 'plugins/FrameEconomy/money'
   FileName: 'database'
   Use: false
+MongoDB:
+  Database: ' '
+  User: ' '
+  Password: ' '
+  Host: ' '
+  Port: 27017
+  Localhost: false
+  Normal: false
+  Use: false
 Currency:
   Plural: '$'
   Singular: '$'

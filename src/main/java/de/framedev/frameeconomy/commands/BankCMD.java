@@ -38,6 +38,8 @@ public class BankCMD implements CommandExecutor {
                         } else {
                             player.sendMessage(plugin.getPrefix() + "§cError while Creating Bank!");
                         }
+                    } else {
+                        player.sendMessage(plugin.getPrefix() + "§cNo Permissions!");
                     }
                 }
             }
@@ -52,7 +54,11 @@ public class BankCMD implements CommandExecutor {
                             } else {
                                 player.sendMessage(plugin.getPrefix() + "§cYou are not a BankMember or the Owner!");
                             }
+                        } else {
+                            player.sendMessage(plugin.getPrefix() + "§cThis Bank doesn't exist!");
                         }
+                    } else {
+                        player.sendMessage(plugin.getPrefix() + "§cNo Permissions!");
                     }
                 }
             }
@@ -74,7 +80,11 @@ public class BankCMD implements CommandExecutor {
                             } else {
                                 player.sendMessage(plugin.getPrefix() + "§cNot enougt Money!");
                             }
+                        } else {
+                            player.sendMessage(plugin.getPrefix() + "§cThis Bank doesn't exist!");
                         }
+                    } else {
+                        player.sendMessage(plugin.getPrefix() + "§cNo Permissions!");
                     }
                 }
             } else if (args[0].equalsIgnoreCase("withdraw")) {
@@ -95,7 +105,11 @@ public class BankCMD implements CommandExecutor {
                             } else {
                                 player.sendMessage(plugin.getPrefix() + "§cYou are not a BankMember or the Owner!");
                             }
+                        } else {
+                            player.sendMessage(plugin.getPrefix() + "§cThis Bank doesn't exist!");
                         }
+                    } else {
+                        player.sendMessage(plugin.getPrefix() + "§cNo Permissions!");
                     }
                 }
             } else if (args[0].equalsIgnoreCase("addmember")) {
@@ -111,7 +125,11 @@ public class BankCMD implements CommandExecutor {
                             } else {
                                 player.sendMessage(plugin.getPrefix() + "§cYou are not the Bank Owner!");
                             }
+                        } else {
+                            player.sendMessage(plugin.getPrefix() + "§cThis Bank doesn't exist!");
                         }
+                    } else {
+                        player.sendMessage(plugin.getPrefix() + "§cNo Permissions!");
                     }
                 }
             } else if (args[0].equalsIgnoreCase("removemember")) {
@@ -127,7 +145,11 @@ public class BankCMD implements CommandExecutor {
                             } else {
                                 player.sendMessage(plugin.getPrefix() + "§cYou are not the Bank Owner!");
                             }
+                        } else {
+                            player.sendMessage(plugin.getPrefix() + "§cThis Bank doesn't exist!");
                         }
+                    } else {
+                        player.sendMessage(plugin.getPrefix() + "§cNo Permissions!");
                     }
                 }
             }

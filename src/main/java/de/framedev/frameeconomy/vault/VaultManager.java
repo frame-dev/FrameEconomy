@@ -1,7 +1,10 @@
 package de.framedev.frameeconomy.vault;
 
-import de.framedev.frameeconomy.main.Main;
-import net.milkbowl.vault.economy.Economy;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -9,10 +12,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.ServicePriority;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import de.framedev.frameeconomy.main.Main;
+import net.milkbowl.vault.economy.Economy;
 
 public class VaultManager {
 
@@ -60,6 +61,8 @@ public class VaultManager {
         }
     }
 
+    File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
+    FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
     public void addBankMember(String bankName, OfflinePlayer player) {
         if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
             new MySQLManager().addBankMember(bankName, player);
@@ -70,6 +73,23 @@ public class VaultManager {
             Main.getInstance().getBackendManager().updateUser(player,"bankname",bankName,"eco");
             Main.getInstance().getBackendManager().updateUser(player,"bankmembers", users,"eco");
             Main.getInstance().getBackendManager().updataData("bankname", bankName, "bankmembers", users, "eco");
+        } else {
+            if (!cfg.contains("Banks." + bankName + ".members")) {
+                List<String> players = new ArrayList<>();
+                if (!players.contains(player.getName()))
+                    players.add(player.getName());
+                cfg.set("Banks." + bankName + ".members", players);
+            } else {
+                List<String> players = cfg.getStringList("Banks." + bankName + ".members");
+                if (!players.contains(player.getName()))
+                    players.add(player.getName());
+                cfg.set("Banks." + bankName + ".members", players);
+                try {
+                    cfg.save(file);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -83,6 +103,19 @@ public class VaultManager {
             Main.getInstance().getBackendManager().updateUser(player,"bankname","","eco");
             Main.getInstance().getBackendManager().updateUser(player,"bankmembers", users,"eco");
             Main.getInstance().getBackendManager().updataData("bankname", bankName, "bankmembers", users, "eco");
+        } else {
+            if (!cfg.contains("Banks." + bankName + ".members")) {
+            } else {
+                List<String> players = cfg.getStringList("Banks." + bankName + ".members");
+                if (players.contains(player.getName()))
+                    players.remove(player.getName());
+                cfg.set("Banks." + bankName + ".members", players);
+                try {
+                    cfg.save(file);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -91,8 +124,9 @@ public class VaultManager {
             return new MySQLManager().getBankMembers(bankName);
         } else if (Main.getInstance().isMongoDb()) {
             return (List<String>) Main.getInstance().getBackendManager().getObject("bankname",bankName,"bankmembers","eco");
+        } else {
+            return cfg.getStringList("Banks." + bankName + ".members");
         }
-        return null;
     }
 
 
