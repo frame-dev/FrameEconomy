@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -74,6 +75,13 @@ public class VaultManager {
             Main.getInstance().getBackendManager().updateUser(player,"bankmembers", users,"eco");
             Main.getInstance().getBackendManager().updataData("bankname", bankName, "bankmembers", users, "eco");
         } else {
+            try {
+                cfg.load(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InvalidConfigurationException e) {
+                e.printStackTrace();
+            }
             if (!cfg.contains("Banks." + bankName + ".members")) {
                 List<String> players = new ArrayList<>();
                 if (!players.contains(player.getName()))
@@ -84,11 +92,11 @@ public class VaultManager {
                 if (!players.contains(player.getName()))
                     players.add(player.getName());
                 cfg.set("Banks." + bankName + ".members", players);
-                try {
-                    cfg.save(file);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            }
+            try {
+                cfg.save(file);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -98,23 +106,30 @@ public class VaultManager {
             new MySQLManager().removeBankMember(bankName, player);
         } else if (Main.getInstance().isMongoDb()) {
             List<String> users = (List<String>) Main.getInstance().getBackendManager().getObject("bankname", bankName, "bankmembers", "eco");
-            if (users.contains(player.getName()))
+            if (users.contains(player.getName())) 
                 users.remove(player.getName());
             Main.getInstance().getBackendManager().updateUser(player,"bankname","","eco");
             Main.getInstance().getBackendManager().updateUser(player,"bankmembers", users,"eco");
             Main.getInstance().getBackendManager().updataData("bankname", bankName, "bankmembers", users, "eco");
         } else {
+            try {
+                cfg.load(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InvalidConfigurationException e) {
+                e.printStackTrace();
+            }
             if (!cfg.contains("Banks." + bankName + ".members")) {
             } else {
                 List<String> players = cfg.getStringList("Banks." + bankName + ".members");
                 if (players.contains(player.getName()))
                     players.remove(player.getName());
                 cfg.set("Banks." + bankName + ".members", players);
-                try {
-                    cfg.save(file);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            }
+            try {
+                cfg.save(file);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
