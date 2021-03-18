@@ -9,7 +9,6 @@ import de.framedev.frameeconomy.mongodb.MongoManager;
 import de.framedev.frameeconomy.mysql.MySQL;
 import de.framedev.frameeconomy.mysql.SQLLite;
 import de.framedev.frameeconomy.vault.VaultManager;
-import frameeconomy.VaultProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -29,7 +28,6 @@ public final class Main extends JavaPlugin implements Listener {
     private static Main instance;
 
     private VaultManager vaultManager;
-    private static VaultProvider vaultProvider;
     private MongoManager mongoManager;
     private BackendManager backendManager;
 
@@ -61,7 +59,6 @@ public final class Main extends JavaPlugin implements Listener {
         }
 
         this.vaultManager = new VaultManager(this);
-        vaultProvider = new VaultProvider(this);
         new PayCMD(this);
         new BalanceCMD(this);
         new EcoCMD(this);
@@ -167,10 +164,6 @@ public final class Main extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         getLogger().log(Level.INFO, "Disabled!");
-    }
-
-    public static VaultProvider getVaultProvider() {
-        return vaultProvider;
     }
 
     public BackendManager getBackendManager() {

@@ -26,17 +26,3 @@ Currency:
   Singular: '$'
 Economy:
   MaxBalance: 1000000000
-PayLoad:
-  Use: false
-  Time:
-    Sec: 0
-    Min: 30
-    Hour: 0
-    Day: 0
-Interest:
-  Use: false
-  Time:
-    Sec: 0
-    Min: 0
-    Hour: 1
-    Day: 0
