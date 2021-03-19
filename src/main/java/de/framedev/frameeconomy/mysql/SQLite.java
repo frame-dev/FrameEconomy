@@ -12,15 +12,15 @@ import java.sql.SQLException;
  * Copyrighted by FrameDev
  */
 
-public class SQLLite {
+public class SQLite {
 
     public static Connection connection;
     private static String fileName;
     private static String path;
 
-    public SQLLite(String path, String fileName) {
-        SQLLite.fileName = fileName;
-        SQLLite.path = path;
+    public SQLite(String path, String fileName) {
+        SQLite.fileName = fileName;
+        SQLite.path = path;
     }
 
     public static Connection connect() {

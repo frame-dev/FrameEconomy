@@ -6,8 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 
 public class SQL {
@@ -34,7 +32,7 @@ public class SQL {
                 stmt.executeUpdate();
             } else if (Main.getInstance().isSQL()) {
                 String sql = "CREATE TABLE IF NOT EXISTS " + tablename + " (ID INTEGER PRIMARY KEY AUTOINCREMENT," + builder + ",created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);";
-                PreparedStatement stmt = SQLLite.connect().prepareStatement(sql);
+                PreparedStatement stmt = SQLite.connect().prepareStatement(sql);
                 stmt.executeUpdate();
             }
         } catch (SQLException e) {
@@ -43,13 +41,13 @@ public class SQL {
             if (Main.getInstance().isMysql()) {
                 MySQL.close();
             } else if (Main.getInstance().isSQL()) {
-                SQLLite.close();
+                SQLite.close();
             }
         }
         if (Main.getInstance().isMysql()) {
             MySQL.close();
         } else if (Main.getInstance().isSQL()) {
-            SQLLite.close();
+            SQLite.close();
         }
     }
 
@@ -70,7 +68,7 @@ public class SQL {
                 Statement stmt = MySQL.getConnection().createStatement();
                 stmt.executeUpdate(builder2);
             } else if (Main.getInstance().isSQL()) {
-                Statement stmt = SQLLite.connect().createStatement();
+                Statement stmt = SQLite.connect().createStatement();
                 stmt.executeUpdate(builder2);
             }
         } catch (SQLException e) {
@@ -79,13 +77,13 @@ public class SQL {
             if (Main.getInstance().isMysql()) {
                 MySQL.close();
             } else if (Main.getInstance().isSQL()) {
-                SQLLite.close();
+                SQLite.close();
             }
         }
         if (Main.getInstance().isMysql()) {
             MySQL.close();
         } else if (Main.getInstance().isSQL()) {
-            SQLLite.close();
+            SQLite.close();
         }
     }
 
@@ -98,7 +96,7 @@ public class SQL {
                 Statement stmt = MySQL.getConnection().createStatement();
                 stmt.executeUpdate(sql);
             } else if (Main.getInstance().isSQL()) {
-                Statement stmt = SQLLite.connect().createStatement();
+                Statement stmt = SQLite.connect().createStatement();
                 stmt.executeUpdate(sql);
             }
         } catch (SQLException e) {
@@ -107,13 +105,13 @@ public class SQL {
             if (Main.getInstance().isMysql()) {
                 MySQL.close();
             } else if (Main.getInstance().isSQL()) {
-                SQLLite.close();
+                SQLite.close();
             }
         }
         if (Main.getInstance().isMysql()) {
             MySQL.close();
         } else if (Main.getInstance().isSQL()) {
-            SQLLite.close();
+            SQLite.close();
         }
     }
 
@@ -128,7 +126,7 @@ public class SQL {
                 Statement stmt = MySQL.getConnection().createStatement();
                 stmt.executeUpdate(sql);
             } else if (Main.getInstance().isSQL()) {
-                Statement stmt = SQLLite.connect().createStatement();
+                Statement stmt = SQLite.connect().createStatement();
                 stmt.executeUpdate(sql);
             }
         } catch (SQLException e) {
@@ -137,13 +135,13 @@ public class SQL {
             if (Main.getInstance().isMysql()) {
                 MySQL.close();
             } else if (Main.getInstance().isSQL()) {
-                SQLLite.close();
+                SQLite.close();
             }
         }
         if (Main.getInstance().isMysql()) {
             MySQL.close();
         } else if (Main.getInstance().isSQL()) {
-            SQLLite.close();
+            SQLite.close();
         }
     }
 
@@ -158,7 +156,7 @@ public class SQL {
                 Statement stmt = MySQL.getConnection().createStatement();
                 stmt.executeUpdate(sql);
             } else if (Main.getInstance().isSQL()) {
-                Statement stmt = SQLLite.connect().createStatement();
+                Statement stmt = SQLite.connect().createStatement();
                 stmt.executeUpdate(sql);
             }
         } catch (SQLException e) {
@@ -167,13 +165,13 @@ public class SQL {
             if (Main.getInstance().isMysql()) {
                 MySQL.close();
             } else if (Main.getInstance().isSQL()) {
-                SQLLite.close();
+                SQLite.close();
             }
         }
         if (Main.getInstance().isMysql()) {
             MySQL.close();
         } else if (Main.getInstance().isSQL()) {
-            SQLLite.close();
+            SQLite.close();
         }
     }
 
@@ -200,7 +198,7 @@ public class SQL {
                     }
                 }
             } else if (Main.getInstance().isSQL()) {
-                Statement statement = SQLLite.connect().createStatement();
+                Statement statement = SQLite.connect().createStatement();
                 String sql = stringBuilder.toString();
                 ResultSet res = statement.executeQuery(sql);
                 if (res.next()) {
@@ -220,13 +218,13 @@ public class SQL {
             if (Main.getInstance().isMysql()) {
                 MySQL.close();
             } else if (Main.getInstance().isSQL()) {
-                SQLLite.close();
+                SQLite.close();
             }
         }
         if (Main.getInstance().isMysql()) {
             MySQL.close();
         } else if (Main.getInstance().isSQL()) {
-            SQLLite.close();
+            SQLite.close();
         }
         return false;
     }
@@ -251,7 +249,7 @@ public class SQL {
                     return true;
                 }
             } else if (Main.getInstance().isSQL()) {
-                Statement statement = SQLLite.connect().createStatement();
+                Statement statement = SQLite.connect().createStatement();
                 String sql = stringBuilder.toString();
                 ResultSet res = statement.executeQuery(sql);
                 if (res.next()) {
@@ -268,13 +266,13 @@ public class SQL {
             if (Main.getInstance().isMysql()) {
                 MySQL.close();
             } else if (Main.getInstance().isSQL()) {
-                SQLLite.close();
+                SQLite.close();
             }
         }
         if (Main.getInstance().isMysql()) {
             MySQL.close();
         } else if (Main.getInstance().isSQL()) {
-            SQLLite.close();
+            SQLite.close();
         }
         return false;
     }
@@ -301,7 +299,7 @@ public class SQL {
                     return o;
                 }
             } else if (Main.getInstance().isSQL()) {
-                Statement statement = SQLLite.connect().createStatement();
+                Statement statement = SQLite.connect().createStatement();
                 ResultSet res = statement.executeQuery(sql);
                 if (res.next()) {
                     o = res.getObject(selected);
@@ -318,13 +316,13 @@ public class SQL {
             if (Main.getInstance().isMysql()) {
                 MySQL.close();
             } else if (Main.getInstance().isSQL()) {
-                SQLLite.close();
+                SQLite.close();
             }
         }
         if (Main.getInstance().isMysql()) {
             MySQL.close();
         } else if (Main.getInstance().isSQL()) {
-            SQLLite.close();
+            SQLite.close();
         }
         return o;
     }
@@ -339,7 +337,7 @@ public class SQL {
                 Statement stmt = MySQL.getConnection().createStatement();
                 stmt.executeUpdate(sql);
             } else if(Main.getInstance().isSQL()) {
-                Statement stmt = SQLLite.connect().createStatement();
+                Statement stmt = SQLite.connect().createStatement();
                 stmt.executeUpdate(sql);
             }
         } catch (SQLException e) {
@@ -348,13 +346,13 @@ public class SQL {
             if (Main.getInstance().isMysql()) {
                 MySQL.close();
             } else if (Main.getInstance().isSQL()) {
-                SQLLite.close();
+                SQLite.close();
             }
         }
         if (Main.getInstance().isMysql()) {
             MySQL.close();
         } else if (Main.getInstance().isSQL()) {
-            SQLLite.close();
+            SQLite.close();
         }
     }
 
@@ -367,7 +365,7 @@ public class SQL {
                     return true;
                 }
             } else if(Main.getInstance().isSQL()) {
-                Statement statement = SQLLite.connect().createStatement();
+                Statement statement = SQLite.connect().createStatement();
                 ResultSet rs = statement.executeQuery("SELECT \n" +
                         "    name\n" +
                         "FROM \n" +
@@ -388,13 +386,13 @@ public class SQL {
             if (Main.getInstance().isMysql()) {
                 MySQL.close();
             } else if (Main.getInstance().isSQL()) {
-                SQLLite.close();
+                SQLite.close();
             }
         }
         if (Main.getInstance().isMysql()) {
             MySQL.close();
         } else if (Main.getInstance().isSQL()) {
-            SQLLite.close();
+            SQLite.close();
         }
         return false;
     }

@@ -5,7 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import de.framedev.frameeconomy.main.Main;
 import de.framedev.frameeconomy.mysql.MySQL;
 import de.framedev.frameeconomy.mysql.SQL;
-import de.framedev.frameeconomy.mysql.SQLLite;
+import de.framedev.frameeconomy.mysql.SQLite;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
@@ -146,7 +146,7 @@ public class MySQLManager {
                     players.add(resultSet.getString("Player"));
                 }
             } else if (Main.getInstance().isSQL()) {
-                Statement statement = SQLLite.connect().createStatement();
+                Statement statement = SQLite.connect().createStatement();
                 ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName + " WHERE BankName ='" + name + "';");
                 while (resultSet.next()) {
                     i++;
@@ -159,7 +159,7 @@ public class MySQLManager {
             if (Main.getInstance().isMysql()) {
                 MySQL.close();
             } else if (Main.getInstance().isSQL())
-                SQLLite.close();
+                SQLite.close();
         }
         if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
             for (int x = 0; x <= i; x++) {
@@ -178,7 +178,7 @@ public class MySQLManager {
                 if (resultSet.next())
                     return resultSet.getDouble("BankBalance");
             } else if (Main.getInstance().isSQL()) {
-                Statement statement = SQLLite.connect().createStatement();
+                Statement statement = SQLite.connect().createStatement();
                 ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName + " WHERE BankName ='" + name + "';");
                 if (resultSet.next())
                     return resultSet.getDouble("BankBalance");
@@ -188,7 +188,7 @@ public class MySQLManager {
             if (Main.getInstance().isMysql()) {
                 MySQL.close();
             } else if (Main.getInstance().isSQL())
-                SQLLite.close();
+                SQLite.close();
         }
         return 0.0;
     }
@@ -222,7 +222,7 @@ public class MySQLManager {
                             return true;
                 }
             } else if (Main.getInstance().isSQL()) {
-                Statement statement = SQLLite.connect().createStatement();
+                Statement statement = SQLite.connect().createStatement();
                 ResultSet resultSet = null;
                 if (isOnlineMode()) {
                     resultSet = statement.executeQuery("SELECT * FROM " + tableName + " WHERE Player = '" + player.getUniqueId().toString() + "';");
@@ -245,7 +245,7 @@ public class MySQLManager {
             if (Main.getInstance().isMysql()) {
                 MySQL.close();
             } else if (Main.getInstance().isSQL())
-                SQLLite.close();
+                SQLite.close();
         }
         return false;
     }
@@ -336,7 +336,7 @@ public class MySQLManager {
                         }
                     } else if (Main.getInstance().isSQL()) {
                         try {
-                            Statement statement = SQLLite.connect().createStatement();
+                            Statement statement = SQLite.connect().createStatement();
                             ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName + " WHERE BankName ='" + bankName + "';");
                             while (resultSet.next()) {
                                 pls.add(resultSet.getString("Player"));
@@ -344,7 +344,7 @@ public class MySQLManager {
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         } finally {
-                            SQLLite.close();
+                            SQLite.close();
                         }
                     }
                 }
@@ -418,7 +418,7 @@ public class MySQLManager {
                         banks.add(resultSet.getString("BankName"));
                     }
                 } else if (Main.getInstance().isSQL()) {
-                    Statement statement = SQLLite.connect().createStatement();
+                    Statement statement = SQLite.connect().createStatement();
                     ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName + " WHERE BankName IS NOT NULL");
                     while (resultSet.next()) {
                         banks.add(resultSet.getString("BankName"));
@@ -430,7 +430,7 @@ public class MySQLManager {
                 if (Main.getInstance().isMysql())
                     MySQL.close();
                 if (Main.getInstance().isSQL())
-                    SQLLite.close();
+                    SQLite.close();
             }
         }
         return banks;

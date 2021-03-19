@@ -7,7 +7,7 @@ import de.framedev.frameeconomy.commands.PayCMD;
 import de.framedev.frameeconomy.mongodb.BackendManager;
 import de.framedev.frameeconomy.mongodb.MongoManager;
 import de.framedev.frameeconomy.mysql.MySQL;
-import de.framedev.frameeconomy.mysql.SQLLite;
+import de.framedev.frameeconomy.mysql.SQLite;
 import de.framedev.frameeconomy.vault.VaultManager;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -55,7 +55,7 @@ public final class Main extends JavaPlugin implements Listener {
             new MySQL();
             getLogger().log(Level.INFO, "MySQL Enabled!");
         } else if (isSQL()) {
-            new SQLLite(getConfig().getString("SQLite.Path"), getConfig().getString("SQLite.FileName"));
+            new SQLite(getConfig().getString("SQLite.Path"), getConfig().getString("SQLite.FileName"));
             getLogger().log(Level.INFO, "SQLite Enabled!");
         }
 
