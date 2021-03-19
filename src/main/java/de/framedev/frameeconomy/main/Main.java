@@ -22,6 +22,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.logging.Level;
 
 public final class Main extends JavaPlugin implements Listener {
@@ -55,6 +57,7 @@ public final class Main extends JavaPlugin implements Listener {
             new MySQL();
             getLogger().log(Level.INFO, "MySQL Enabled!");
         } else if (isSQL()) {
+            //noinspection InstantiationOfUtilityClass
             new SQLite(getConfig().getString("SQLite.Path"), getConfig().getString("SQLite.FileName"));
             getLogger().log(Level.INFO, "SQLite Enabled!");
         }
@@ -77,7 +80,8 @@ public final class Main extends JavaPlugin implements Listener {
                 this.backendManager = new BackendManager(this);
             }
         }
-        /*for(Document document : backendManager.getAllDocuments("eco")) {
+        /*
+        for(Document document : backendManager.getAllDocuments("eco")) {
             Document doc = new Document("bank",120.0);
             MongoCollection mongoCollection = mongoManager.getDatabase().getCollection("eco");
             Document updateObject = new Document("$set", doc);
@@ -90,7 +94,7 @@ public final class Main extends JavaPlugin implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (vaultManager.getEco() != null)
+                if (vaultManager.getEconomy() != null)
                     getLogger().log(Level.INFO, "Connect to Vault API!");
             }
         }.runTaskLater(this, 60);
@@ -104,11 +108,9 @@ public final class Main extends JavaPlugin implements Listener {
 
     public void reloadCustomConfig() throws UnsupportedEncodingException {
         // Look for defaults in the jar
-        Reader defConfigStream = new InputStreamReader(this.getResource("config.yml"), "UTF8");
-        if (defConfigStream != null) {
-            YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-            getConfig().setDefaults(defConfig);
-        }
+        Reader defConfigStream = new InputStreamReader(Objects.requireNonNull(this.getResource("config.yml")), StandardCharsets.UTF_8);
+        YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+        getConfig().setDefaults(defConfig);
     }
 
     public void checkUpdate() {
@@ -136,31 +138,26 @@ public final class Main extends JavaPlugin implements Listener {
         badWordsFile = new File(getDataFolder() + "config.yml");
         badWordsData = YamlConfiguration.loadConfiguration(badWordsFile);
         //Defaults in jar
-        Reader defConfigStream = null;
-        try {
-            defConfigStream = new InputStreamReader(getResource("config.yml"), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        if (defConfigStream != null) {
-            YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-            badWordsData.setDefaults(defConfig);
-            //Copy default values
-            badWordsData.options().copyDefaults(true);
-            this.saveConfig();
-            //OR use this to copy default values
-            //this.saveDefaultConfig();
-        }
+        Reader defConfigStream;
+        defConfigStream = new InputStreamReader(Objects.requireNonNull(getResource("config.yml")), StandardCharsets.UTF_8);
+        YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+        badWordsData.setDefaults(defConfig);
+        //Copy default values
+        badWordsData.options().copyDefaults(true);
+        this.saveConfig();
+        //OR use this to copy default values
+        //this.saveDefaultConfig();
     }
 
     @NotNull
     public String getPrefix() {
         String prefix = getConfig().getString("Prefix");
+        if(prefix == null) return "§6[§aFrame§bEconomy§6] §c» §7";
         if (prefix.contains("&"))
             prefix = prefix.replace("&", "§");
         if (prefix.contains(">>"))
             prefix = prefix.replace(">>", "»");
-        return prefix;
+        return Objects.requireNonNull(prefix);
     }
 
     @Override
@@ -179,8 +176,8 @@ public final class Main extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (vaultManager != null) {
-            if (!vaultManager.getEco().hasAccount(event.getPlayer()))
-                vaultManager.getEco().createPlayerAccount(event.getPlayer());
+            if (!vaultManager.getEconomy().hasAccount(event.getPlayer()))
+                vaultManager.getEconomy().createPlayerAccount(event.getPlayer());
         }
         if (isMongoDb()) {
             if (!backendManager.exists(event.getPlayer(), "uuid", "eco"))

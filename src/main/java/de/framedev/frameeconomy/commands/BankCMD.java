@@ -33,7 +33,7 @@ public class BankCMD implements CommandExecutor {
                 if (sender instanceof Player) {
                     Player player = (Player) sender;
                     if (player.hasPermission("frameeconomy.bank.create")) {
-                        if (plugin.getVaultManager().getEco().createBank(args[1], player).transactionSuccess()) {
+                        if (plugin.getVaultManager().getEconomy().createBank(args[1], player).transactionSuccess()) {
                             player.sendMessage(plugin.getPrefix() + "§aBank Successfully Created!");
                         } else {
                             player.sendMessage(plugin.getPrefix() + "§cError while Creating Bank!");
@@ -48,9 +48,9 @@ public class BankCMD implements CommandExecutor {
                 if (sender instanceof Player) {
                     Player player = (Player) sender;
                     if (player.hasPermission("frameeconomy.bank.balance")) {
-                        if (plugin.getVaultManager().getEco().getBanks().contains(bankName)) {
-                            if (plugin.getVaultManager().getEco().isBankOwner(bankName, player).transactionSuccess() || plugin.getVaultManager().getEco().isBankMember(bankName, player).transactionSuccess()) {
-                                player.sendMessage(plugin.getPrefix() + "§aThe Balance from the Bank is §6" + plugin.getVaultManager().getEco().bankBalance(bankName).balance);
+                        if (plugin.getVaultManager().getEconomy().getBanks().contains(bankName)) {
+                            if (plugin.getVaultManager().getEconomy().isBankOwner(bankName, player).transactionSuccess() || plugin.getVaultManager().getEconomy().isBankMember(bankName, player).transactionSuccess()) {
+                                player.sendMessage(plugin.getPrefix() + "§aThe Balance from the Bank is §6" + plugin.getVaultManager().getEconomy().bankBalance(bankName).balance);
                             } else {
                                 player.sendMessage(plugin.getPrefix() + "§cYou are not a BankMember or the Owner!");
                             }
@@ -69,10 +69,10 @@ public class BankCMD implements CommandExecutor {
                 if (sender instanceof Player) {
                     Player player = (Player) sender;
                     if (player.hasPermission("frameeconomy.bank.deposit")) {
-                        if (plugin.getVaultManager().getEco().getBanks().contains(bankName)) {
-                            if (plugin.getVaultManager().getEco().has(player, amount)) {
-                                plugin.getVaultManager().getEco().withdrawPlayer(player, amount);
-                                if (plugin.getVaultManager().getEco().bankDeposit(bankName, amount).transactionSuccess()) {
+                        if (plugin.getVaultManager().getEconomy().getBanks().contains(bankName)) {
+                            if (plugin.getVaultManager().getEconomy().has(player, amount)) {
+                                plugin.getVaultManager().getEconomy().withdrawPlayer(player, amount);
+                                if (plugin.getVaultManager().getEconomy().bankDeposit(bankName, amount).transactionSuccess()) {
                                     player.sendMessage(plugin.getPrefix() + "§6" + amount + " §awas successfully transferred to the bank!");
                                 } else {
                                     player.sendMessage(plugin.getPrefix() + "§cError while Deposit to the Bank!");
@@ -93,11 +93,11 @@ public class BankCMD implements CommandExecutor {
                 if (sender instanceof Player) {
                     Player player = (Player) sender;
                     if (player.hasPermission("frameeconomy.bank.withdraw")) {
-                        if (plugin.getVaultManager().getEco().getBanks().contains(bankName)) {
-                            if (plugin.getVaultManager().getEco().isBankOwner(bankName, player).transactionSuccess() || plugin.getVaultManager().getEco().isBankMember(bankName, player).transactionSuccess()) {
-                                if (plugin.getVaultManager().getEco().bankHas(bankName, amount).transactionSuccess()) {
-                                    plugin.getVaultManager().getEco().depositPlayer(player, amount);
-                                    plugin.getVaultManager().getEco().bankWithdraw(bankName, amount);
+                        if (plugin.getVaultManager().getEconomy().getBanks().contains(bankName)) {
+                            if (plugin.getVaultManager().getEconomy().isBankOwner(bankName, player).transactionSuccess() || plugin.getVaultManager().getEconomy().isBankMember(bankName, player).transactionSuccess()) {
+                                if (plugin.getVaultManager().getEconomy().bankHas(bankName, amount).transactionSuccess()) {
+                                    plugin.getVaultManager().getEconomy().depositPlayer(player, amount);
+                                    plugin.getVaultManager().getEconomy().bankWithdraw(bankName, amount);
                                     player.sendMessage(plugin.getPrefix() + "§aYou successfully withdrew §6" + amount + " §afrom the bank!");
                                 } else {
                                     player.sendMessage(plugin.getPrefix() + "§cThe Bank has not enought Money!");
@@ -118,8 +118,8 @@ public class BankCMD implements CommandExecutor {
                 if (sender instanceof Player) {
                     Player player = (Player) sender;
                     if (player.hasPermission("frameeconomy.bank.addmember")) {
-                        if (plugin.getVaultManager().getEco().getBanks().contains(bankName)) {
-                            if (plugin.getVaultManager().getEco().isBankOwner(bankName, player).transactionSuccess()) {
+                        if (plugin.getVaultManager().getEconomy().getBanks().contains(bankName)) {
+                            if (plugin.getVaultManager().getEconomy().isBankOwner(bankName, player).transactionSuccess()) {
                                 plugin.getVaultManager().addBankMember(bankName, offline);
                                 player.sendMessage(plugin.getPrefix() + "§6" + offline.getName() + " §ais now Successfully a Member of your Bank!");
                             } else {
@@ -138,8 +138,8 @@ public class BankCMD implements CommandExecutor {
                 if (sender instanceof Player) {
                     Player player = (Player) sender;
                     if (player.hasPermission("frameeconomy.bank.removemember")) {
-                        if (plugin.getVaultManager().getEco().getBanks().contains(bankName)) {
-                            if (plugin.getVaultManager().getEco().isBankOwner(bankName, player).transactionSuccess()) {
+                        if (plugin.getVaultManager().getEconomy().getBanks().contains(bankName)) {
+                            if (plugin.getVaultManager().getEconomy().isBankOwner(bankName, player).transactionSuccess()) {
                                 plugin.getVaultManager().removeBankMember(bankName, offline);
                                 player.sendMessage(plugin.getPrefix() + "§6" + offline.getName() + " §ais no longer a member of your Bank!");
                             } else {

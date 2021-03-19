@@ -40,7 +40,7 @@ public class BalanceCMD implements CommandExecutor {
                 if (sender instanceof Player) {
                     if (sender.hasPermission("frameeconomy.balance")) {
                         Player player = (Player) sender;
-                        player.sendMessage("§aYour Money §6" + plugin.getVaultManager().getEco().getBalance(player) + plugin.getVaultManager().getEco().currencyNamePlural());
+                        player.sendMessage("§aYour Money §6" + plugin.getVaultManager().getEconomy().getBalance(player) + plugin.getVaultManager().getEconomy().currencyNamePlural());
                     } else {
                         sender.sendMessage("§cNo Permissions!");
                     }
@@ -51,7 +51,7 @@ public class BalanceCMD implements CommandExecutor {
                 if (sender.hasPermission("frameeconomy.balance.others")) {
                     OfflinePlayer player = Bukkit.getOfflinePlayer(args[0]);
                     if (player != null) {
-                        sender.sendMessage("§aMoney from §6" + player.getName() + " §ais §6" + plugin.getVaultManager().getEco().getBalance(player) + plugin.getVaultManager().getEco().currencyNamePlural());
+                        sender.sendMessage("§aMoney from §6" + player.getName() + " §ais §6" + plugin.getVaultManager().getEconomy().getBalance(player) + plugin.getVaultManager().getEconomy().currencyNamePlural());
                     } else {
                         sender.sendMessage("§cThis Player isn't Online! §6" + args[0]);
                     }
@@ -66,10 +66,10 @@ public class BalanceCMD implements CommandExecutor {
                 ValueComparator bvc = new ValueComparator(mostplayers);
                 TreeMap<String, Double> sorted_map = new TreeMap<String, Double>(bvc);
                 for (Player all : Bukkit.getOnlinePlayers()) {
-                    mostplayers.put(all.getName(), plugin.getVaultManager().getEco().getBalance(all));
+                    mostplayers.put(all.getName(), plugin.getVaultManager().getEconomy().getBalance(all));
                 }
                 for (OfflinePlayer alloffline : Bukkit.getOfflinePlayers()) {
-                    mostplayers.put(alloffline.getName(), plugin.getVaultManager().getEco().getBalance(alloffline));
+                    mostplayers.put(alloffline.getName(), plugin.getVaultManager().getEconomy().getBalance(alloffline));
                 }
                 sorted_map.putAll(mostplayers);
                 int i = 0;

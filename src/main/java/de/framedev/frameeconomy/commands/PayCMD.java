@@ -41,13 +41,13 @@ public class PayCMD implements CommandExecutor, TabCompleter {
                     amount = Double.parseDouble(String.format("%.4f",amount));
                     Player target = Bukkit.getPlayer(args[1]);
                     if (target != null) {
-                        if (plugin.getVaultManager().getEco().has(player, amount)) {
+                        if (plugin.getVaultManager().getEconomy().has(player, amount)) {
                             boolean[] success = {false,false};
-                            success[0] = plugin.getVaultManager().getEco().depositPlayer(target, amount).transactionSuccess();
-                            success[1] = plugin.getVaultManager().getEco().withdrawPlayer(player, amount).transactionSuccess();
+                            success[0] = plugin.getVaultManager().getEconomy().depositPlayer(target, amount).transactionSuccess();
+                            success[1] = plugin.getVaultManager().getEconomy().withdrawPlayer(player, amount).transactionSuccess();
                             if(success[0] && success[1]) {
-                                player.sendMessage("§aYou give §6" + target.getName() + " " + amount + plugin.getVaultManager().getEco().currencyNamePlural());
-                                target.sendMessage("§aYou got from §6" + player.getName() + " " + amount + plugin.getVaultManager().getEco().currencyNamePlural());
+                                player.sendMessage("§aYou give §6" + target.getName() + " " + amount + plugin.getVaultManager().getEconomy().currencyNamePlural());
+                                target.sendMessage("§aYou got from §6" + player.getName() + " " + amount + plugin.getVaultManager().getEconomy().currencyNamePlural());
                             }
                         } else {
                             player.sendMessage("§cNot enought Money!");
@@ -74,15 +74,15 @@ public class PayCMD implements CommandExecutor, TabCompleter {
                     double sum = Math.round(betrag * percent);
                     sum /= 100.0;
                     if (target != null) {
-                        if (plugin.getVaultManager().getEco().has(player, amount)) {
+                        if (plugin.getVaultManager().getEconomy().has(player, amount)) {
                             boolean[] success = {false,false};
                             amount = Double.parseDouble(String.format("%.4f",amount + sum));
-                            success[0] = plugin.getVaultManager().getEco().depositPlayer(target, amount).transactionSuccess();
-                            success[1] = plugin.getVaultManager().getEco().withdrawPlayer(player, amount).transactionSuccess();
+                            success[0] = plugin.getVaultManager().getEconomy().depositPlayer(target, amount).transactionSuccess();
+                            success[1] = plugin.getVaultManager().getEconomy().withdrawPlayer(player, amount).transactionSuccess();
                             if(success[0] && success[1]) {
                                 player.sendMessage("§aPercent : §6" + sum);
-                                player.sendMessage("§aYou give §6" + target.getName() + " " + amount + plugin.getVaultManager().getEco().currencyNamePlural());
-                                target.sendMessage("§aYou got from §6" + player.getName() + " " + amount + plugin.getVaultManager().getEco().currencyNamePlural());
+                                player.sendMessage("§aYou give §6" + target.getName() + " " + amount + plugin.getVaultManager().getEconomy().currencyNamePlural());
+                                target.sendMessage("§aYou got from §6" + player.getName() + " " + amount + plugin.getVaultManager().getEconomy().currencyNamePlural());
                             }
                         } else {
                             player.sendMessage("§cNot enought Money!");
@@ -102,7 +102,7 @@ public class PayCMD implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if(args.length == 1) {
             ArrayList<String> empty = new ArrayList<>();
-            empty.add(plugin.getVaultManager().getEco().getBalance((OfflinePlayer) sender) + "");
+            empty.add(plugin.getVaultManager().getEconomy().getBalance((OfflinePlayer) sender) + "");
             Collections.sort(empty);
             return empty;
         }

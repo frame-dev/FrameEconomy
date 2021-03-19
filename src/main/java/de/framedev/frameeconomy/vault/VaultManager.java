@@ -18,7 +18,7 @@ import net.milkbowl.vault.economy.Economy;
 
 public class VaultManager {
 
-    private final Economy eco;
+    private final Economy economy;
 
     public VaultManager(Main plugin) {
         File fileData = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
@@ -55,10 +55,10 @@ public class VaultManager {
             }
         }
         plugin.getServer().getServicesManager().register(Economy.class, new VaultAPI(), plugin, ServicePriority.High);
-        eco = new VaultAPI();
+        economy = new VaultAPI();
         for (Player p : Bukkit.getOnlinePlayers()) {
-            if (!eco.hasAccount(p.getName()))
-                eco.createPlayerAccount(p.getName());
+            if (!economy.hasAccount(p))
+                economy.createPlayerAccount(p);
         }
     }
 
@@ -77,9 +77,7 @@ public class VaultManager {
         } else {
             try {
                 cfg.load(file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (InvalidConfigurationException e) {
+            } catch (IOException | InvalidConfigurationException e) {
                 e.printStackTrace();
             }
             if (!cfg.contains("Banks." + bankName + ".members")) {
@@ -114,9 +112,7 @@ public class VaultManager {
         } else {
             try {
                 cfg.load(file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (InvalidConfigurationException e) {
+            } catch (IOException | InvalidConfigurationException e) {
                 e.printStackTrace();
             }
             if (!cfg.contains("Banks." + bankName + ".members")) {
@@ -145,7 +141,7 @@ public class VaultManager {
     }
 
 
-    public Economy getEco() {
-        return eco;
+    public Economy getEconomy() {
+        return economy;
     }
 }
