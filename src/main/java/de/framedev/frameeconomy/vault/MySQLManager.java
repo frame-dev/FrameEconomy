@@ -435,4 +435,57 @@ public class MySQLManager {
         }
         return banks;
     }
+
+    public boolean removeBank(String bankName) {
+        if(SQL.isTableExists(tableName)) {
+            if(getBanks().contains(bankName)) {
+                List<String> members = getBankMembers(bankName);
+                try {
+                    if(Main.getInstance().isMysql()) {
+                        Statement statement = MySQL.getConnection().createStatement();
+                        ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName + " WHERE bankname = '" + bankName + "'");
+                        while (resultSet.next()) {
+                            resultSet.updateDouble("bankbalance",0.0);
+                            resultSet.updateString("bankname",null);
+                            resultSet.updateString("bankowner",null);
+                            resultSet.updateString("bankmembers",null);
+                        }
+                        return true;
+                    } else if(Main.getInstance().isSQL()) {
+                        for(OfflinePlayer player : Bukkit.getOfflinePlayers()) {
+                            if(isBankOwner(bankName,player))
+                                if(Bukkit.getOnlineMode()) {
+                                    SQL.updateData(tableName, "bankowner", "'" + null + "'", "player = '" + player.getUniqueId().toString());
+                                } else {
+                                    SQL.updateData(tableName, "bankowner", "'" + null + "'", "player = '" + player.getName());
+                                }
+                        }
+                        members.forEach(member -> {
+                            removeBankMember(bankName,Bukkit.getOfflinePlayer(member));
+                            if(Bukkit.getOnlineMode()) {
+                                SQL.updateData(tableName, "bankname", "'" + null + "'", "player = '" + Bukkit.getOfflinePlayer(member).getUniqueId().toString() + "'");
+                                SQL.updateData(tableName,"bankbalance","'" + 0.0 + "'","player = '" + Bukkit.getOfflinePlayer(member).getUniqueId().toString());
+                                SQL.updateData(tableName,"bankowner","'" + null + "'","player = '" + Bukkit.getOfflinePlayer(member).getUniqueId().toString());
+                                SQL.updateData(tableName,"bankmembers","'" + null + "'","player = '" + Bukkit.getOfflinePlayer(member).getUniqueId().toString());
+                            } else {
+                                SQL.updateData(tableName, "bankname", "'" + null + "'", "player = '" + Bukkit.getOfflinePlayer(member).getName() + "'");
+                                SQL.updateData(tableName,"bankbalance","'" + 0.0 + "'","player = '" + Bukkit.getOfflinePlayer(member).getName());
+                                SQL.updateData(tableName,"bankowner","'" + null + "'","player = '" + Bukkit.getOfflinePlayer(member).getName());
+                                SQL.updateData(tableName,"bankmembers","'" + null + "'","player = '" + Bukkit.getOfflinePlayer(member).getName());
+                            }
+                        });
+                        return true;
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                } finally {
+                    if(Main.getInstance().isMysql()) {
+                        MySQL.close();
+                    } else if(Main.getInstance().isSQL())
+                        SQLite.close();
+                }
+            }
+        }
+        return false;
+    }
 }

@@ -62,6 +62,19 @@ public class BankCMD implements CommandExecutor {
                     }
                 }
             }
+            if(args[0].equalsIgnoreCase("remove")) {
+                String bankName = args[1];
+                if(sender instanceof Player) {
+                    Player player = (Player) sender;
+                    if(player.hasPermission("frameeconomy.bank.remove")) {
+                        if(plugin.getVaultManager().getEconomy().getBanks().contains(bankName)) {
+                            if(plugin.getVaultManager().getEconomy().isBankOwner(bankName,player).transactionSuccess()) {
+
+                            }
+                        }
+                    }
+                }
+            }
         } else if (args.length == 3) {
             if (args[0].equalsIgnoreCase("deposit")) {
                 String bankName = args[1];

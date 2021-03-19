@@ -259,7 +259,22 @@ public class VaultAPI extends AbstractEconomy {
     }
 
     @Override
-    public EconomyResponse deleteBank(String s) {
+    public EconomyResponse deleteBank(String name) {
+        if(Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
+            new MySQLManager().removeBank(name);
+            return new EconomyResponse(0.0,0.0, EconomyResponse.ResponseType.SUCCESS,"");
+        } else {
+            File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
+            FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
+            if (!cfg.contains("Banks." + name))
+                return new EconomyResponse(0.0D, 0.0D, EconomyResponse.ResponseType.FAILURE, "Bank doesn't exists!");
+            cfg.set("Banks." + name, null);
+            try {
+                cfg.save(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         return null;
     }
 
