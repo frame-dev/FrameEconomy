@@ -69,8 +69,11 @@ public class BankCMD implements CommandExecutor {
                     if(player.hasPermission("frameeconomy.bank.remove")) {
                         if(plugin.getVaultManager().getEconomy().getBanks().contains(bankName)) {
                             if(plugin.getVaultManager().getEconomy().isBankOwner(bankName,player).transactionSuccess()) {
-                                plugin.getVaultManager().getEconomy().deleteBank(bankName);
-                                player.sendMessage(plugin.getPrefix() + "§cBank successfully deleted!");
+                                if(plugin.getVaultManager().getEconomy().deleteBank(bankName).transactionSuccess()) {
+                                    player.sendMessage(plugin.getPrefix() + "§cBank successfully deleted!");
+                                } else {
+                                    player.sendMessage(plugin.getPrefix() + "§cError while deleting Bank!");
+                                }
                             } else {
                                 player.sendMessage(plugin.getPrefix() + "§cYou are not the Owner!");
                             }
