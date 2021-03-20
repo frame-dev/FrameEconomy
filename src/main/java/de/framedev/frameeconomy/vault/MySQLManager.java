@@ -344,7 +344,7 @@ public class MySQLManager {
     /**
      *
      * @param bankName the Bank Name
-     * @param player
+     * @param player the Player
      */
     public void removeBankMember(String bankName, OfflinePlayer player) {
         List<String> pls = new ArrayList<>();
@@ -453,7 +453,7 @@ public class MySQLManager {
     /**
      *
      * @param bankName the Bank
-     * @returnw all BankMembers
+     * @return all BankMembers
      */
     public List<String> getBankMembers(String bankName) {
         if (SQL.isTableExists(tableName)) {

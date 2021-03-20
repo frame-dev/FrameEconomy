@@ -8,6 +8,7 @@ import de.framedev.frameeconomy.mongodb.BackendManager;
 import de.framedev.frameeconomy.mongodb.MongoManager;
 import de.framedev.frameeconomy.mysql.MySQL;
 import de.framedev.frameeconomy.mysql.SQLite;
+import de.framedev.frameeconomy.utils.ConfigUtils;
 import de.framedev.frameeconomy.vault.VaultManager;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -38,19 +39,22 @@ public final class Main extends JavaPlugin implements Listener {
     private MongoManager mongoManager;
     private BackendManager backendManager;
 
+    private ConfigUtils configUtils;
+
     private String prefix = null;
 
     @Override
     public void onEnable() {
         instance = this;
 
+        this.configUtils = new ConfigUtils();
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
-        saveDefaultConfigValues();
+        configUtils.saveDefaultConfigValues();
         reloadConfig();
         saveConfig();
         try {
-            reloadCustomConfig();
+            configUtils.reloadCustomConfig();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -113,17 +117,6 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     /**
-     * Reload the Config.yml
-     * @throws UnsupportedEncodingException
-     */
-    public void reloadCustomConfig() throws UnsupportedEncodingException {
-        // Look for defaults in the jar
-        Reader defConfigStream = new InputStreamReader(Objects.requireNonNull(this.getResource("config.yml")), StandardCharsets.UTF_8);
-        YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-        getConfig().setDefaults(defConfig);
-    }
-
-    /**
      * Checking for Updates in SpigotMC Forum
      */
     public void checkUpdate() {
@@ -142,27 +135,6 @@ public final class Main extends JavaPlugin implements Listener {
         } catch (IOException e) {
             Bukkit.getConsoleSender().sendMessage(prefix + "Failed to check for updates on spigotmc.org");
         }
-    }
-
-    public File configFile;
-    public FileConfiguration configCfg;
-
-    /**
-     * Saves the Default Config Sections from the Config.yml
-     */
-    public void saveDefaultConfigValues() {
-        configFile = new File(getDataFolder() + "config.yml");
-        configCfg = YamlConfiguration.loadConfiguration(configFile);
-        //Defaults in jar
-        Reader defConfigStream;
-        defConfigStream = new InputStreamReader(Objects.requireNonNull(getResource("config.yml")), StandardCharsets.UTF_8);
-        YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-        configCfg.setDefaults(defConfig);
-        //Copy default values
-        configCfg.options().copyDefaults(true);
-        this.saveConfig();
-        //OR use this to copy default values
-        //this.saveDefaultConfig();
     }
 
     /**
