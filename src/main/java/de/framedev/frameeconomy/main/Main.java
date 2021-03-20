@@ -11,8 +11,6 @@ import de.framedev.frameeconomy.mysql.SQLite;
 import de.framedev.frameeconomy.utils.ConfigUtils;
 import de.framedev.frameeconomy.vault.VaultManager;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -20,10 +18,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.logging.Level;
 
@@ -59,6 +59,7 @@ public final class Main extends JavaPlugin implements Listener {
             e.printStackTrace();
         }
 
+        //init Variable Prefix
         prefix = getPrefix();
 
         if (isMysql()) {
@@ -71,6 +72,8 @@ public final class Main extends JavaPlugin implements Listener {
         }
 
         this.vaultManager = new VaultManager(this);
+
+        //Register Commands
         new PayCMD(this);
         new BalanceCMD(this);
         new EcoCMD(this);
@@ -81,12 +84,12 @@ public final class Main extends JavaPlugin implements Listener {
             if (getConfig().getBoolean("MongoDB.Localhost")) {
                 this.mongoManager = new MongoManager();
                 mongoManager.connectLocalHost();
-                getLogger().log(Level.INFO,"MongoDB Enabled!");
+                getLogger().log(Level.INFO, "MongoDB Enabled!");
                 this.backendManager = new BackendManager(this);
             } else if (getConfig().getBoolean("MongoDB.Normal")) {
                 this.mongoManager = new MongoManager();
                 mongoManager.connect();
-                getLogger().log(Level.INFO,"MongoDB Enabled!");
+                getLogger().log(Level.INFO, "MongoDB Enabled!");
                 this.backendManager = new BackendManager(this);
             }
         }
@@ -98,6 +101,7 @@ public final class Main extends JavaPlugin implements Listener {
             mongoCollection.updateOne(Filters.eq("uuid",document.getString("uuid")), updateObject);
         }*/
 
+        // Register Join Listener
         getServer().getPluginManager().registerEvents(this, this);
 
         getLogger().log(Level.INFO, "Enabled!");
@@ -139,12 +143,13 @@ public final class Main extends JavaPlugin implements Listener {
 
     /**
      * This can only be changed in Config.yml
+     *
      * @return Prefix of this Plugin
      */
     @NotNull
     public String getPrefix() {
         String prefix = getConfig().getString("Prefix");
-        if(prefix == null) return "§6[§aFrame§bEconomy§6] §c» §7";
+        if (prefix == null) return "§6[§aFrame§bEconomy§6] §c» §7";
         if (prefix.contains("&"))
             prefix = prefix.replace("&", "§");
         if (prefix.contains(">>"))
@@ -159,6 +164,7 @@ public final class Main extends JavaPlugin implements Listener {
 
     /**
      * This Class conaints Creater / Updater / Inserter for your MongoDB Connection!
+     *
      * @return the Util class for MongoDB
      */
     public BackendManager getBackendManager() {
@@ -167,6 +173,7 @@ public final class Main extends JavaPlugin implements Listener {
 
     /**
      * Used for Connection to your MongoDB Database
+     *
      * @return the MongoDB util Class
      */
     public MongoManager getMongoManager() {
@@ -180,13 +187,15 @@ public final class Main extends JavaPlugin implements Listener {
                 vaultManager.getEconomy().createPlayerAccount(event.getPlayer());
         }
         if (isMongoDb()) {
-            if (!backendManager.exists(event.getPlayer(), "uuid", "eco"))
-                backendManager.createUser(event.getPlayer(), "eco");
+            if (backendManager != null)
+                if (!backendManager.exists(event.getPlayer(), "uuid", "eco"))
+                    backendManager.createUser(event.getPlayer(), "eco");
         }
     }
 
     /**
      * VaultManager used for VaultAPI
+     *
      * @return the VaultManager
      */
     public VaultManager getVaultManager() {
@@ -194,7 +203,6 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     /**
-     *
      * @return this Main Class
      */
     public static Main getInstance() {

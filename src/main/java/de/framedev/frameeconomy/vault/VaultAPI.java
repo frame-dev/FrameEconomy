@@ -203,6 +203,9 @@ public class VaultAPI extends AbstractEconomy {
             return new EconomyResponse(0.0D, 0.0D, EconomyResponse.ResponseType.FAILURE, "Value is less than zero!");
         double balance = getBalance(playerName);
         balance += amount;
+        if (balance > Main.getInstance().getConfig().getDouble("Economy.MaxBalance"))
+            return new EconomyResponse(Main.getInstance().getConfig().getDouble("Economy.MaxBalance"), 0.0D, EconomyResponse.ResponseType.FAILURE, "Bigger");
+
         if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
             new MySQLManager().addMoney(Bukkit.getOfflinePlayer(playerName), amount);
         } else if (Main.getInstance().isMongoDb()) {
@@ -211,9 +214,6 @@ public class VaultAPI extends AbstractEconomy {
         } else {
             File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
             FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-            if (balance > Main.getInstance().getConfig().getDouble("Economy.MaxBalance")) {
-                return new EconomyResponse(Main.getInstance().getConfig().getDouble("Economy.MaxBalance"), 0.0D, EconomyResponse.ResponseType.FAILURE, "Bigger");
-            }
             if (Bukkit.getServer().getOnlineMode()) {
                 cfg.set(Bukkit.getOfflinePlayer(playerName).getUniqueId().toString(), balance);
             } else {
@@ -260,10 +260,10 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public EconomyResponse deleteBank(String name) {
-        if(Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-            if(new MySQLManager().removeBank(name))
+        if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
+            if (new MySQLManager().removeBank(name))
                 return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.SUCCESS, "");
-            return new EconomyResponse(0.0,0.0, EconomyResponse.ResponseType.FAILURE,"Error while Deleting Bank!");
+            return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Error while Deleting Bank!");
         } else {
             File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
             FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
@@ -404,7 +404,7 @@ public class VaultAPI extends AbstractEconomy {
         } else if (Main.getInstance().isMongoDb()) {
             List<String> data = new ArrayList<>();
             for (OfflinePlayer offlinePlayer : Bukkit.getOnlinePlayers()) {
-                if (((String)Main.getInstance().getBackendManager().get(offlinePlayer, "bankowner", "eco")).equalsIgnoreCase(offlinePlayer.getUniqueId().toString()))
+                if (((String) Main.getInstance().getBackendManager().get(offlinePlayer, "bankowner", "eco")).equalsIgnoreCase(offlinePlayer.getUniqueId().toString()))
                     data.add((String) Main.getInstance().getBackendManager().get(offlinePlayer, "bankname", "eco"));
             }
             return data;
