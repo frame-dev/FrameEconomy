@@ -31,6 +31,11 @@ public class MySQLManager {
         return Bukkit.getServer().getOnlineMode();
     }
 
+    /**
+     * set the Money in the Database
+     * @param player the Player
+     * @param amount Money amount
+     */
     protected void setMoney(OfflinePlayer player, double amount) {
         if (isOnlineMode()) {
             if (SQL.isTableExists(tableName)) {
@@ -57,6 +62,11 @@ public class MySQLManager {
         }
     }
 
+    /**
+     *
+     * @param player the Player
+     * @return the Money from the selected Player
+     */
     protected double getMoney(OfflinePlayer player) {
         if (isOnlineMode()) {
             if (SQL.isTableExists(tableName)) {
@@ -94,6 +104,12 @@ public class MySQLManager {
         setMoney(player, money);
     }
 
+    /**
+     *
+     * @param player the BankOwner
+     * @param bankName the BankName
+     * @return Successfully creating the Bank or not
+     */
     protected boolean createBank(OfflinePlayer player, String bankName) {
         if (SQL.isTableExists(tableName)) {
             if (isOnlineMode()) {
@@ -134,6 +150,11 @@ public class MySQLManager {
         return false;
     }
 
+    /**
+     * set the Bank Money
+     * @param name the BankName
+     * @param amount amount to adding to the Bank
+     */
     protected void setBankMoney(String name, double amount) {
         int i = 0;
         List<String> players = new ArrayList<>();
@@ -170,6 +191,11 @@ public class MySQLManager {
         }
     }
 
+    /**
+     *
+     * @param name the BankName
+     * @return Amount of the Bank
+     */
     protected double getBankMoney(String name) {
         try {
             if (Main.getInstance().isMysql()) {
@@ -205,6 +231,12 @@ public class MySQLManager {
         setBankMoney(name, money);
     }
 
+    /**
+     *
+     * @param name the BankName
+     * @param player the Player
+     * @return if the user is the BankOwner
+     */
     protected boolean isBankOwner(String name, OfflinePlayer player) {
         try {
             if (Main.getInstance().isMysql()) {
@@ -250,6 +282,11 @@ public class MySQLManager {
         return false;
     }
 
+    /**
+     * Adding user to the Bank as Member
+     * @param bankName the BankName
+     * @param player the Player
+     */
     public void addBankMember(String bankName, OfflinePlayer player) {
         if (SQL.isTableExists(tableName)) {
             if (SQL.exists(tableName, "BankName", bankName)) {
@@ -283,6 +320,12 @@ public class MySQLManager {
         }
     }
 
+    /**
+     *
+     * @param bankName the BankName
+     * @param player the Player
+     * @return if the Player is a BankMember
+     */
     public boolean isBankMember(String bankName, OfflinePlayer player) {
         if (SQL.isTableExists(tableName)) {
             if (SQL.exists(tableName, "BankName", bankName)) {
@@ -298,6 +341,11 @@ public class MySQLManager {
         return false;
     }
 
+    /**
+     *
+     * @param bankName the Bank Name
+     * @param player
+     */
     public void removeBankMember(String bankName, OfflinePlayer player) {
         List<String> pls = new ArrayList<>();
         List<String> members = new ArrayList<>();
@@ -363,6 +411,10 @@ public class MySQLManager {
         }
     }
 
+    /**
+     * Create an Account for Vault
+     * @param player the Player
+     */
     protected void createAccount(OfflinePlayer player) {
         if (!SQL.isTableExists("frameeconomy_accounts")) {
             SQL.createTable("frameeconomy_accounts", "name TEXT(255)", "uuid VARCHAR(2003)");
@@ -378,6 +430,11 @@ public class MySQLManager {
         }
     }
 
+    /**
+     *
+     * @param player the Player
+     * @return if the Player has an Account or not
+     */
     protected boolean hasAccount(OfflinePlayer player) {
         if (SQL.isTableExists("frameeconomy_accounts")) {
             if (isOnlineMode()) {
@@ -393,6 +450,11 @@ public class MySQLManager {
         return false;
     }
 
+    /**
+     *
+     * @param bankName the Bank
+     * @returnw all BankMembers
+     */
     public List<String> getBankMembers(String bankName) {
         if (SQL.isTableExists(tableName)) {
             if (SQL.exists(tableName, "BankName", bankName)) {
@@ -407,6 +469,10 @@ public class MySQLManager {
         return null;
     }
 
+    /**
+     *
+     * @return all Banks
+     */
     protected List<String> getBanks() {
         List<String> banks = new ArrayList<>();
         if (SQL.isTableExists(tableName)) {

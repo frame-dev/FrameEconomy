@@ -51,6 +51,11 @@ public class BackendManager {
         this.plugin = plugin;
     }
 
+    /**
+     * Creating the Document of the User
+     * @param player the Player
+     * @param collection Collection in the Database
+     */
     public void createUser(OfflinePlayer player, String collection) {
         String uuid = player.getUniqueId().toString();
         if (existsCollection(collection)) {
@@ -89,6 +94,14 @@ public class BackendManager {
         }
     }
 
+    /**
+     *
+     * @param where from the Database Document
+     * @param data Data in where
+     * @param selected the Selected key in your Database
+     * @param collection the Collection in your Database
+     * @return data from Database
+     */
     public Object getObject(String where, Object data, String selected, String collection) {
         if (existsCollection(collection)) {
             MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);

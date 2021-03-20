@@ -32,6 +32,9 @@ public class MongoManager {
 
     }
 
+    /**
+     * Connecting to the Database from HostName, Port, and Database
+     */
     public void connectLocalHost() {
         this.client = MongoClients.create(
                 MongoClientSettings.builder()
@@ -41,6 +44,9 @@ public class MongoManager {
         this.database = this.client.getDatabase(databasestring);
     }
 
+    /**
+     * Connecting to the Database from the Username, Password, database, Hostname and Port
+     */
     public void connect() {
         MongoCredential credential = MongoCredential.createCredential(username, databasestring, password.toCharArray());
         this.client = MongoClients.create(
@@ -57,6 +63,10 @@ public class MongoManager {
         return client;
     }
 
+    /**
+     *
+     * @return the Selected Database
+     */
     public MongoDatabase getDatabase() {
         return database;
     }

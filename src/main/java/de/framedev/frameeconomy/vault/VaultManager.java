@@ -64,6 +64,12 @@ public class VaultManager {
 
     File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
     FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
+
+    /**
+     * Add a User to the Bank
+     * @param bankName the Bank name
+     * @param player the OfflinePlayer
+     */
     public void addBankMember(String bankName, OfflinePlayer player) {
         if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
             new MySQLManager().addBankMember(bankName, player);
@@ -99,6 +105,11 @@ public class VaultManager {
         }
     }
 
+    /**
+     * Removing a User from the Bank
+     * @param bankName the BankName
+     * @param player the OfflinePlayer
+     */
     public void removeBankMember(String bankName, OfflinePlayer player) {
         if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
             new MySQLManager().removeBankMember(bankName, player);
@@ -130,6 +141,11 @@ public class VaultManager {
         }
     }
 
+    /**
+     * Return all BankMembers if the Bank exists and have BankMembers!
+     * @param bankName the BankName
+     * @return all BankMembers from the Bank
+     */
     public List<String> getBankMembers(String bankName) {
         if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
             return new MySQLManager().getBankMembers(bankName);

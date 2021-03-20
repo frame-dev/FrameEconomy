@@ -51,6 +51,12 @@ public class SQL {
         }
     }
 
+    /**
+     *
+     * @param table the Table in the Database
+     * @param data data to set in the Database
+     * @param columns the Columns in the Database to add new Data
+     */
     public static void insertData(String table, String data, String... columns) {
         StringBuilder newStringBuilder = new StringBuilder();
         for (int i = 0; i < columns.length; i++) {
@@ -87,6 +93,13 @@ public class SQL {
         }
     }
 
+    /**
+     *
+     * @param table the Selected Table
+     * @param selected where you would like to Update data
+     * @param data the new Data
+     * @param where witch row you want do Update
+     */
     public static void updateData(String table, String selected, String data, String where) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("UPDATE " + table + " SET ").append(selected + " = " + data).append(" WHERE " + where);
@@ -115,7 +128,11 @@ public class SQL {
         }
     }
 
-
+    /**
+     *
+     * @param table The Table in the Database
+     * @param where where you would like to remove Data
+     */
     public static void deleteDataInTable(String table, String where) {
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM " + table)
@@ -145,6 +162,12 @@ public class SQL {
         }
     }
 
+    /**
+     *
+     * @param table the Table in the Database
+     * @param where where you want to remove Datas
+     * @param and the same as where
+     */
     public static void deleteDataInTable(String table, String where, String and) {
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM " + table)
@@ -175,6 +198,13 @@ public class SQL {
         }
     }
 
+    /**
+     *
+     * @param table the Table in the Database
+     * @param column where you would like to search
+     * @param data the data of where
+     * @return if the Data exists
+     */
     public static boolean exists(String table, String column, String data) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT * FROM ")
@@ -277,7 +307,14 @@ public class SQL {
         return false;
     }
 
-
+    /**
+     *
+     * @param table the Table in the Database
+     * @param selected the Selected Column in the Database
+     * @param column the Column you would like to search
+     * @param data the Data of the where Column
+     * @return the Data from the Database
+     */
     public static Object get(String table, String selected, String column, String data) {
         Object o = null;
         StringBuilder stringBuilder = new StringBuilder();
@@ -327,6 +364,10 @@ public class SQL {
         return o;
     }
 
+    /**
+     *
+     * @param table the Table you would like to Delete
+     */
     public static void deleteTable(String table) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("DROP TABLE " + table);
@@ -356,6 +397,11 @@ public class SQL {
         }
     }
 
+    /**
+     *
+     * @param table the Table do you want to search
+     * @return if Table exists or not
+     */
     public static boolean isTableExists(String table) {
         try {
             if(Main.getInstance().isMysql()) {

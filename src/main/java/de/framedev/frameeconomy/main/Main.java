@@ -28,9 +28,13 @@ import java.util.logging.Level;
 
 public final class Main extends JavaPlugin implements Listener {
 
+    // The Instance for this Class
     private static Main instance;
 
+    //VaultManager is used for Connection to Vault
     private VaultManager vaultManager;
+
+    //MongoDB Utils
     private MongoManager mongoManager;
     private BackendManager backendManager;
 
@@ -73,10 +77,12 @@ public final class Main extends JavaPlugin implements Listener {
             if (getConfig().getBoolean("MongoDB.Localhost")) {
                 this.mongoManager = new MongoManager();
                 mongoManager.connectLocalHost();
+                getLogger().log(Level.INFO,"MongoDB Enabled!");
                 this.backendManager = new BackendManager(this);
             } else if (getConfig().getBoolean("MongoDB.Normal")) {
                 this.mongoManager = new MongoManager();
                 mongoManager.connect();
+                getLogger().log(Level.INFO,"MongoDB Enabled!");
                 this.backendManager = new BackendManager(this);
             }
         }
@@ -106,6 +112,10 @@ public final class Main extends JavaPlugin implements Listener {
         }.runTaskLater(this, 120);
     }
 
+    /**
+     * Reload the Config.yml
+     * @throws UnsupportedEncodingException
+     */
     public void reloadCustomConfig() throws UnsupportedEncodingException {
         // Look for defaults in the jar
         Reader defConfigStream = new InputStreamReader(Objects.requireNonNull(this.getResource("config.yml")), StandardCharsets.UTF_8);
@@ -113,6 +123,9 @@ public final class Main extends JavaPlugin implements Listener {
         getConfig().setDefaults(defConfig);
     }
 
+    /**
+     * Checking for Updates in SpigotMC Forum
+     */
     public void checkUpdate() {
         Bukkit.getConsoleSender().sendMessage(prefix + "Checking for updates...");
         try {
@@ -131,24 +144,31 @@ public final class Main extends JavaPlugin implements Listener {
         }
     }
 
-    public File badWordsFile;
-    public FileConfiguration badWordsData;
+    public File configFile;
+    public FileConfiguration configCfg;
 
+    /**
+     * Saves the Default Config Sections from the Config.yml
+     */
     public void saveDefaultConfigValues() {
-        badWordsFile = new File(getDataFolder() + "config.yml");
-        badWordsData = YamlConfiguration.loadConfiguration(badWordsFile);
+        configFile = new File(getDataFolder() + "config.yml");
+        configCfg = YamlConfiguration.loadConfiguration(configFile);
         //Defaults in jar
         Reader defConfigStream;
         defConfigStream = new InputStreamReader(Objects.requireNonNull(getResource("config.yml")), StandardCharsets.UTF_8);
         YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-        badWordsData.setDefaults(defConfig);
+        configCfg.setDefaults(defConfig);
         //Copy default values
-        badWordsData.options().copyDefaults(true);
+        configCfg.options().copyDefaults(true);
         this.saveConfig();
         //OR use this to copy default values
         //this.saveDefaultConfig();
     }
 
+    /**
+     * This can only be changed in Config.yml
+     * @return Prefix of this Plugin
+     */
     @NotNull
     public String getPrefix() {
         String prefix = getConfig().getString("Prefix");
@@ -165,10 +185,18 @@ public final class Main extends JavaPlugin implements Listener {
         getLogger().log(Level.INFO, "Disabled!");
     }
 
+    /**
+     * This Class conaints Creater / Updater / Inserter for your MongoDB Connection!
+     * @return the Util class for MongoDB
+     */
     public BackendManager getBackendManager() {
         return backendManager;
     }
 
+    /**
+     * Used for Connection to your MongoDB Database
+     * @return the MongoDB util Class
+     */
     public MongoManager getMongoManager() {
         return mongoManager;
     }
@@ -185,10 +213,18 @@ public final class Main extends JavaPlugin implements Listener {
         }
     }
 
+    /**
+     * VaultManager used for VaultAPI
+     * @return the VaultManager
+     */
     public VaultManager getVaultManager() {
         return vaultManager;
     }
 
+    /**
+     *
+     * @return this Main Class
+     */
     public static Main getInstance() {
         return instance;
     }
