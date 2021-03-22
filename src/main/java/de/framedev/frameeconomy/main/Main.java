@@ -10,6 +10,7 @@ import de.framedev.frameeconomy.mysql.MySQL;
 import de.framedev.frameeconomy.mysql.SQLite;
 import de.framedev.frameeconomy.utils.ConfigUtils;
 import de.framedev.frameeconomy.vault.VaultManager;
+import frameeconomy.kotlin.VaultProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -104,6 +105,7 @@ public final class Main extends JavaPlugin implements Listener {
         // Register Join Listener
         getServer().getPluginManager().registerEvents(this, this);
 
+        new VaultProvider(this);
         getLogger().log(Level.INFO, "Enabled!");
         new BukkitRunnable() {
             @Override
@@ -163,8 +165,7 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     /**
-     * This Class conaints Creater / Updater / Inserter for your MongoDB Connection!
-     *
+     * This Class contains Creator / Updater / Inserter for your MongoDB Connection
      * @return the Util class for MongoDB
      */
     public BackendManager getBackendManager() {

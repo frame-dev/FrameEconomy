@@ -23,7 +23,7 @@ import java.util.Objects;
 public class ConfigUtils {
     /**
      * Reload the Config.yml
-     * @throws UnsupportedEncodingException
+     * @throws UnsupportedEncodingException error
      */
     public void reloadCustomConfig() throws UnsupportedEncodingException {
         // Look for defaults in the jar
@@ -32,8 +32,8 @@ public class ConfigUtils {
         Main.getInstance().getConfig().setDefaults(defConfig);
     }
 
-    public File configFile;
-    public FileConfiguration configCfg;
+    private File configFile;
+    private FileConfiguration configCfg;
 
     /**
      * Saves the Default Config Sections from the Config.yml

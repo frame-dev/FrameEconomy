@@ -20,10 +20,12 @@ import java.io.IOException;
 
 public class FileManager {
 
-    private File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
-    private FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
+    private File file;
+    private FileConfiguration cfg;
 
     public FileManager() {
+        this.file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
+        this.cfg = YamlConfiguration.loadConfiguration(file);
     }
 
     private void save() {
