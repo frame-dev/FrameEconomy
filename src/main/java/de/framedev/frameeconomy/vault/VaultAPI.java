@@ -169,18 +169,7 @@ public class VaultAPI extends AbstractEconomy {
                 if (Main.getInstance().getBackendManager().exists(Bukkit.getOfflinePlayer(playerName), "money", "eco"))
                     Main.getInstance().getBackendManager().updateUser(Bukkit.getOfflinePlayer(playerName), "money", amount, "eco");
             } else {
-                File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
-                FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-                if (Bukkit.getServer().getOnlineMode()) {
-                    cfg.set(Bukkit.getOfflinePlayer(playerName).getUniqueId().toString(), balance);
-                } else {
-                    cfg.set(Bukkit.getOfflinePlayer(playerName).getName(), balance);
-                }
-                try {
-                    cfg.save(file);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                new FileManager().setMoney(Bukkit.getOfflinePlayer(playerName), balance);
             }
 
         }
@@ -209,18 +198,7 @@ public class VaultAPI extends AbstractEconomy {
             if (Main.getInstance().getBackendManager().exists(Bukkit.getOfflinePlayer(playerName), "money", "eco"))
                 Main.getInstance().getBackendManager().updateUser(Bukkit.getOfflinePlayer(playerName), "money", amount, "eco");
         } else {
-            File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
-            FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-            if (Bukkit.getServer().getOnlineMode()) {
-                cfg.set(Bukkit.getOfflinePlayer(playerName).getUniqueId().toString(), balance);
-            } else {
-                cfg.set(Bukkit.getOfflinePlayer(playerName).getName(), balance);
-            }
-            try {
-                cfg.save(file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            new FileManager().setMoney(Bukkit.getOfflinePlayer(playerName), balance);
         }
         return new EconomyResponse(amount, 0.0D, EconomyResponse.ResponseType.SUCCESS, "");
     }
