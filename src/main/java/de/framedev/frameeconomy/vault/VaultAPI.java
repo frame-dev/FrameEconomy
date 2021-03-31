@@ -1,6 +1,7 @@
 package de.framedev.frameeconomy.vault;
 
 import de.framedev.frameeconomy.main.Main;
+import de.framedev.frameeconomy.utils.FileManager;
 import net.milkbowl.vault.economy.AbstractEconomy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
@@ -120,11 +121,7 @@ public class VaultAPI extends AbstractEconomy {
             if (Main.getInstance().getBackendManager().exists(Bukkit.getOfflinePlayer(playerName), "money", "eco"))
                 return (double) Main.getInstance().getBackendManager().get(Bukkit.getOfflinePlayer(playerName), "money", "eco");
         } else {
-            if (Bukkit.getServer().getOnlineMode()) {
-                return cfg.getDouble(Bukkit.getOfflinePlayer(playerName).getUniqueId().toString());
-            } else {
-                return cfg.getDouble(Bukkit.getOfflinePlayer(playerName).getName());
-            }
+            return new FileManager().getMoney(Bukkit.getOfflinePlayer(playerName));
         }
         return 0.0;
     }

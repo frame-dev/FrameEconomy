@@ -1,16 +1,12 @@
 package de.framedev.frameeconomy.main;
 
-import de.framedev.frameeconomy.commands.BalanceCMD;
-import de.framedev.frameeconomy.commands.BankCMD;
-import de.framedev.frameeconomy.commands.EcoCMD;
-import de.framedev.frameeconomy.commands.PayCMD;
 import de.framedev.frameeconomy.mongodb.BackendManager;
 import de.framedev.frameeconomy.mongodb.MongoManager;
 import de.framedev.frameeconomy.mysql.MySQL;
 import de.framedev.frameeconomy.mysql.SQLite;
 import de.framedev.frameeconomy.utils.ConfigUtils;
+import de.framedev.frameeconomy.utils.RegisterManager;
 import de.framedev.frameeconomy.vault.VaultManager;
-import frameeconomy.kotlin.VaultProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -74,12 +70,6 @@ public final class Main extends JavaPlugin implements Listener {
 
         this.vaultManager = new VaultManager(this);
 
-        //Register Commands
-        new PayCMD(this);
-        new BalanceCMD(this);
-        new EcoCMD(this);
-        new BankCMD(this);
-
 
         if (isMongoDb()) {
             if (getConfig().getBoolean("MongoDB.Localhost")) {
@@ -101,11 +91,7 @@ public final class Main extends JavaPlugin implements Listener {
             Document updateObject = new Document("$set", doc);
             mongoCollection.updateOne(Filters.eq("uuid",document.getString("uuid")), updateObject);
         }*/
-
-        // Register Join Listener
-        getServer().getPluginManager().registerEvents(this, this);
-
-        new VaultProvider(this);
+        new RegisterManager(this);
         getLogger().log(Level.INFO, "Enabled!");
         new BukkitRunnable() {
             @Override
