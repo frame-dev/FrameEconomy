@@ -24,6 +24,7 @@ import java.util.logging.Level;
 
 public class BalanceCMD implements CommandExecutor {
 
+    //
     private final Main plugin;
 
     public BalanceCMD(Main plugin) {

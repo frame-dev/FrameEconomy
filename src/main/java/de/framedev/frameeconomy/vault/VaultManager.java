@@ -21,6 +21,7 @@ public class VaultManager {
     private final Economy economy;
 
     public VaultManager(Main plugin) {
+        // Installation of Vault //
         File fileData = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
         FileConfiguration cfgData = YamlConfiguration.loadConfiguration(fileData);
         if (!fileData.exists()) {

@@ -35,3 +35,11 @@ PayLoad:
   Day: 0
   Amount: 100.0
   Use: false
+Interest:
+  Percent: 1.25
+  Amount: 10
+  Sec: 0
+  Min: 0
+  Hour: 1
+  Day: 0
+  Use: false

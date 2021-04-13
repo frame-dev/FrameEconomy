@@ -26,10 +26,7 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public boolean isEnabled() {
-        if (Main.getInstance() != null) {
-            return true;
-        }
-        return false;
+        return Main.getInstance() != null;
     }
 
     @Override
@@ -95,15 +92,10 @@ public class VaultAPI extends AbstractEconomy {
             if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
                 return new MySQLManager().hasAccount(Bukkit.getOfflinePlayer(s));
             }
-            if (cfg.getStringList("accounts").contains(Bukkit.getOfflinePlayer(s).getUniqueId().toString())) {
-                return true;
-            }
+            return cfg.getStringList("accounts").contains(Bukkit.getOfflinePlayer(s).getUniqueId().toString());
         } else {
-            if (cfg.getStringList("accounts").contains(Bukkit.getOfflinePlayer(s).getName())) {
-                return true;
-            }
+            return cfg.getStringList("accounts").contains(Bukkit.getOfflinePlayer(s).getName());
         }
-        return false;
     }
 
     @Override
@@ -143,10 +135,7 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public boolean has(String playerName, double amount) {
-        if (getBalance(playerName) < amount) {
-            return false;
-        }
-        return true;
+        return !(getBalance(playerName) < amount);
     }
 
     @Override

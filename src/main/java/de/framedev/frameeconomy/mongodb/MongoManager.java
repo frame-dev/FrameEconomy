@@ -1,22 +1,31 @@
 package de.framedev.frameeconomy.mongodb;
 
+/**
+ * This Plugin was Created by FrameDev
+ * Package : de.framedev.frameeconomy.mongodb
+ * ClassName MongoManager
+ * Date: 07.04.21
+ * Project: FrameEconomy
+ * Copyrighted by FrameDev
+ */
+
+/*
+ * #Copyright (c) by FrameDev#
+ * #Dies ist ein Project von FrameDev Bitte verändere nichts!#
+ *
+ */
+
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import de.framedev.frameeconomy.main.Main;
+import org.bson.Document;
 
 import java.util.Arrays;
-
-/**
- * This Plugin was Created by FrameDev
- * Package : de.framedev.javagradle.managers
- * Date: 07.03.21
- * Project: JavaGradle
- * Copyrighted by FrameDev
- */
 
 public class MongoManager {
 
@@ -27,14 +36,12 @@ public class MongoManager {
     private int port = Main.getInstance().getConfig().getInt("MongoDB.Port");
     private MongoClient client;
     private MongoDatabase database;
+    private MongoCollection<Document> players;
 
     public MongoManager() {
 
     }
 
-    /**
-     * Connecting to the Database from HostName, Port, and Database
-     */
     public void connectLocalHost() {
         this.client = MongoClients.create(
                 MongoClientSettings.builder()
@@ -44,9 +51,6 @@ public class MongoManager {
         this.database = this.client.getDatabase(databasestring);
     }
 
-    /**
-     * Connecting to the Database from the Username, Password, database, Hostname and Port
-     */
     public void connect() {
         MongoCredential credential = MongoCredential.createCredential(username, databasestring, password.toCharArray());
         this.client = MongoClients.create(
@@ -63,11 +67,8 @@ public class MongoManager {
         return client;
     }
 
-    /**
-     *
-     * @return the Selected Database
-     */
     public MongoDatabase getDatabase() {
         return database;
     }
 }
+

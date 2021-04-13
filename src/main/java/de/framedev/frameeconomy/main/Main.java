@@ -5,6 +5,7 @@ import de.framedev.frameeconomy.mongodb.MongoManager;
 import de.framedev.frameeconomy.mysql.MySQL;
 import de.framedev.frameeconomy.mysql.SQLite;
 import de.framedev.frameeconomy.utils.ConfigUtils;
+import de.framedev.frameeconomy.utils.MongoDBUtils;
 import de.framedev.frameeconomy.utils.RegisterManager;
 import de.framedev.frameeconomy.vault.VaultManager;
 import org.bukkit.Bukkit;
@@ -33,8 +34,7 @@ public final class Main extends JavaPlugin implements Listener {
     private VaultManager vaultManager;
 
     //MongoDB Utils
-    private MongoManager mongoManager;
-    private BackendManager backendManager;
+    private MongoDBUtils mongoDBUtils;
 
     private ConfigUtils configUtils;
 
@@ -66,24 +66,11 @@ public final class Main extends JavaPlugin implements Listener {
             //noinspection InstantiationOfUtilityClass
             new SQLite(getConfig().getString("SQLite.Path"), getConfig().getString("SQLite.FileName"));
             getLogger().log(Level.INFO, "SQLite Enabled!");
-        }
+        } else if (isMongoDb())
+            this.mongoDBUtils = new MongoDBUtils();
 
         this.vaultManager = new VaultManager(this);
 
-
-        if (isMongoDb()) {
-            if (getConfig().getBoolean("MongoDB.Localhost")) {
-                this.mongoManager = new MongoManager();
-                mongoManager.connectLocalHost();
-                getLogger().log(Level.INFO, "MongoDB Enabled!");
-                this.backendManager = new BackendManager(this);
-            } else if (getConfig().getBoolean("MongoDB.Normal")) {
-                this.mongoManager = new MongoManager();
-                mongoManager.connect();
-                getLogger().log(Level.INFO, "MongoDB Enabled!");
-                this.backendManager = new BackendManager(this);
-            }
-        }
         /*
         for(Document document : backendManager.getAllDocuments("eco")) {
             Document doc = new Document("bank",120.0);
@@ -152,10 +139,12 @@ public final class Main extends JavaPlugin implements Listener {
 
     /**
      * This Class contains Creator / Updater / Inserter for your MongoDB Connection
+     *
      * @return the Util class for MongoDB
      */
     public BackendManager getBackendManager() {
-        return backendManager;
+        if (mongoDBUtils == null) return null;
+        return mongoDBUtils.getBackendManager();
     }
 
     /**
@@ -164,7 +153,8 @@ public final class Main extends JavaPlugin implements Listener {
      * @return the MongoDB util Class
      */
     public MongoManager getMongoManager() {
-        return mongoManager;
+        if (mongoDBUtils == null) return null;
+        return mongoDBUtils.getMongoManager();
     }
 
     @EventHandler
@@ -174,9 +164,9 @@ public final class Main extends JavaPlugin implements Listener {
                 vaultManager.getEconomy().createPlayerAccount(event.getPlayer());
         }
         if (isMongoDb()) {
-            if (backendManager != null)
-                if (!backendManager.exists(event.getPlayer(), "uuid", "eco"))
-                    backendManager.createUser(event.getPlayer(), "eco");
+            if (getBackendManager() != null)
+                if (!getBackendManager().exists(event.getPlayer(), "uuid", "eco"))
+                    getBackendManager().createUser(event.getPlayer(), "eco");
         }
     }
 
