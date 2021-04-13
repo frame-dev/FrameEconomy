@@ -2,23 +2,20 @@
 ```text
 Gradle:
 repositories {
-	maven { url 'https://jitpack.io' }
+	maven { url 'http://framedev.stream:82/releases' }
 }
 dependencies {
-	implementation 'com.github.frame-dev:FrameEconomy:1.3'
+	compileOnly 'de.framedev:FrameEconomy:1.6-SNAPSHOT'
 }
 
 Maven:
-<repositories>
-    <repository>
-	<id>jitpack.io</id>
-	<url>https://jitpack.io</url>
-    </repository>
-</repositories>
-  
+<repository>
+  <id>repository</id>
+  <url>http://framedev.stream:82/releases</url>
+</repository>
 <dependency>
-	<groupId>com.github.frame-dev</groupId>
-	<artifactId>FrameEconomy</artifactId>
-	<version>1.3</version>
+  <groupId>de.framedev</groupId>
+  <artifactId>FrameEconomy</artifactId>
+  <version>1.6-SNAPSHOT</version>
 </dependency>
 ```
