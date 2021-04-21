@@ -2,7 +2,7 @@ name: FrameEconomy
 version: @version@
 description: Money System works with Vault
 main: de.framedev.frameeconomy.main.Main
-api-version: 1.16
+api-version: 1.13
 depend: [ Vault ]
 authors: [ FrameDev ]
 website: https://framedev.stream
