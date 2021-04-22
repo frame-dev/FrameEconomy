@@ -1,6 +1,6 @@
 Prefix: '&6[&aFrame&bEconomy&6] &c>> &7'
 
-#MySQL Connection!
+# MySQL Connection!
 MySQL:
   Host: 'localhost'
   User: 'root'

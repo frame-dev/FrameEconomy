@@ -186,14 +186,26 @@ public final class Main extends JavaPlugin implements Listener {
         return instance;
     }
 
+    /**
+     *
+     * @return if SQLite is Enabled
+     */
     public boolean isSQL() {
         return getConfig().getBoolean("SQLite.Use");
     }
 
+    /**
+     *
+     * @return if MySQL is Enabled
+     */
     public boolean isMysql() {
         return getConfig().getBoolean("MySQL.Use");
     }
 
+    /**
+     *
+     * @return if MongoDB is Enabled
+     */
     public boolean isMongoDb() {
         return getConfig().getBoolean("MongoDB.Use");
     }

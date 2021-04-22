@@ -20,8 +20,8 @@ import java.io.IOException;
 
 public class FileManager {
 
-    private File file;
-    private FileConfiguration cfg;
+    private final File file;
+    private final FileConfiguration cfg;
 
     public FileManager() {
         this.file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");

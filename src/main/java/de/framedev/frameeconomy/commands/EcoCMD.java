@@ -41,10 +41,10 @@ public class EcoCMD implements CommandExecutor, TabCompleter {
                         plugin.getVaultManager().getEconomy().depositPlayer(player, amount);
                         player.sendMessage("§aYour Money has been set to §6" + amount + plugin.getVaultManager().getEconomy().currencyNamePlural());
                     } else {
-                        sender.sendMessage("§cNo Permissions!");
+                        sender.sendMessage(plugin.getPrefix() + "§cNo Permissions!");
                     }
                 } else {
-                    sender.sendMessage("§cOnly Player can use this Command!");
+                    sender.sendMessage(plugin.getPrefix() + "§cOnly Player can use this Command!");
                 }
             } else if (args.length == 3) {
                 if (sender.hasPermission("frameeconomy.eco.set.others")) {
@@ -57,7 +57,7 @@ public class EcoCMD implements CommandExecutor, TabCompleter {
                     }
                     sender.sendMessage("§aMoney from §6" + player.getName() + " §ahas been set to §6" + amount + plugin.getVaultManager().getEconomy().currencyNamePlural());
                 } else {
-                    sender.sendMessage("§cNo Permissions!");
+                    sender.sendMessage(plugin.getPrefix() + "§cNo Permissions!");
                 }
             }
         }

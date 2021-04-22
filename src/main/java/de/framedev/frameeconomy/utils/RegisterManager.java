@@ -18,10 +18,7 @@ import frameeconomy.kotlin.VaultProvider;
 
 public class RegisterManager {
 
-    private final Main plugin;
-
     public RegisterManager(Main plugin) {
-        this.plugin = plugin;
         //Register Commands
         new PayCMD(plugin);
         new BalanceCMD(plugin);
