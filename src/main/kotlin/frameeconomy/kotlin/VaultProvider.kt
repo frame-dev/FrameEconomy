@@ -20,6 +20,18 @@ open class VaultProvider(val plugin: Main) {
         runnable()
     }
 
+    open fun accounts(): List<OfflinePlayer> {
+        val accounts: ArrayList<OfflinePlayer> = ArrayList<OfflinePlayer>()
+        for (offlinePlayer in Bukkit.getOfflinePlayers()) {
+            if (offlinePlayer != null)
+                if (offlinePlayer.name != null)
+                    if (Main.getInstance().vaultManager.economy.hasAccount(offlinePlayer)) {
+                        accounts.add(offlinePlayer)
+                    }
+        }
+        return accounts
+    }
+
     private fun runnable() {
         val sec = Ticks.secToTicks(plugin.config.getLong("PayLoad.Sec"))
         val min = Ticks.minToTicks(plugin.config.getLong("PayLoad.Min"))

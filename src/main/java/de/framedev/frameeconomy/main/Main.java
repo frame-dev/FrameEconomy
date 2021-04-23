@@ -7,6 +7,7 @@ import de.framedev.frameeconomy.mysql.SQLite;
 import de.framedev.frameeconomy.utils.ConfigUtils;
 import de.framedev.frameeconomy.utils.MongoDBUtils;
 import de.framedev.frameeconomy.utils.RegisterManager;
+import de.framedev.frameeconomy.utils.SchedulerManager;
 import de.framedev.frameeconomy.vault.VaultManager;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -32,6 +33,8 @@ public final class Main extends JavaPlugin implements Listener {
 
     //VaultManager is used for Connection to Vault
     private VaultManager vaultManager;
+
+    private RegisterManager registerManager;
 
     //MongoDB Utils
     private MongoDBUtils mongoDBUtils;
@@ -78,7 +81,7 @@ public final class Main extends JavaPlugin implements Listener {
             Document updateObject = new Document("$set", doc);
             mongoCollection.updateOne(Filters.eq("uuid",document.getString("uuid")), updateObject);
         }*/
-        new RegisterManager(this);
+        this.registerManager = new RegisterManager(this);
         getLogger().log(Level.INFO, "Enabled!");
         new BukkitRunnable() {
             @Override
@@ -93,6 +96,12 @@ public final class Main extends JavaPlugin implements Listener {
                 checkUpdate();
             }
         }.runTaskLater(this, 120);
+
+        new SchedulerManager().runTaskTimerAsynchronously(this, 20*6, 20*60*5);
+    }
+
+    public RegisterManager getRegisterManager() {
+        return registerManager;
     }
 
     /**

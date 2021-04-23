@@ -19,8 +19,10 @@ import net.milkbowl.vault.economy.Economy;
 public class VaultManager {
 
     private final Economy economy;
+    private List<OfflinePlayer> accounts;
 
     public VaultManager(Main plugin) {
+        this.accounts = new ArrayList<>();
         // Installation of Vault //
         File fileData = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
         FileConfiguration cfgData = YamlConfiguration.loadConfiguration(fileData);
@@ -61,6 +63,14 @@ public class VaultManager {
             if (!economy.hasAccount(p))
                 economy.createPlayerAccount(p);
         }
+    }
+
+    public void setAccounts(List<OfflinePlayer> accounts) {
+        this.accounts = accounts;
+    }
+
+    public List<OfflinePlayer> getAccounts() {
+        return accounts;
     }
 
     File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");

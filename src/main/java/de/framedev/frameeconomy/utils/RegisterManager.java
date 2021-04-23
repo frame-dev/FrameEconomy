@@ -18,14 +18,20 @@ import frameeconomy.kotlin.VaultProvider;
 
 public class RegisterManager {
 
+    private VaultProvider vaultProvider;
+
     public RegisterManager(Main plugin) {
         //Register Commands
         new PayCMD(plugin);
         new BalanceCMD(plugin);
         new EcoCMD(plugin);
         new BankCMD(plugin);
-        new VaultProvider(plugin);
+        this.vaultProvider = new VaultProvider(plugin);
         // Register Join Listener
         plugin.getServer().getPluginManager().registerEvents(plugin, plugin);
+    }
+
+    public VaultProvider getVaultProvider() {
+        return vaultProvider;
     }
 }
