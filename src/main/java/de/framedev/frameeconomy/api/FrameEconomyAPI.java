@@ -24,11 +24,27 @@ public class FrameEconomyAPI {
         instance = this;
     }
 
+    /**
+     * Get the Instance of this API
+     * @return return the Instance of this API
+     */
     public static FrameEconomyAPI getInstance() {
         return instance;
     }
 
+    /**
+     * Updates Accounts
+     * @return return Registered Accounts
+     */
     public List<OfflinePlayer> accounts() {
         return plugin.getVaultManager().getAccounts();
+    }
+
+    /**
+     * Update Banks
+     * @return return Banks
+     */
+    public List<String> banks() {
+        return plugin.getRegisterManager().getVaultProvider().banks();
     }
 }

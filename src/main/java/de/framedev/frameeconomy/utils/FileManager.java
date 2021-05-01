@@ -28,6 +28,9 @@ public class FileManager {
         this.cfg = YamlConfiguration.loadConfiguration(file);
     }
 
+    /**
+     * Save the eco.yml File
+     */
     private void save() {
         try {
             cfg.save(file);
@@ -36,6 +39,11 @@ public class FileManager {
         }
     }
 
+    /**
+     *
+     * @param player the Player to set the Money
+     * @param amount the Amount of the Money
+     */
     public void setMoney(OfflinePlayer player, double amount) {
         if (Bukkit.getServer().getOnlineMode()) {
             cfg.set(player.getUniqueId().toString(), amount);
@@ -45,6 +53,11 @@ public class FileManager {
         save();
     }
 
+    /**
+     *
+     * @param player the Player to get the Money
+     * @return returns the Money from the Player
+     */
     public double getMoney(OfflinePlayer player) {
         if (Bukkit.getServer().getOnlineMode()) {
             return cfg.getDouble(player.getUniqueId().toString());
@@ -53,18 +66,34 @@ public class FileManager {
         }
     }
 
+    /**
+     *
+     * @param player the Player to add Money
+     * @param amount the Amount to add
+     */
     public void addMoney(OfflinePlayer player, double amount) {
         double money = getMoney(player);
         money += amount;
         setMoney(player, money);
     }
 
+    /**
+     *
+     * @param player the Player to remove Money
+     * @param amount the Amount to remove
+     */
     public void removeMoney(OfflinePlayer player, double amount) {
         double money = getMoney(player);
         money -= amount;
         setMoney(player, money);
     }
 
+    /**
+     *
+     * @param player the Player
+     * @param amount the Amount that requires the Player
+     * @return return if the Player has the Money
+     */
     public boolean has(OfflinePlayer player, double amount) {
         return getMoney(player) >= amount;
     }

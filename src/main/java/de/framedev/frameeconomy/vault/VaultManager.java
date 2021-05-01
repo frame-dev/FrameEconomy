@@ -167,7 +167,9 @@ public class VaultManager {
         }
     }
 
-
+    /**
+     * @return returns the registered Economy class
+     */
     public Economy getEconomy() {
         return economy;
     }

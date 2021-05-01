@@ -42,6 +42,9 @@ public class MongoManager {
 
     }
 
+    /**
+     * Connect to the Localhost database
+     */
     public void connectLocalHost() {
         this.client = MongoClients.create(
                 MongoClientSettings.builder()
@@ -51,6 +54,9 @@ public class MongoManager {
         this.database = this.client.getDatabase(databasestring);
     }
 
+    /**
+     * Connect to the Server
+     */
     public void connect() {
         MongoCredential credential = MongoCredential.createCredential(username, databasestring, password.toCharArray());
         this.client = MongoClients.create(
@@ -62,11 +68,18 @@ public class MongoManager {
         this.database = this.client.getDatabase(databasestring);
     }
 
-
+    /**
+     *
+     * @return returns the Registerd Client
+     */
     public MongoClient getClient() {
         return client;
     }
 
+    /**
+     *
+     * @return returns the Database
+     */
     public MongoDatabase getDatabase() {
         return database;
     }

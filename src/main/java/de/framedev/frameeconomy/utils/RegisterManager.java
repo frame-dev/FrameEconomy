@@ -31,6 +31,10 @@ public class RegisterManager {
         plugin.getServer().getPluginManager().registerEvents(plugin, plugin);
     }
 
+    /**
+     *
+     * @return returns the Registerd VaultProvider
+     */
     public VaultProvider getVaultProvider() {
         return vaultProvider;
     }

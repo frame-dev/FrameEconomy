@@ -8,38 +8,50 @@ package frameeconomy.kotlin
  * Project: FrameEconomy
  * Copyrighted by FrameDev
  */
-enum class Ticks(val i : Long) {
+enum class Ticks(val i: Long) {
 
     SECOND(20),
     MINUTE(1200),
     HOUR(72000),
     DAY(1728000),
-    WEEK(12096000);
+    WEEK(12096000),
+    MONTH(20 * 60 * 60 * 24 * 7 * 4),
+    YEAR(DAY.i * 365);
 
     companion object {
-        fun secToTicks(sec : Long): Long {
-            if(sec == 0L) return 0L
+        fun secToTicks(sec: Long): Long {
+            if (sec == 0L) return 0L
             return sec * SECOND.i
         }
 
-        fun minToTicks(min : Long): Long {
-            if(min == 0L) return 0L
+        fun minToTicks(min: Long): Long {
+            if (min == 0L) return 0L
             return min * MINUTE.i
         }
 
-        fun hourToTicks(hour : Long): Long {
-            if(hour == 0L) return 0L
+        fun hourToTicks(hour: Long): Long {
+            if (hour == 0L) return 0L
             return hour * HOUR.i
         }
 
-        fun dayToTicks(day : Long): Long {
-            if(day == 0L) return 0L
+        fun dayToTicks(day: Long): Long {
+            if (day == 0L) return 0L
             return day * DAY.i
         }
 
-        fun weekToTicks(week : Long): Long {
-            if(week == 0L) return 0L
+        fun weekToTicks(week: Long): Long {
+            if (week == 0L) return 0L
             return week * WEEK.i
+        }
+
+        fun monthToTicks(month: Long): Long {
+            if (month == 0L) return 0L
+            return month * MONTH.i
+        }
+
+        fun yearToTicks(year: Long): Long {
+            if (year == 0L) return 0L;
+            return year * YEAR.i
         }
     }
 }

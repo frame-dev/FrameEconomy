@@ -72,6 +72,7 @@ public final class Main extends JavaPlugin implements Listener {
         } else if (isMongoDb())
             this.mongoDBUtils = new MongoDBUtils();
 
+        // Register Vault
         this.vaultManager = new VaultManager(this);
 
         /*
@@ -81,8 +82,11 @@ public final class Main extends JavaPlugin implements Listener {
             Document updateObject = new Document("$set", doc);
             mongoCollection.updateOne(Filters.eq("uuid",document.getString("uuid")), updateObject);
         }*/
+        // Register All
         this.registerManager = new RegisterManager(this);
-        getLogger().log(Level.INFO, "Enabled!");
+
+        getLogger().log(Level.INFO, "Enabled");
+
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -98,6 +102,16 @@ public final class Main extends JavaPlugin implements Listener {
         }.runTaskLater(this, 120);
 
         new SchedulerManager().runTaskTimerAsynchronously(this, 20*6, 20*60*5);
+    }
+
+    @Override
+    public void onLoad() {
+        getLogger().log(Level.INFO, "Loaded");
+    }
+
+    @Override
+    public void onDisable() {
+        getLogger().log(Level.INFO, "Disabled!");
     }
 
     public RegisterManager getRegisterManager() {
@@ -125,6 +139,7 @@ public final class Main extends JavaPlugin implements Listener {
         }
     }
 
+
     /**
      * This can only be changed in Config.yml
      *
@@ -139,11 +154,6 @@ public final class Main extends JavaPlugin implements Listener {
         if (prefix.contains(">>"))
             prefix = prefix.replace(">>", "»");
         return Objects.requireNonNull(prefix);
-    }
-
-    @Override
-    public void onDisable() {
-        getLogger().log(Level.INFO, "Disabled!");
     }
 
     /**

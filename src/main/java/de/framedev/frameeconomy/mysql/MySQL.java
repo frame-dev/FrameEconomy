@@ -25,6 +25,9 @@ public class MySQL {
     public static Connection con;
     static ConsoleCommandSender console = Bukkit.getConsoleSender();
 
+    /**
+     * Register this Class to use it
+     */
     public MySQL() {
         host = cfg.getString("MySQL.Host");
         user = cfg.getString("MySQL.User");

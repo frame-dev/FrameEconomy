@@ -20,6 +20,9 @@ public class SchedulerManager extends BukkitRunnable {
         Main.getInstance().getLogger().log(Level.INFO, "Scheduler Started");
     }
 
+    /**
+     * Update the Accounts
+     */
     private void updateAccounts() {
         Main.getInstance().getVaultManager().setAccounts(Main.getInstance().getRegisterManager().getVaultProvider().accounts());
     }

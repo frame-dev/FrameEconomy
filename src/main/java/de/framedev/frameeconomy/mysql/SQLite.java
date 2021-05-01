@@ -23,6 +23,10 @@ public class SQLite {
         SQLite.path = path;
     }
 
+    /**
+     * Connect to the SQLite Database
+     * @return the Connected Connection
+     */
     public static Connection connect() {
         Connection conn = null;
         try {
@@ -39,6 +43,9 @@ public class SQLite {
         return null;
     }
 
+    /**
+     * Closes the Opened Connection
+     */
     public static void close() {
         if (connection != null) {
             try {
