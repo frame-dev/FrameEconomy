@@ -1,6 +1,7 @@
 package de.framedev.frameeconomy.commands;
 
 import de.framedev.frameeconomy.main.Main;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -31,15 +32,27 @@ public class EcoCMD implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if(args[0].equalsIgnoreCase("status")) {
+            if(sender.hasPermission("frameeconomy.eco.status")) {
+                sender.sendMessage("§aVault Enabled? : "
+                        + plugin.getServer().getPluginManager().isPluginEnabled("Vault"));
+                return true;
+            } else {
+                sender.sendMessage(plugin.getPrefix() + "§cNo Permissions!");
+                return true;
+            }
+        }
         if (args[0].equalsIgnoreCase("set")) {
             if (args.length == 2) {
                 if (sender instanceof Player) {
                     if (sender.hasPermission("frameeconomy.eco.set")) {
                         Player player = (Player) sender;
                         double amount = Double.parseDouble(args[1]);
-                        plugin.getVaultManager().getEconomy().withdrawPlayer(player, plugin.getVaultManager().getEconomy().getBalance(player));
+                        plugin.getVaultManager().getEconomy()
+                                .withdrawPlayer(player, plugin.getVaultManager().getEconomy().getBalance(player));
                         plugin.getVaultManager().getEconomy().depositPlayer(player, amount);
-                        player.sendMessage("§aYour Money has been set to §6" + amount + plugin.getVaultManager().getEconomy().currencyNamePlural());
+                        player.sendMessage("§aYour Money has been set to §6" + amount
+                                + plugin.getVaultManager().getEconomy().currencyNamePlural());
                     } else {
                         sender.sendMessage(plugin.getPrefix() + "§cNo Permissions!");
                     }
@@ -48,17 +61,35 @@ public class EcoCMD implements CommandExecutor, TabCompleter {
                 }
             } else if (args.length == 3) {
                 if (sender.hasPermission("frameeconomy.eco.set.others")) {
-                    OfflinePlayer player = Bukkit.getOfflinePlayer(args[2]);
-                    double amount = Double.parseDouble(args[1]);
-                    plugin.getVaultManager().getEconomy().withdrawPlayer(player, plugin.getVaultManager().getEconomy().getBalance(player));
-                    plugin.getVaultManager().getEconomy().depositPlayer(player, amount);
-                    if (player.isOnline()) {
-                        ((Player) player).sendMessage("§aYour Money has been set to §6" + amount + plugin.getVaultManager().getEconomy().currencyNamePlural());
+                    if(args[1].equalsIgnoreCase(Bukkit.getOfflinePlayer(args[2]).getName())) {
+                        OfflinePlayer player = Bukkit.getOfflinePlayer(args[2]);
+                        double amount = Double.parseDouble(args[1]);
+                        plugin.getVaultManager().getEconomy()
+                                .withdrawPlayer(player, plugin.getVaultManager().getEconomy().getBalance(player));
+                        plugin.getVaultManager().getEconomy().depositPlayer(player, amount);
+                        if (player.isOnline()) {
+                            ((Player) player).sendMessage("§aYour Money has been set to §6" + amount
+                                    + plugin.getVaultManager().getEconomy().currencyNamePlural());
+                        }
+                        sender.sendMessage("§aMoney from §6" + player.getName() + " §ahas been set to §6" + amount
+                                + plugin.getVaultManager().getEconomy().currencyNamePlural());
+                    } else if(args[1].equalsIgnoreCase("**")) {
+                        for(OfflinePlayer player : Bukkit.getOfflinePlayers()) {
+                            double amount = Double.parseDouble(args[1]);
+                            plugin.getVaultManager().getEconomy()
+                                    .withdrawPlayer(player, plugin.getVaultManager().getEconomy().getBalance(player));
+                            plugin.getVaultManager().getEconomy().depositPlayer(player, amount);
+                            if (player.isOnline()) {
+                                ((Player) player).sendMessage("§aYour Money has been set to §6" + amount
+                                        + plugin.getVaultManager().getEconomy().currencyNamePlural());
+                            }
+                        }
                     }
-                    sender.sendMessage("§aMoney from §6" + player.getName() + " §ahas been set to §6" + amount + plugin.getVaultManager().getEconomy().currencyNamePlural());
                 } else {
                     sender.sendMessage(plugin.getPrefix() + "§cNo Permissions!");
                 }
+            } else {
+                sender.sendMessage(plugin.getPrefix() + "§cPlease use §6/economy set <Amount> §cor §6/economy set <Amount> <PlayerName> §4§l!");
             }
         }
         return false;

@@ -24,7 +24,6 @@ import java.util.logging.Level;
 
 public class BalanceCMD implements CommandExecutor {
 
-    //
     private final Main plugin;
 
     public BalanceCMD(Main plugin) {
@@ -86,8 +85,8 @@ public class BalanceCMD implements CommandExecutor {
         }
         return false;
     }
-    static class ValueComparator implements Comparator<String> {
 
+    static class ValueComparator implements Comparator<String> {
 
         Map<String, Double> base;
 

@@ -39,15 +39,13 @@ public final class Main extends JavaPlugin implements Listener {
     //MongoDB Utils
     private MongoDBUtils mongoDBUtils;
 
-    private ConfigUtils configUtils;
-
     private String prefix = null;
 
     @Override
     public void onEnable() {
         instance = this;
 
-        this.configUtils = new ConfigUtils();
+        ConfigUtils configUtils = new ConfigUtils();
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
         configUtils.saveDefaultConfigValues();
@@ -75,13 +73,12 @@ public final class Main extends JavaPlugin implements Listener {
         // Register Vault
         this.vaultManager = new VaultManager(this);
 
-        /*
-        for(Document document : backendManager.getAllDocuments("eco")) {
-            Document doc = new Document("bank",120.0);
-            MongoCollection mongoCollection = mongoManager.getDatabase().getCollection("eco");
-            Document updateObject = new Document("$set", doc);
-            mongoCollection.updateOne(Filters.eq("uuid",document.getString("uuid")), updateObject);
-        }*/
+        // for(Document document : backendManager.getAllDocuments("eco")) {
+        //     Document doc = new Document("bank",120.0);
+        //     MongoCollection mongoCollection = mongoManager.getDatabase().getCollection("eco");
+        //     Document updateObject = new Document("$set", doc);
+        //     mongoCollection.updateOne(Filters.eq("uuid",document.getString("uuid")), updateObject);
+        // }
         // Register All
         this.registerManager = new RegisterManager(this);
 
@@ -138,7 +135,6 @@ public final class Main extends JavaPlugin implements Listener {
             Bukkit.getConsoleSender().sendMessage(prefix + "Failed to check for updates on spigotmc.org");
         }
     }
-
 
     /**
      * This can only be changed in Config.yml

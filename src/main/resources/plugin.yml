@@ -32,6 +32,7 @@ permissions:
       frameeconomy.bank.balance: true
       frameeconomy.bank.deposit: true
       frameeconomy.bank.withdraw: true
+      frameeconomy.eco.status: true
   frameeconomy.balance:
     default: op
   frameeconomy.balance.others:
@@ -55,4 +56,6 @@ permissions:
   frameeconomy.bank.deposit:
     default: op
   frameeconomy.bank.withdraw:
+    default: op
+  frameeconomy.set.status:
     default: op
