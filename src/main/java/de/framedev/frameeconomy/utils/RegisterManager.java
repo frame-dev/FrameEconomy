@@ -27,6 +27,7 @@ public class RegisterManager {
         new EcoCMD(plugin);
         new BankCMD(plugin);
 
+        // Create VaultProvider
         this.vaultProvider = new VaultProvider(plugin);
         // Register Join Listener
         plugin.getServer().getPluginManager().registerEvents(plugin, plugin);

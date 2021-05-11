@@ -9,16 +9,23 @@ website: https://framedev.stream
 
 commands:
   pay:
+    description: Pay to another Player Money
   balance:
     aliases:
       - bal
+    description: Show your Balance or from another Player
   economy:
     aliases:
       - eco
+    description: Economy is the Upper Command for each Command
   balancetop:
     aliases:
       - baltop
   bank:
+    description: Bank is the Command for al Sub Commands like bank create
+  frameeconomy:
+    aliases:
+      - frameeco
 permissions:
   frameeconomy.*:
     children:
@@ -33,6 +40,7 @@ permissions:
       frameeconomy.bank.deposit: true
       frameeconomy.bank.withdraw: true
       frameeconomy.eco.status: true
+      frameeconomy.reload: true
   frameeconomy.balance:
     default: op
   frameeconomy.balance.others:
@@ -58,4 +66,6 @@ permissions:
   frameeconomy.bank.withdraw:
     default: op
   frameeconomy.set.status:
+    default: op
+  frameeconomy.reload:
     default: op

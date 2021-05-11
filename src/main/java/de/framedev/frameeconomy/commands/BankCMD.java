@@ -176,6 +176,10 @@ public class BankCMD implements CommandExecutor {
                     }
                 }
             }
+        } else {
+            sender.sendMessage(plugin.getPrefix() + "§cPlease use §6/bank create <Name> §cor §6/bank deposit <Name> §cor " +
+                    "§6/bank withdraw <Name> §cor §6/bank addmember <Name> <PlayerName> §cor §6/bank removemember <Name> <PlayerName> §cor" +
+                    " §6/bank balance <Name>§4§l!");
         }
         return false;
     }

@@ -10,6 +10,8 @@ import de.framedev.frameeconomy.utils.RegisterManager;
 import de.framedev.frameeconomy.utils.SchedulerManager;
 import de.framedev.frameeconomy.vault.VaultManager;
 import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -223,5 +225,25 @@ public final class Main extends JavaPlugin implements Listener {
      */
     public boolean isMongoDb() {
         return getConfig().getBoolean("MongoDB.Use");
+    }
+
+    @Override
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        if(command.getName().equalsIgnoreCase("frameeconomy")) {
+            if(args.length == 1) {
+                if(args[0].equalsIgnoreCase("reload")) {
+                    if(sender.hasPermission("frameeconomy.reload")) {
+                        saveConfig();
+                        reloadConfig();
+                        Bukkit.getPluginManager().disablePlugin(this);
+                        Bukkit.getPluginManager().enablePlugin(this);
+                        sender.sendMessage(getPrefix() + "§aConfig Reloaded!");
+                    } else {
+                        sender.sendMessage(getPrefix() + "§cKeine Permissions!");
+                    }
+                }
+            }
+        }
+        return super.onCommand(sender, command, label, args);
     }
 }
