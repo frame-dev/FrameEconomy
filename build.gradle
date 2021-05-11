@@ -26,7 +26,7 @@ repositories {
         name = 'sonatype'
         url = 'https://oss.sonatype.org/content/groups/public/'
     }
-    maven { url "http://framedev.stream:82/releases" }
+    maven { url "http://framedev.stream:82/releases/" }
     maven { url 'https://jitpack.io' }
 }
 
@@ -49,7 +49,7 @@ publishing{
             url "http://framedev.stream:82/releases"
             credentials {
                 username = 'root'
-                password = 'pzOLiJ9Iig3wkE1KPDJjFxW1vBgfW8fChVr7UsrAer+5SS4tqqyvtG6sv35yfsdq'
+                password = '$2a$10$gvsTCkuLSDFI0Chcjlh2yeLBBiku4VVShPkTDlpOuHmH6dxbopxUy'
             }
             authentication {
                 basic(BasicAuthentication)
@@ -65,7 +65,6 @@ shadowJar {
 }
 
 dependencies {
-    compileOnly 'de.framedev:MySQLAPI:1.0.5-SNAPSHOT'
     compileOnly 'org.spigotmc:spigot-api:1.16.1-R0.1-SNAPSHOT'
     compileOnly "com.github.MilkBowl:VaultAPI:1.7"
     api 'org.jetbrains.kotlin:kotlin-stdlib'
