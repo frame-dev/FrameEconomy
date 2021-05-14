@@ -21,10 +21,16 @@ open class VaultProvider(val plugin: Main) {
         runnable()
     }
 
+    /**
+     * @return all Banks
+     */
     open fun banks(): List<String> {
         return Main.getInstance().vaultManager.economy.banks;
     }
 
+    /**
+     * @return all Accounts from OfflinePlayers
+     */
     open fun accounts(): List<OfflinePlayer> {
         val accounts: ArrayList<OfflinePlayer> = ArrayList<OfflinePlayer>()
         for (offlinePlayer in Bukkit.getOfflinePlayers()) {

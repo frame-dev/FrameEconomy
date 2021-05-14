@@ -140,7 +140,7 @@ public final class Main extends JavaPlugin implements Listener {
 
     /**
      * This can only be changed in Config.yml
-     *
+     * Implements an Example Prefix if Prefix in Config.yml was Null
      * @return Prefix of this Plugin
      */
     @NotNull
@@ -166,7 +166,7 @@ public final class Main extends JavaPlugin implements Listener {
 
     /**
      * Used for Connection to your MongoDB Database
-     *
+     * in this Class MongoDB will connect to your Database
      * @return the MongoDB util Class
      */
     public MongoManager getMongoManager() {
@@ -189,7 +189,7 @@ public final class Main extends JavaPlugin implements Listener {
 
     /**
      * VaultManager used for VaultAPI
-     *
+     * Any change will make Errors
      * @return the VaultManager
      */
     public VaultManager getVaultManager() {

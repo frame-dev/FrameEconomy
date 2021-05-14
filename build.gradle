@@ -11,7 +11,7 @@ apply plugin: 'kotlin'
 apply plugin: 'maven-publish'
 
 group = 'de.framedev'
-version = '1.8-SNAPSHOT'
+version = '1.8.1-SNAPSHOT'
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
@@ -34,6 +34,8 @@ publishing{
     publications {
         mavenJava(MavenPublication) {
             from components.java
+            groupId 'de.framedev'
+            artifactId 'FrameEconomy'
             versionMapping {
                 usage('java-api') {
                     fromResolutionOf('runtimeClasspath')
@@ -46,21 +48,21 @@ publishing{
     }
     repositories {
         maven {
-            url "http://framedev.stream:82/releases"
+            url "http://framedev.stream:82/releases/"
             credentials {
                 username = 'root'
-                password = '$2a$10$gvsTCkuLSDFI0Chcjlh2yeLBBiku4VVShPkTDlpOuHmH6dxbopxUy'
+                password = 'wELZvRtiGpTvD/b+y3eWzbhOCQL5jLt0TI55eP2DWfga6aWEwvTm2cvhkuC0exgE'
             }
-            authentication {
-                basic(BasicAuthentication)
-            }
+            // authentication {
+            //    basic(BasicAuthentication)
+            //}
         }
     }
 }
 
 shadowJar {
     dependencies {
-        include(dependency(':org.jetbrains.kotlin:kotlin-stdlib:'))
+        include(dependency(':org.jetbrains.kotlin:kotlin-stdlib'))
     }
 }
 

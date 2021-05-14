@@ -47,4 +47,17 @@ public class FrameEconomyAPI {
     public List<String> banks() {
         return plugin.getRegisterManager().getVaultProvider().banks();
     }
+
+    /**
+     *
+     * @param player the Player to create a new Account for Economy
+     * @return if it was success or not / return false if Player has already an Account
+     */
+    public boolean createAccount(OfflinePlayer player) {
+        if(!plugin.getVaultManager().getEconomy().hasAccount(player)) {
+            plugin.getVaultManager().getEconomy().createPlayerAccount(player);
+            return true;
+        }
+        return false;
+    }
 }

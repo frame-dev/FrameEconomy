@@ -438,13 +438,9 @@ public class MySQLManager {
     protected boolean hasAccount(OfflinePlayer player) {
         if (SQL.isTableExists("frameeconomy_accounts")) {
             if (isOnlineMode()) {
-                if (SQL.exists("frameeconomy_accounts", "uuid", "" + player.getUniqueId())) {
-                    return true;
-                }
+                return SQL.exists("frameeconomy_accounts", "uuid", "" + player.getUniqueId());
             } else {
-                if (SQL.exists("frameeconomy_accounts", "name", "" + player.getName())) {
-                    return true;
-                }
+                return SQL.exists("frameeconomy_accounts", "name", "" + player.getName());
             }
         }
         return false;

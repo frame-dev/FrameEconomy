@@ -23,6 +23,9 @@ public class FileManager {
     private final File file;
     private final FileConfiguration cfg;
 
+    /**
+     * Constructor for this class / Creates the File and FileConfiguration
+     */
     public FileManager() {
         this.file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
         this.cfg = YamlConfiguration.loadConfiguration(file);
@@ -30,7 +33,8 @@ public class FileManager {
 
     /**
      * Save the eco.yml File
-     */
+     * throw an IOException {@link IOException}
+     * */
     private void save() {
         try {
             cfg.save(file);

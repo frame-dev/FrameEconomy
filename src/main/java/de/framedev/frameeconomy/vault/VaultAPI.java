@@ -94,6 +94,9 @@ public class VaultAPI extends AbstractEconomy {
             }
             return cfg.getStringList("accounts").contains(Bukkit.getOfflinePlayer(s).getUniqueId().toString());
         } else {
+            if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
+                return new MySQLManager().hasAccount(Bukkit.getOfflinePlayer(s));
+            }
             return cfg.getStringList("accounts").contains(Bukkit.getOfflinePlayer(s).getName());
         }
     }
