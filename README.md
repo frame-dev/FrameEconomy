@@ -2,7 +2,7 @@
 ```text
 Gradle:
 repositories {
-	maven { url 'http://framedev.stream:82/releases' }
+	maven { url 'https://framedev.ch:444/releases' }
 }
 dependencies {
 	compileOnly 'de.framedev:FrameEconomy:1.7-SNAPSHOT'
@@ -11,7 +11,7 @@ dependencies {
 Maven:
 <repository>
   <id>repository</id>
-  <url>http://framedev.stream:82/releases</url>
+  <url>https://framedev.ch:444/releases</url>
 </repository>
 <dependency>
   <groupId>de.framedev</groupId>
