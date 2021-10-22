@@ -32,7 +32,7 @@ open class VaultProvider(val plugin: Main) {
      * @return all Accounts from OfflinePlayers
      */
     open fun accounts(): List<OfflinePlayer> {
-        val accounts: ArrayList<OfflinePlayer> = ArrayList<OfflinePlayer>()
+        val accounts: ArrayList<OfflinePlayer> = ArrayList()
         for (offlinePlayer in Bukkit.getOfflinePlayers()) {
             if (offlinePlayer != null)
                 if (offlinePlayer.name != null)
@@ -48,7 +48,7 @@ open class VaultProvider(val plugin: Main) {
         val min = Ticks.minToTicks(plugin.config.getLong("PayLoad.Min"))
         val hour = Ticks.hourToTicks(plugin.config.getLong("PayLoad.Hour"))
         val day = Ticks.dayToTicks(plugin.config.getLong("PayLoad.Day"))
-        val ticks = sec + min + hour + day
+        val ticks = sec + min + hour + day * 20
         if (plugin.config.getBoolean("PayLoad.Use"))
             object : BukkitRunnable() {
                 override fun run() {
@@ -59,7 +59,7 @@ open class VaultProvider(val plugin: Main) {
         val minInt = Ticks.minToTicks(plugin.config.getLong("Interest.Min"))
         val hourInt = Ticks.hourToTicks(plugin.config.getLong("Interest.Hour"))
         val dayInt = Ticks.dayToTicks(plugin.config.getLong("Interest.Day"))
-        val ticksInt = secInt + minInt + hourInt + dayInt
+        val ticksInt = secInt + minInt + hourInt + dayInt * 20
         if (plugin.config.getBoolean("Interest.Use"))
             object : BukkitRunnable() {
                 override fun run() {
@@ -81,7 +81,7 @@ open class VaultProvider(val plugin: Main) {
     open fun interest() {
         val percent = plugin.config.getDouble("Interest.Percent")
         val amount = plugin.config.getDouble("Interest.Amount")
-        val sum: Double = (amount * percent).roundToLong().toDouble()
+        val sum: Double = (amount * percent).toDouble()
         for (offlinePlayer in Bukkit.getOfflinePlayers()) {
             plugin.vaultManager.economy.withdrawPlayer(offlinePlayer, sum)
         }
@@ -90,7 +90,7 @@ open class VaultProvider(val plugin: Main) {
     open fun interest(offlinePlayer: OfflinePlayer) {
         val percent = plugin.config.getDouble("Interest.Percent")
         val amount = plugin.config.getDouble("Interest.Amount")
-        val sum: Double = (amount * percent).roundToLong().toDouble()
+        val sum: Double = (amount * percent)
         plugin.vaultManager.economy.withdrawPlayer(offlinePlayer, sum)
     }
 }

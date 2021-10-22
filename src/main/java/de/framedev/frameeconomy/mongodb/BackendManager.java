@@ -242,6 +242,7 @@ public class BackendManager {
             }
             return null;
         }
+        if(this.plugin.getMongoManager() == null) return null;
         this.plugin.getMongoManager().getDatabase().createCollection(collection);
         MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
         String uuid = player.getUniqueId().toString();
@@ -266,10 +267,8 @@ public class BackendManager {
         if (existsCollection(collection)) {
             MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
             collections.find(new Document("offline", true)).forEach((Block<? super Document>) document -> {
-                if (document != null) {
-                    UUID uuid = UUID.fromString(document.getString("uuid"));
-                    players.add(Bukkit.getOfflinePlayer(uuid));
-                }
+                UUID uuid = UUID.fromString(document.getString("uuid"));
+                players.add(Bukkit.getOfflinePlayer(uuid));
             });
             return players;
         }
@@ -277,15 +276,13 @@ public class BackendManager {
     }
 
     public List<Object> getList(String where, Object data, String selected, String collection) {
-        ArrayList<Object> players = new ArrayList<>();
+        ArrayList<Object> objects = new ArrayList<>();
         if (existsCollection(collection)) {
             MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
             collections.find(new Document(where,data)).forEach((Block<? super Document>) document -> {
-                if (document != null) {
-                    players.add(document.get(selected));
-                }
+                objects.add(document.get(selected));
             });
-            return players;
+            return objects;
         }
         return null;
     }
@@ -295,9 +292,8 @@ public class BackendManager {
         if (existsCollection(collection)) {
             MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
             FindIterable<Document> find = collections.find();
-            Iterator it = find.iterator();
-            while (it.hasNext()) {
-                list.add((Document) it.next());
+            for (Document document : find) {
+                list.add(document);
             }
         }
         return list;
