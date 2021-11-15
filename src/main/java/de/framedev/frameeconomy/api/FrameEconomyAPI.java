@@ -1,6 +1,7 @@
 package de.framedev.frameeconomy.api;
 
 import de.framedev.frameeconomy.main.Main;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.OfflinePlayer;
 
 import java.util.List;
@@ -59,5 +60,9 @@ public class FrameEconomyAPI {
             return true;
         }
         return false;
+    }
+
+    public Economy getEconomy() {
+        return plugin.getVaultManager().getEconomy();
     }
 }

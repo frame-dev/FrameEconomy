@@ -19,3 +19,12 @@ Maven:
   <version>1.7-SNAPSHOT</version>
 </dependency>
 ```
+
+
+Build by your Self
+
+```
+git clone https://github.com/frame-dev/FrameEconomy
+cd FrameEconomy
+./gradlew clean fatJar
+```

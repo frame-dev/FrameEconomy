@@ -30,12 +30,12 @@ public class BalanceCMD implements CommandExecutor {
         this.plugin = plugin;
         plugin.getCommand("balance").setExecutor(this::onCommand);
         plugin.getCommand("balancetop").setExecutor(this::onCommand);
-        plugin.getLogger().log(Level.INFO,"Loaded");
+        plugin.getLogger().log(Level.INFO, "Loaded");
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(command.getName().equalsIgnoreCase("balance")) {
+        if (command.getName().equalsIgnoreCase("balance")) {
             if (args.length == 0) {
                 if (sender instanceof Player) {
                     if (sender.hasPermission("frameeconomy.balance")) {
@@ -65,11 +65,32 @@ public class BalanceCMD implements CommandExecutor {
                 HashMap<String, Double> mostplayers = new HashMap<>();
                 ValueComparator bvc = new ValueComparator(mostplayers);
                 TreeMap<String, Double> sorted_map = new TreeMap<>(bvc);
+
                 for (Player all : Bukkit.getOnlinePlayers()) {
-                    mostplayers.put(all.getName(), plugin.getVaultManager().getEconomy().getBalance(all));
+                    if (plugin.getVaultManager().getEconomy().getBanks().isEmpty()) {
+                        mostplayers.put(all.getName(), plugin.getVaultManager().getEconomy().getBalance(all));
+                    } else {
+                        for (String bank : plugin.getVaultManager().getEconomy().getBanks()) {
+                            if (plugin.getVaultManager().getEconomy().isBankMember(bank, all).transactionSuccess() || plugin.getVaultManager().getEconomy().isBankOwner(bank, all).transactionSuccess()) {
+                                mostplayers.put(all.getName(), Double.parseDouble(plugin.getVaultManager().getEconomy().format(plugin.getVaultManager().getEconomy().getBalance(all))) + Double.parseDouble(plugin.getVaultManager().getEconomy().format(plugin.getVaultManager().getEconomy().bankBalance(bank).balance)));
+                            } else {
+                                mostplayers.put(all.getName(), Double.parseDouble(plugin.getVaultManager().getEconomy().format(plugin.getVaultManager().getEconomy().getBalance(all))));
+                            }
+                        }
+                    }
                 }
                 for (OfflinePlayer alloffline : Bukkit.getOfflinePlayers()) {
-                    mostplayers.put(alloffline.getName(), plugin.getVaultManager().getEconomy().getBalance(alloffline));
+                    if (plugin.getVaultManager().getEconomy().getBanks().isEmpty()) {
+                        mostplayers.put(alloffline.getName(), plugin.getVaultManager().getEconomy().getBalance(alloffline));
+                    } else {
+                        for (String bank : plugin.getVaultManager().getEconomy().getBanks()) {
+                            if (plugin.getVaultManager().getEconomy().isBankMember(bank, alloffline).transactionSuccess() || plugin.getVaultManager().getEconomy().isBankOwner(bank, alloffline).transactionSuccess()) {
+                                mostplayers.put(alloffline.getName(), Double.parseDouble(plugin.getVaultManager().getEconomy().format(plugin.getVaultManager().getEconomy().getBalance(alloffline))) + Double.parseDouble(plugin.getVaultManager().getEconomy().format(plugin.getVaultManager().getEconomy().bankBalance(bank).balance)));
+                            } else {
+                                mostplayers.put(alloffline.getName(), Double.parseDouble(plugin.getVaultManager().getEconomy().format(plugin.getVaultManager().getEconomy().getBalance(alloffline))));
+                            }
+                        }
+                    }
                 }
                 sorted_map.putAll(mostplayers);
                 int i = 0;

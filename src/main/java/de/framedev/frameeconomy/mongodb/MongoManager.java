@@ -26,6 +26,7 @@ import de.framedev.frameeconomy.main.Main;
 import org.bson.Document;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 public class MongoManager {
 
@@ -49,7 +50,7 @@ public class MongoManager {
         this.client = MongoClients.create(
                 MongoClientSettings.builder()
                         .applyToClusterSettings(builder ->
-                                builder.hosts(Arrays.asList(new ServerAddress(hostname, port))))
+                                builder.hosts(Collections.singletonList(new ServerAddress(hostname, port))))
                         .build());
         this.database = this.client.getDatabase(databasestring);
     }

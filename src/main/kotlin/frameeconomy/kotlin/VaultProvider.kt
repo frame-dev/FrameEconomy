@@ -48,7 +48,7 @@ open class VaultProvider(val plugin: Main) {
         val min = Ticks.minToTicks(plugin.config.getLong("PayLoad.Min"))
         val hour = Ticks.hourToTicks(plugin.config.getLong("PayLoad.Hour"))
         val day = Ticks.dayToTicks(plugin.config.getLong("PayLoad.Day"))
-        val ticks = sec + min + hour + day * 20
+        val ticks = sec + min + hour + day
         if (plugin.config.getBoolean("PayLoad.Use"))
             object : BukkitRunnable() {
                 override fun run() {
@@ -59,7 +59,7 @@ open class VaultProvider(val plugin: Main) {
         val minInt = Ticks.minToTicks(plugin.config.getLong("Interest.Min"))
         val hourInt = Ticks.hourToTicks(plugin.config.getLong("Interest.Hour"))
         val dayInt = Ticks.dayToTicks(plugin.config.getLong("Interest.Day"))
-        val ticksInt = secInt + minInt + hourInt + dayInt * 20
+        val ticksInt = secInt + minInt + hourInt + dayInt
         if (plugin.config.getBoolean("Interest.Use"))
             object : BukkitRunnable() {
                 override fun run() {
