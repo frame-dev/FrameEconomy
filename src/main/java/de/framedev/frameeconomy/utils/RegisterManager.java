@@ -14,7 +14,7 @@ import frameeconomy.kotlin.VaultProvider;
  * Date: 31.03.21
  * Project: FrameEconomy
  * Copyrighted by FrameDev
- *
+ * <p>
  * Register All Commands and Listeners
  */
 
@@ -24,6 +24,7 @@ public class RegisterManager {
 
     /**
      * Initial the RegisterManager for Register all Listeners and Commands
+     *
      * @param plugin the Main Java Plugin
      */
     public RegisterManager(Main plugin) {
@@ -41,6 +42,7 @@ public class RegisterManager {
 
     /**
      * This Returns the Koltin Util File
+     *
      * @return returns the Registerd VaultProvider
      */
     public VaultProvider getVaultProvider() {
