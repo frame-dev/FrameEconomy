@@ -1,5 +1,6 @@
 package de.framedev.frameeconomy.main;
 
+import de.framedev.frameeconomy.api.FrameEconomyAPI;
 import de.framedev.frameeconomy.mongodb.BackendManager;
 import de.framedev.frameeconomy.mongodb.MongoManager;
 import de.framedev.frameeconomy.mysql.MySQL;
@@ -103,6 +104,7 @@ public final class Main extends JavaPlugin implements Listener {
         }.runTaskLater(this, 120);
 
         new SchedulerManager().runTaskTimerAsynchronously(this, 20*6, 20*60*5);
+        new FrameEconomyAPI(this);
     }
 
     @Override

@@ -12,16 +12,12 @@ wrapper {
 apply plugin: "eclipse"
 apply plugin: 'kotlin'
 apply plugin: 'maven-publish'
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'java'
 
 group = 'de.framedev'
 version = '1.9-RELEASE'
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
-
-jar.enabled = false
 
 repositories {
     mavenCentral()
@@ -149,8 +145,4 @@ shadowJar {
     archiveClassifier.set('')
     archiveVersion.set(version)
     archiveClassifier = ''
-}
-
-jar {
-    jar.finalizedBy(shadowJar)
 }

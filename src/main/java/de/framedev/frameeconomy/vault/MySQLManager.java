@@ -33,6 +33,7 @@ public class MySQLManager {
 
     /**
      * set the Money in the Database
+     *
      * @param player the Player
      * @param amount Money amount
      */
@@ -63,7 +64,6 @@ public class MySQLManager {
     }
 
     /**
-     *
      * @param player the Player
      * @return the Money from the selected Player
      */
@@ -105,8 +105,7 @@ public class MySQLManager {
     }
 
     /**
-     *
-     * @param player the BankOwner
+     * @param player   the BankOwner
      * @param bankName the BankName
      * @return Successfully creating the Bank or not
      */
@@ -152,7 +151,8 @@ public class MySQLManager {
 
     /**
      * set the Bank Money
-     * @param name the BankName
+     *
+     * @param name   the BankName
      * @param amount amount to adding to the Bank
      */
     protected void setBankMoney(String name, double amount) {
@@ -192,7 +192,6 @@ public class MySQLManager {
     }
 
     /**
-     *
      * @param name the BankName
      * @return Amount of the Bank
      */
@@ -232,8 +231,7 @@ public class MySQLManager {
     }
 
     /**
-     *
-     * @param name the BankName
+     * @param name   the BankName
      * @param player the Player
      * @return if the user is the BankOwner
      */
@@ -284,8 +282,9 @@ public class MySQLManager {
 
     /**
      * Adding user to the Bank as Member
+     *
      * @param bankName the BankName
-     * @param player the Player
+     * @param player   the Player
      */
     public void addBankMember(String bankName, OfflinePlayer player) {
         if (SQL.isTableExists(tableName)) {
@@ -321,9 +320,8 @@ public class MySQLManager {
     }
 
     /**
-     *
      * @param bankName the BankName
-     * @param player the Player
+     * @param player   the Player
      * @return if the Player is a BankMember
      */
     public boolean isBankMember(String bankName, OfflinePlayer player) {
@@ -333,6 +331,7 @@ public class MySQLManager {
                     Type type = new TypeToken<List<String>>() {
                     }.getType();
                     List<String> players = new Gson().fromJson((String) SQL.get(tableName, "BankMembers", "BankName", bankName), type);
+                    if (players == null) return false;
                     if (players.contains(player.getName()))
                         return true;
                 }
@@ -342,9 +341,8 @@ public class MySQLManager {
     }
 
     /**
-     *
      * @param bankName the Bank Name
-     * @param player the Player
+     * @param player   the Player
      */
     public void removeBankMember(String bankName, OfflinePlayer player) {
         List<String> pls = new ArrayList<>();
@@ -413,6 +411,7 @@ public class MySQLManager {
 
     /**
      * Create an Account for Vault
+     *
      * @param player the Player
      */
     protected void createAccount(OfflinePlayer player) {
@@ -431,7 +430,6 @@ public class MySQLManager {
     }
 
     /**
-     *
      * @param player the Player
      * @return if the Player has an Account or not
      */
@@ -447,7 +445,6 @@ public class MySQLManager {
     }
 
     /**
-     *
      * @param bankName the Bank
      * @return all BankMembers
      */
@@ -466,7 +463,6 @@ public class MySQLManager {
     }
 
     /**
-     *
      * @return all Banks
      */
     protected List<String> getBanks() {

@@ -32,7 +32,7 @@ open class VaultProvider(val plugin: Main) {
      * @return all Accounts from OfflinePlayers
      */
     open fun accounts(): List<OfflinePlayer> {
-        val accounts: ArrayList<OfflinePlayer> = ArrayList<OfflinePlayer>()
+        val accounts: ArrayList<OfflinePlayer> = ArrayList()
         for (offlinePlayer in Bukkit.getOfflinePlayers()) {
             if (offlinePlayer != null)
                 if (offlinePlayer.name != null)
@@ -81,7 +81,7 @@ open class VaultProvider(val plugin: Main) {
     open fun interest() {
         val percent = plugin.config.getDouble("Interest.Percent")
         val amount = plugin.config.getDouble("Interest.Amount")
-        val sum: Double = (amount * percent).roundToLong().toDouble()
+        val sum: Double = (amount * percent).toDouble()
         for (offlinePlayer in Bukkit.getOfflinePlayers()) {
             plugin.vaultManager.economy.withdrawPlayer(offlinePlayer, sum)
         }
@@ -90,7 +90,7 @@ open class VaultProvider(val plugin: Main) {
     open fun interest(offlinePlayer: OfflinePlayer) {
         val percent = plugin.config.getDouble("Interest.Percent")
         val amount = plugin.config.getDouble("Interest.Amount")
-        val sum: Double = (amount * percent).roundToLong().toDouble()
+        val sum: Double = (amount * percent)
         plugin.vaultManager.economy.withdrawPlayer(offlinePlayer, sum)
     }
 }
