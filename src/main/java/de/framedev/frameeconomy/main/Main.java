@@ -36,11 +36,13 @@ public final class Main extends JavaPlugin implements Listener {
     //VaultManager is used for Connection to Vault
     private VaultManager vaultManager;
 
+    // Register Manager
     private RegisterManager registerManager;
 
     //MongoDB Utils
     private MongoDBUtils mongoDBUtils;
 
+    // Prefix will be initialized in the onEnable method
     private String prefix = null;
 
     @Override
@@ -113,6 +115,10 @@ public final class Main extends JavaPlugin implements Listener {
         getLogger().log(Level.INFO, "Disabled!");
     }
 
+    /**
+     * This Class is used for Register all classes
+     * @return return the RegisterManager that register all Classes that implements CommandExecutor and other stuff
+     */
     public RegisterManager getRegisterManager() {
         return registerManager;
     }
@@ -156,7 +162,6 @@ public final class Main extends JavaPlugin implements Listener {
 
     /**
      * This Class contains Creator / Updater / Inserter for your MongoDB Connection
-     *
      * @return the Util class for MongoDB
      */
     public BackendManager getBackendManager() {

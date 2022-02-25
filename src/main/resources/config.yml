@@ -21,6 +21,7 @@ MongoDB:
   Localhost: false
   Normal: false
   Use: false
+  CollectionName: 'frameeconomy_economy'
 Currency:
   Plural: '$'
   Singular: '$'

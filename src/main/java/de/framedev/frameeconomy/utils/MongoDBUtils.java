@@ -34,10 +34,18 @@ public class MongoDBUtils {
         }
     }
 
+    /**
+     * this Method will be returning the initialzed MongoManager
+     * @return returns the initialzed MongoManager
+     */
     public MongoManager getMongoManager() {
         return mongoManager;
     }
 
+    /**
+     * this Method will be returning the initialzed BackendManager
+     * @return returns the initialzed BackendManager
+     */
     public BackendManager getBackendManager() {
         return backendManager;
     }

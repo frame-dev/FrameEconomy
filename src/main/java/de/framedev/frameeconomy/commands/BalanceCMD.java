@@ -64,7 +64,7 @@ public class BalanceCMD implements CommandExecutor {
             if (sender.hasPermission("frameeconomy.balancetop")) {
                 HashMap<String, Double> mostplayers = new HashMap<>();
                 ValueComparator bvc = new ValueComparator(mostplayers);
-                TreeMap<String, Double> sorted_map = new TreeMap<String, Double>(bvc);
+                TreeMap<String, Double> sorted_map = new TreeMap<>(bvc);
                 for (Player all : Bukkit.getOnlinePlayers()) {
                     mostplayers.put(all.getName(), plugin.getVaultManager().getEconomy().getBalance(all));
                 }

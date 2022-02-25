@@ -273,10 +273,7 @@ public class SQL {
                 String sql = stringBuilder.toString();
                 ResultSet res = statement.executeQuery(sql);
                 if (res.next()) {
-                    if (res.getString(column) == null) {
-                        return false;
-                    }
-                    return true;
+                    return res.getString(column) != null;
                 }
             } else if (Main.getInstance().isSQL()) {
                 Statement statement = SQLite.connect().createStatement();
