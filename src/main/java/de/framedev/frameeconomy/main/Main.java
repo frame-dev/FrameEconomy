@@ -36,6 +36,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
+@SuppressWarnings("InstantiationOfUtilityClass")
 public final class Main extends JavaPlugin implements Listener {
 
     // The Instance for this Class
