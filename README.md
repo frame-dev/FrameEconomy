@@ -141,4 +141,4 @@ frameeconomy.reload
 - Shadow jar plugin: `8.1.1`
 - Java bytecode target: `1.8`
 
-Most command storage work is scheduled asynchronously, while Bukkit-facing messages are sent back on the server thread.
+FrameEconomy uses a dedicated serialized database worker for plugin-owned economy and storage work. Command handlers, scheduled account updates, payload/interest jobs, and player-join account creation queue their storage operations off the main server thread, then hop back to the server thread for Bukkit-facing messages.

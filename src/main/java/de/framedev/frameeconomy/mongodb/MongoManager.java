@@ -84,5 +84,12 @@ public class MongoManager {
     public MongoDatabase getDatabase() {
         return database;
     }
+
+    public void shutdown() {
+        if (client != null) {
+            client.close();
+            client = null;
+        }
+    }
 }
 

@@ -42,7 +42,7 @@ public class BalanceCMD implements CommandExecutor {
                 Player player = CommandHelper.requirePlayerWithPermission(plugin, sender, "frameeconomy.balance");
                 if (player == null) return true;
                 String currency = plugin.getVaultManager().getEconomy().currencyNamePlural();
-                plugin.runAsync(() -> plugin.sendMessageSync(player, "balance.own",
+                plugin.runDatabaseAsync(() -> plugin.sendMessageSync(player, "balance.own",
                         "amount", String.valueOf(plugin.getVaultManager().getEconomy().getBalance(player)),
                         "currency", currency));
             } else if (args.length == 1) {
@@ -51,7 +51,7 @@ public class BalanceCMD implements CommandExecutor {
                 if (player != null) {
                     String currency = plugin.getVaultManager().getEconomy().currencyNamePlural();
                     String playerName = player.getName();
-                    plugin.runAsync(() -> plugin.sendMessageSync(sender, "balance.other",
+                    plugin.runDatabaseAsync(() -> plugin.sendMessageSync(sender, "balance.other",
                             "player", playerName,
                             "amount", String.valueOf(plugin.getVaultManager().getEconomy().getBalance(player)),
                             "currency", currency));
@@ -64,7 +64,7 @@ public class BalanceCMD implements CommandExecutor {
             if (!CommandHelper.requirePermission(plugin, sender, "frameeconomy.balancetop")) return true;
             OfflinePlayer[] players = Bukkit.getOfflinePlayers();
             List<String> banks = new ArrayList<>(plugin.getVaultManager().getEconomy().getBanks());
-            plugin.runAsync(() -> {
+            plugin.runDatabaseAsync(() -> {
                 HashMap<String, Double> mostplayers = new HashMap<>();
                 ValueComparator bvc = new ValueComparator(mostplayers);
                 TreeMap<String, Double> sorted_map = new TreeMap<>(bvc);

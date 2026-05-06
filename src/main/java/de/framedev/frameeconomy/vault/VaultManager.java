@@ -60,10 +60,13 @@ public class VaultManager {
         }
         economy = new VaultAPI();
         plugin.getServer().getServicesManager().register(Economy.class, economy, plugin, ServicePriority.High);
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            if (!economy.hasAccount(p))
-                economy.createPlayerAccount(p);
-        }
+        OfflinePlayer[] onlinePlayers = Bukkit.getOnlinePlayers().toArray(new OfflinePlayer[0]);
+        plugin.runDatabaseAsync(() -> {
+            for (OfflinePlayer player : onlinePlayers) {
+                if (!economy.hasAccount(player))
+                    economy.createPlayerAccount(player);
+            }
+        });
     }
 
     public void setAccounts(List<OfflinePlayer> accounts) {

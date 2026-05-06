@@ -29,6 +29,6 @@ public class SchedulerManager extends BukkitRunnable {
 
     @Override
     public void run() {
-        updateAccounts();
+        Main.getInstance().runDatabaseAsync(this::updateAccounts);
     }
 }

@@ -37,7 +37,7 @@ public class BankCMD implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length == 1 && args[0].equalsIgnoreCase("list")) {
             if (!CommandHelper.requirePermission(plugin, sender, "frameeconomy.bank.list")) return true;
-            plugin.runAsync(() -> {
+            plugin.runDatabaseAsync(() -> {
                 List<String> banks = plugin.getVaultManager().getEconomy().getBanks();
                 plugin.runSync(() -> sendList(sender, banks, "bank.list-empty"));
             });
@@ -49,7 +49,7 @@ public class BankCMD implements CommandExecutor, TabCompleter {
                 Player player = CommandHelper.requirePlayerWithPermission(plugin, sender, "frameeconomy.bank.create");
                 if (player == null) return true;
                 String bankName = args[1];
-                plugin.runAsync(() -> {
+                plugin.runDatabaseAsync(() -> {
                     if (plugin.getVaultManager().getEconomy().createBank(bankName, player).transactionSuccess()) {
                         plugin.sendMessageSync(player, "bank.create-success", "bank", bankName);
                     } else {
@@ -64,7 +64,7 @@ public class BankCMD implements CommandExecutor, TabCompleter {
                 if (player == null) return true;
                 String bankName = args[1];
                 String currency = plugin.getVaultManager().getEconomy().currencyNamePlural();
-                plugin.runAsync(() -> {
+                plugin.runDatabaseAsync(() -> {
                     if (!ensureBankExists(player, bankName)) return;
                     if (!ensureBankMember(player, bankName)) return;
                     plugin.sendMessageSync(player, "bank.balance",
@@ -79,7 +79,7 @@ public class BankCMD implements CommandExecutor, TabCompleter {
                 Player player = CommandHelper.requirePlayerWithPermission(plugin, sender, "frameeconomy.bank.remove");
                 if (player == null) return true;
                 String bankName = args[1];
-                plugin.runAsync(() -> {
+                plugin.runDatabaseAsync(() -> {
                     if (!ensureBankExists(player, bankName)) return;
                     if (!ensureBankOwner(player, bankName)) return;
                     if (plugin.getVaultManager().getEconomy().deleteBank(bankName).transactionSuccess()) {
@@ -95,7 +95,7 @@ public class BankCMD implements CommandExecutor, TabCompleter {
                 Player player = CommandHelper.requirePlayerWithPermission(plugin, sender, "frameeconomy.bank.listmembers");
                 if (player == null) return true;
                 String bankName = args[1];
-                plugin.runAsync(() -> {
+                plugin.runDatabaseAsync(() -> {
                     if (!ensureBankExists(player, bankName)) return;
                     if (!ensureBankMember(player, bankName)) return;
                     List<String> bankMembers = new ArrayList<>(plugin.getVaultManager().getBankMembers(bankName));
@@ -114,7 +114,7 @@ public class BankCMD implements CommandExecutor, TabCompleter {
                 if (parsedAmount == null) return true;
                 double amount = parsedAmount;
                 String currency = plugin.getVaultManager().getEconomy().currencyNamePlural();
-                plugin.runAsync(() -> {
+                plugin.runDatabaseAsync(() -> {
                     if (!ensureBankExists(player, bankName)) return;
                     if (!plugin.getVaultManager().getEconomy().has(player, amount)) {
                         plugin.sendMessageSync(player, "general.not-enough-money");
@@ -145,7 +145,7 @@ public class BankCMD implements CommandExecutor, TabCompleter {
                 if (parsedAmount == null) return true;
                 double amount = parsedAmount;
                 String currency = plugin.getVaultManager().getEconomy().currencyNamePlural();
-                plugin.runAsync(() -> {
+                plugin.runDatabaseAsync(() -> {
                     if (!ensureBankExists(player, bankName)) return;
                     if (!ensureBankMember(player, bankName)) return;
                     if (!plugin.getVaultManager().getEconomy().bankHas(bankName, amount).transactionSuccess()) {
@@ -173,7 +173,7 @@ public class BankCMD implements CommandExecutor, TabCompleter {
                 String bankName = args[1];
                 OfflinePlayer offline = Bukkit.getOfflinePlayer(args[2]);
                 String offlineName = offline.getName();
-                plugin.runAsync(() -> {
+                plugin.runDatabaseAsync(() -> {
                     if (!ensureBankExists(player, bankName)) return;
                     if (!ensureBankOwner(player, bankName)) return;
                     if (addMember) {

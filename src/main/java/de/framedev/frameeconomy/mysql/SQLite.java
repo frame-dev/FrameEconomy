@@ -28,15 +28,16 @@ public class SQLite {
      * @return the Connected Connection
      */
     public static Connection connect() {
-        Connection conn = null;
         try {
+            if (connection != null && !connection.isClosed()) {
+                return connection;
+            }
             // db parameters
             Class.forName("org.sqlite.JDBC");
             String url = "jdbc:sqlite:" + path + "/" + fileName + ".db";
             // create a connection to the database
-            conn = DriverManager.getConnection(url);
-            connection = conn;
-            return conn;
+            connection = DriverManager.getConnection(url);
+            return connection;
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -47,9 +48,14 @@ public class SQLite {
      * Closes the Opened Connection
      */
     public static void close() {
+        // Connections are reused by FrameEconomy's serialized database worker.
+    }
+
+    public static void shutdown() {
         if (connection != null) {
             try {
                 connection.close();
+                connection = null;
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }

@@ -28,6 +28,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 public final class Main extends JavaPlugin implements Listener {
@@ -44,9 +47,16 @@ public final class Main extends JavaPlugin implements Listener {
     //MongoDB Utils
     private MongoDBUtils mongoDBUtils;
 
+    private ExecutorService databaseExecutor;
+
     @Override
     public void onEnable() {
         instance = this;
+        databaseExecutor = Executors.newSingleThreadExecutor(task -> {
+            Thread thread = new Thread(task, "FrameEconomy-Database");
+            thread.setDaemon(true);
+            return thread;
+        });
 
         ConfigUtils configUtils = new ConfigUtils();
         getConfig().options().copyDefaults(true);
@@ -94,11 +104,11 @@ public final class Main extends JavaPlugin implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
-                checkUpdate();
+                runAsync(Main.this::checkUpdate);
             }
         }.runTaskLater(this, 120);
 
-        new SchedulerManager().runTaskTimerAsynchronously(this, 20 * 6, 20 * 60 * 5);
+        new SchedulerManager().runTaskTimer(this, 20 * 6, 20 * 60 * 5);
         new FrameEconomyAPI(this);
     }
 
@@ -110,6 +120,22 @@ public final class Main extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         Bukkit.getScheduler().cancelTasks(this);
+        if (databaseExecutor != null) {
+            databaseExecutor.shutdown();
+            try {
+                if (!databaseExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                    databaseExecutor.shutdownNow();
+                }
+            } catch (InterruptedException exception) {
+                databaseExecutor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
+        MySQL.shutdown();
+        SQLite.shutdown();
+        if (getMongoManager() != null) {
+            getMongoManager().shutdown();
+        }
         getLogger().log(Level.INFO, "Disabled!");
     }
 
@@ -203,6 +229,25 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     /**
+     * Runs database and storage work on FrameEconomy's serialized database worker.
+     *
+     * @param task storage work to run asynchronously
+     */
+    public void runDatabaseAsync(Runnable task) {
+        if (databaseExecutor == null || databaseExecutor.isShutdown()) {
+            runAsync(task);
+            return;
+        }
+        databaseExecutor.execute(() -> {
+            try {
+                task.run();
+            } catch (Exception exception) {
+                getLogger().log(Level.SEVERE, "Async database task failed", exception);
+            }
+        });
+    }
+
+    /**
      * Runs Bukkit-facing work on the server thread.
      *
      * @param task work to run synchronously
@@ -293,15 +338,18 @@ public final class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if (vaultManager != null) {
-            if (!vaultManager.getEconomy().hasAccount(event.getPlayer()))
-                vaultManager.getEconomy().createPlayerAccount(event.getPlayer());
-        }
-        if (isMongoDb()) {
-            if (getBackendManager() != null)
-                if (!getBackendManager().exists(event.getPlayer(), "uuid", "eco"))
-                    getBackendManager().createUser(event.getPlayer(), "eco");
-        }
+        OfflinePlayer player = event.getPlayer();
+        runDatabaseAsync(() -> {
+            if (vaultManager != null) {
+                if (!vaultManager.getEconomy().hasAccount(player))
+                    vaultManager.getEconomy().createPlayerAccount(player);
+            }
+            if (isMongoDb()) {
+                if (getBackendManager() != null)
+                    if (!getBackendManager().exists(player, "uuid", "eco"))
+                        getBackendManager().createUser(player, "eco");
+            }
+        });
     }
 
     /**

@@ -60,7 +60,7 @@ public class PayCMD implements CommandExecutor, TabCompleter {
         String targetName = target.getName();
         String playerName = player.getName();
 
-        plugin.runAsync(() -> {
+        plugin.runDatabaseAsync(() -> {
             if (!plugin.getVaultManager().getEconomy().has(player, amount)) {
                 plugin.sendMessageSync(player, "general.not-enough-money");
                 return;

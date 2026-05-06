@@ -50,7 +50,7 @@ public class EcoCMD implements CommandExecutor, TabCompleter {
                 if (parsedAmount == null) return true;
                 double amount = parsedAmount;
                 String currency = plugin.getVaultManager().getEconomy().currencyNamePlural();
-                plugin.runAsync(() -> {
+                plugin.runDatabaseAsync(() -> {
                     plugin.setPlayerBalance(player, amount);
                     plugin.sendMessageSync(player, "economy.set-own",
                             "amount", String.valueOf(amount),
@@ -64,7 +64,7 @@ public class EcoCMD implements CommandExecutor, TabCompleter {
                 double amount = parsedAmount;
                 String currency = plugin.getVaultManager().getEconomy().currencyNamePlural();
                 String playerName = player.getName();
-                plugin.runAsync(() -> {
+                plugin.runDatabaseAsync(() -> {
                     plugin.setPlayerBalance(player, amount);
                     plugin.runSync(() -> {
                         if (player.isOnline()) {

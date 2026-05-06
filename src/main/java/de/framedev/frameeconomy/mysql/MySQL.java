@@ -105,6 +105,10 @@ public class MySQL {
     }
 
     public static void close() {
+        // Connections are reused by FrameEconomy's serialized database worker.
+    }
+
+    public static void shutdown() {
         if (con != null) {
             try {
                 con.close();

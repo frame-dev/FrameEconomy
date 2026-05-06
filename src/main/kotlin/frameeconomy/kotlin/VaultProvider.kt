@@ -52,7 +52,7 @@ open class VaultProvider(val plugin: Main) {
             object : BukkitRunnable() {
                 override fun run() {
                     val players = Bukkit.getOfflinePlayers()
-                    plugin.runAsync {
+                    plugin.runDatabaseAsync {
                         payLoad(players)
                     }
                 }
@@ -66,7 +66,7 @@ open class VaultProvider(val plugin: Main) {
             object : BukkitRunnable() {
                 override fun run() {
                     val players = Bukkit.getOfflinePlayers()
-                    plugin.runAsync {
+                    plugin.runDatabaseAsync {
                         interest(players)
                     }
                 }
