@@ -3,6 +3,7 @@ package de.framedev.frameeconomy.main;
 import de.framedev.frameeconomy.api.FrameEconomyAPI;
 import de.framedev.frameeconomy.mongodb.BackendManager;
 import de.framedev.frameeconomy.mongodb.MongoManager;
+import de.framedev.frameeconomy.mysql.H2;
 import de.framedev.frameeconomy.mysql.MySQL;
 import de.framedev.frameeconomy.mysql.SQLite;
 import de.framedev.frameeconomy.utils.ConfigUtils;
@@ -27,9 +28,11 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.UUID;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -67,12 +70,21 @@ public final class Main extends JavaPlugin implements Listener {
         try {
             configUtils.reloadCustomConfig();
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            getLogger().log(Level.WARNING, "Could not load custom config defaults", e);
         }
 
         if (isMysql()) {
             new MySQL();
             getLogger().log(Level.INFO, "MySQL Enabled!");
+        } else if (isH2()) {
+            //noinspection InstantiationOfUtilityClass
+            new H2(
+                    getConfig().getString("H2.Path"),
+                    getConfig().getString("H2.FileName"),
+                    getConfig().getString("H2.User"),
+                    getConfig().getString("H2.Password")
+            );
+            getLogger().log(Level.INFO, "H2 Enabled!");
         } else if (isSQL()) {
             //noinspection InstantiationOfUtilityClass
             new SQLite(getConfig().getString("SQLite.Path"), getConfig().getString("SQLite.FileName"));
@@ -83,7 +95,7 @@ public final class Main extends JavaPlugin implements Listener {
         // Register Vault
         this.vaultManager = new VaultManager(this);
 
-        // for(Document document : backendManager.getAllDocuments("eco")) {
+        // for (Document document : backendManager.getAllDocuments("eco")) {
         //     Document doc = new Document("bank",120.0);
         //     MongoCollection mongoCollection = mongoManager.getDatabase().getCollection("eco");
         //     Document updateObject = new Document("$set", doc);
@@ -120,6 +132,7 @@ public final class Main extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         Bukkit.getScheduler().cancelTasks(this);
+        Bukkit.getServicesManager().unregisterAll(this);
         if (databaseExecutor != null) {
             databaseExecutor.shutdown();
             try {
@@ -132,6 +145,7 @@ public final class Main extends JavaPlugin implements Listener {
             }
         }
         MySQL.shutdown();
+        H2.shutdown();
         SQLite.shutdown();
         if (getMongoManager() != null) {
             getMongoManager().shutdown();
@@ -152,20 +166,23 @@ public final class Main extends JavaPlugin implements Listener {
      * Checking for Updates in SpigotMC Forum
      */
     public void checkUpdate() {
-        Bukkit.getConsoleSender().sendMessage(getMessage("update.checking"));
+        sendConsoleMessage("update.checking");
         try {
             int resource = 90172;
             URLConnection conn = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + resource).openConnection();
-            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String oldVersion = getDescription().getVersion();
-            String newVersion = br.readLine();
-            if (!newVersion.equalsIgnoreCase(oldVersion)) {
-                Bukkit.getConsoleSender().sendMessage(getMessage("update.available", "version", newVersion));
-            } else {
-                Bukkit.getConsoleSender().sendMessage(getMessage("update.current"));
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(5000);
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+                String oldVersion = getDescription().getVersion();
+                String newVersion = br.readLine();
+                if (!newVersion.equalsIgnoreCase(oldVersion)) {
+                    sendConsoleMessage("update.available", "version", newVersion);
+                } else {
+                    sendConsoleMessage("update.current");
+                }
             }
         } catch (IOException e) {
-            Bukkit.getConsoleSender().sendMessage(getMessage("update.failed"));
+            sendConsoleMessage("update.failed");
         }
     }
 
@@ -202,6 +219,9 @@ public final class Main extends JavaPlugin implements Listener {
      */
     public String getMessageWithoutPrefix(String path, String... replacements) {
         String message = getConfig().getString("Messages." + path, "Missing message: " + path);
+        if (message == null) {
+            message = "Missing message: " + path;
+        }
         for (int i = 0; i + 1 < replacements.length; i += 2) {
             message = message.replace("{" + replacements[i] + "}", String.valueOf(replacements[i + 1]));
         }
@@ -231,20 +251,24 @@ public final class Main extends JavaPlugin implements Listener {
     /**
      * Runs database and storage work on FrameEconomy's serialized database worker.
      *
-     * @param task storage work to run asynchronously
+     * @param task storage works to run asynchronously
      */
     public void runDatabaseAsync(Runnable task) {
         if (databaseExecutor == null || databaseExecutor.isShutdown()) {
-            runAsync(task);
+            getLogger().warning("Ignored database task because the database worker is shutting down.");
             return;
         }
-        databaseExecutor.execute(() -> {
-            try {
-                task.run();
-            } catch (Exception exception) {
-                getLogger().log(Level.SEVERE, "Async database task failed", exception);
-            }
-        });
+        try {
+            databaseExecutor.execute(() -> {
+                try {
+                    task.run();
+                } catch (Exception exception) {
+                    getLogger().log(Level.SEVERE, "Async database task failed", exception);
+                }
+            });
+        } catch (RejectedExecutionException exception) {
+            getLogger().log(Level.WARNING, "Ignored database task because the database worker rejected it.", exception);
+        }
     }
 
     /**
@@ -253,6 +277,7 @@ public final class Main extends JavaPlugin implements Listener {
      * @param task work to run synchronously
      */
     public void runSync(Runnable task) {
+        if (!isEnabled()) return;
         Bukkit.getScheduler().runTask(this, task);
     }
 
@@ -265,6 +290,10 @@ public final class Main extends JavaPlugin implements Listener {
      */
     public void sendMessageSync(CommandSender sender, String path, String... replacements) {
         runSync(() -> sendMessage(sender, path, replacements));
+    }
+
+    public void sendConsoleMessage(String path, String... replacements) {
+        runSync(() -> Bukkit.getConsoleSender().sendMessage(getMessage(path, replacements)));
     }
 
     /**
@@ -311,8 +340,57 @@ public final class Main extends JavaPlugin implements Listener {
             vaultManager.getEconomy().createPlayerAccount(player);
         }
         double currentBalance = vaultManager.getEconomy().getBalance(player);
-        return vaultManager.getEconomy().withdrawPlayer(player, currentBalance).transactionSuccess()
-                && vaultManager.getEconomy().depositPlayer(player, amount).transactionSuccess();
+        if (!vaultManager.getEconomy().withdrawPlayer(player, currentBalance).transactionSuccess()) {
+            return false;
+        }
+        if (vaultManager.getEconomy().depositPlayer(player, amount).transactionSuccess()) {
+            return true;
+        }
+        vaultManager.getEconomy().depositPlayer(player, currentBalance);
+        return false;
+    }
+
+    public boolean addPlayerBalance(OfflinePlayer player, double amount) {
+        if (!vaultManager.getEconomy().hasAccount(player)) {
+            vaultManager.getEconomy().createPlayerAccount(player);
+        }
+        return vaultManager.getEconomy().depositPlayer(player, amount).transactionSuccess();
+    }
+
+    public boolean removePlayerBalance(OfflinePlayer player, double amount) {
+        if (!vaultManager.getEconomy().hasAccount(player)) {
+            vaultManager.getEconomy().createPlayerAccount(player);
+        }
+        return vaultManager.getEconomy().withdrawPlayer(player, amount).transactionSuccess();
+    }
+
+    public OfflinePlayer resolveOfflinePlayer(String value) {
+        OfflinePlayer online = Bukkit.getPlayerExact(value);
+        if (online != null) {
+            return online;
+        }
+        try {
+            return Bukkit.getOfflinePlayer(UUID.fromString(value));
+        } catch (IllegalArgumentException ignored) {
+            return resolveOfflinePlayerByName(value);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private OfflinePlayer resolveOfflinePlayerByName(String name) {
+        return Bukkit.getOfflinePlayer(name);
+    }
+
+    public void reloadPluginConfig() {
+        ConfigUtils configUtils = new ConfigUtils();
+        saveDefaultConfig();
+        configUtils.saveDefaultConfigValues();
+        reloadConfig();
+        try {
+            configUtils.reloadCustomConfig();
+        } catch (UnsupportedEncodingException exception) {
+            getLogger().log(Level.WARNING, "Could not reload config defaults", exception);
+        }
     }
 
     /**
@@ -379,6 +457,33 @@ public final class Main extends JavaPlugin implements Listener {
 
     /**
      *
+     * @return if H2 is Enabled
+     */
+    public boolean isH2() {
+        return getConfig().getBoolean("H2.Use");
+    }
+
+    /**
+     *
+     * @return if any SQL-backed storage is Enabled
+     */
+    public boolean isSqlStorage() {
+        return isMysql() || isH2() || isSQL();
+    }
+
+    public boolean isJsonFileStorage() {
+        String type = getConfig().getString("FileStorage.Type", "YML");
+        return type != null && type.equalsIgnoreCase("JSON");
+    }
+
+    public boolean isYamlFileStorage() {
+        String type = getConfig().getString("FileStorage.Type", "YML");
+        if(type == null) type = "YML";
+        return type.equalsIgnoreCase("YML") || type.equalsIgnoreCase("YAML");
+    }
+
+    /**
+     *
      * @return if MySQL is Enabled
      */
     public boolean isMysql() {
@@ -399,17 +504,15 @@ public final class Main extends JavaPlugin implements Listener {
             if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("reload")) {
                     if (sender.hasPermission("frameeconomy.reload")) {
-                        saveConfig();
-                        reloadConfig();
-                        Bukkit.getPluginManager().disablePlugin(this);
-                        Bukkit.getPluginManager().enablePlugin(this);
+                        reloadPluginConfig();
                         sendMessage(sender, "reload.success");
                     } else {
                         sendMessage(sender, "general.no-permission");
                     }
+                    return true;
                 }
             }
         }
-        return super.onCommand(sender, command, label, args);
+        return false;
     }
 }

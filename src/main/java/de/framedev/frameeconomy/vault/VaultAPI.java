@@ -1,17 +1,11 @@
 package de.framedev.frameeconomy.vault;
 
+import de.framedev.frameeconomy.mongodb.BackendManager;
 import de.framedev.frameeconomy.main.Main;
 import de.framedev.frameeconomy.utils.FileManager;
 import net.milkbowl.vault.economy.AbstractEconomy;
 import net.milkbowl.vault.economy.EconomyResponse;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,19 +80,15 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public boolean hasAccount(String s) {
-        File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
-        FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-        if (Bukkit.getServer().getOnlineMode()) {
-            if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-                return new MySQLManager().hasAccount(Bukkit.getOfflinePlayer(s));
-            }
-            return cfg.getStringList("accounts").contains(Bukkit.getOfflinePlayer(s).getUniqueId().toString());
-        } else {
-            if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-                return new MySQLManager().hasAccount(Bukkit.getOfflinePlayer(s));
-            }
-            return cfg.getStringList("accounts").contains(Bukkit.getOfflinePlayer(s).getName());
+        OfflinePlayer player = offlinePlayer(s);
+        if (Main.getInstance().isSqlStorage()) {
+            return new SQLManager().hasAccount(player);
         }
+        BackendManager backendManager = mongoBackend();
+        if (backendManager != null) {
+            return backendManager.exists(player, "uuid", "eco");
+        }
+        return new FileManager().hasAccount(player);
     }
 
     @Override
@@ -108,17 +98,18 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public double getBalance(String playerName) {
-        File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
-        FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-        if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-            return new MySQLManager().getMoney(Bukkit.getOfflinePlayer(playerName));
-        } else if (Main.getInstance().isMongoDb()) {
-            if (Main.getInstance().getBackendManager().exists(Bukkit.getOfflinePlayer(playerName), "money", "eco"))
-                return (double) Main.getInstance().getBackendManager().get(Bukkit.getOfflinePlayer(playerName), "money", "eco");
-        } else {
-            return new FileManager().getMoney(Bukkit.getOfflinePlayer(playerName));
+        OfflinePlayer player = offlinePlayer(playerName);
+        if (Main.getInstance().isSqlStorage()) {
+            return new SQLManager().getMoney(player);
         }
-        return 0.0;
+        BackendManager backendManager = mongoBackend();
+        if (backendManager != null && backendManager.exists(player, "money", "eco")) {
+            Object balance = backendManager.get(player, "money", "eco");
+            if (balance instanceof Number) {
+                return ((Number) balance).doubleValue();
+            }
+        }
+        return new FileManager().getMoney(player);
     }
 
     @Override
@@ -138,6 +129,7 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public boolean has(String playerName, double amount) {
+        if (amount < 0.0D) return false;
         return !(getBalance(playerName) < amount);
     }
 
@@ -156,17 +148,11 @@ public class VaultAPI extends AbstractEconomy {
         double minBalance = Main.getInstance().getConfig().getDouble("Economy.MinBalance", 0.0D);
         double newBalance = balance - amount;
         if (newBalance < minBalance) {
-            return new EconomyResponse(0.0D, balance, EconomyResponse.ResponseType.FAILURE, "Not enough money!");
+            return failure(0.0D, balance, "Not enough money!");
         }
-        if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-            new MySQLManager().setMoney(Bukkit.getOfflinePlayer(playerName), newBalance);
-        } else if (Main.getInstance().isMongoDb()) {
-            if (Main.getInstance().getBackendManager().exists(Bukkit.getOfflinePlayer(playerName), "money", "eco"))
-                Main.getInstance().getBackendManager().updateUser(Bukkit.getOfflinePlayer(playerName), "money", newBalance, "eco");
-        } else {
-            new FileManager().setMoney(Bukkit.getOfflinePlayer(playerName), newBalance);
-        }
-        return new EconomyResponse(amount, newBalance, EconomyResponse.ResponseType.SUCCESS, "");
+        OfflinePlayer player = offlinePlayer(playerName);
+        savePlayerBalance(player, newBalance);
+        return success(amount, newBalance);
     }
 
     @Override
@@ -183,17 +169,11 @@ public class VaultAPI extends AbstractEconomy {
         double balance = getBalance(playerName);
         balance += amount;
         if (balance > Main.getInstance().getConfig().getDouble("Economy.MaxBalance"))
-            return new EconomyResponse(Main.getInstance().getConfig().getDouble("Economy.MaxBalance"), 0.0D, EconomyResponse.ResponseType.FAILURE, "Bigger");
+            return failure(Main.getInstance().getConfig().getDouble("Economy.MaxBalance"), 0.0D, "Bigger");
 
-        if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-            new MySQLManager().setMoney(Bukkit.getOfflinePlayer(playerName), balance);
-        } else if (Main.getInstance().isMongoDb()) {
-            if (Main.getInstance().getBackendManager().exists(Bukkit.getOfflinePlayer(playerName), "money", "eco"))
-                Main.getInstance().getBackendManager().updateUser(Bukkit.getOfflinePlayer(playerName), "money", balance, "eco");
-        } else {
-            new FileManager().setMoney(Bukkit.getOfflinePlayer(playerName), balance);
-        }
-        return new EconomyResponse(amount, balance, EconomyResponse.ResponseType.SUCCESS, "");
+        OfflinePlayer player = offlinePlayer(playerName);
+        savePlayerBalance(player, balance);
+        return success(amount, balance);
     }
 
     @Override
@@ -211,71 +191,71 @@ public class VaultAPI extends AbstractEconomy {
         if (getBanks().contains(name)) {
             return new EconomyResponse(0.0D, 0.0D, EconomyResponse.ResponseType.FAILURE, "Bank already exists!");
         }
-        if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-            if (!new MySQLManager().createBank(Bukkit.getOfflinePlayer(player), name))
-                return new EconomyResponse(0.0D, 0.0D, EconomyResponse.ResponseType.FAILURE, "Error while Creating Bank!");
-        } else if (Main.getInstance().isMongoDb()) {
-            Main.getInstance().getBackendManager().updateUser(Bukkit.getOfflinePlayer(player), "bankowner", Bukkit.getOfflinePlayer(player).getUniqueId().toString(), "eco");
-            Main.getInstance().getBackendManager().updateUser(Bukkit.getOfflinePlayer(player), "bankname", name, "eco");
+        if (Main.getInstance().isSqlStorage()) {
+            if (!new SQLManager().createBank(offlinePlayer(player), name))
+                return failure(0.0D, 0.0D, "Error while Creating Bank!");
         } else {
-            File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
-            FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-            cfg.set("Banks." + name + ".Owner", player);
-            cfg.set("Banks." + name + ".balance", 0.0D);
-            try {
-                cfg.save(file);
-            } catch (IOException e) {
-                e.printStackTrace();
+            BackendManager backendManager = mongoBackend();
+            if (backendManager != null) {
+                OfflinePlayer bankPlayer = offlinePlayer(player);
+                backendManager.updateUser(bankPlayer, "bankowner", bankPlayer.getUniqueId().toString(), "eco");
+                backendManager.updateUser(bankPlayer, "bankname", name, "eco");
+                backendManager.updateUser(bankPlayer, "bank", 0.0D, "eco");
+            } else {
+                new FileManager().createBank(name, player);
             }
         }
-        return new EconomyResponse(0.0D, 0.0D, EconomyResponse.ResponseType.SUCCESS, "");
+        return success(0.0D, 0.0D);
     }
 
     @Override
     public EconomyResponse deleteBank(String name) {
-        if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-            if (new MySQLManager().removeBank(name))
+        if (Main.getInstance().isSqlStorage()) {
+            if (new SQLManager().removeBank(name))
                 return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.SUCCESS, "");
             return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Error while Deleting Bank!");
         } else {
-            File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
-            FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-            if (!cfg.contains("Banks." + name))
-                return new EconomyResponse(0.0D, 0.0D, EconomyResponse.ResponseType.FAILURE, "Bank doesn't exists!");
-            cfg.set("Banks." + name, null);
-            try {
-                cfg.save(file);
-            } catch (IOException e) {
-                e.printStackTrace();
+            FileManager fileManager = new FileManager();
+            if (fileManager.hasBank(name)) {
+                fileManager.deleteBank(name);
+                return success(0.0, 0.0);
             }
-            return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.SUCCESS, "");
+            return failure(0.0D, 0.0D, "Bank doesn't exists!");
         }
     }
 
     @Override
     public EconomyResponse bankBalance(String name) {
-        if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-            return new EconomyResponse(new MySQLManager().getBankMoney(name), new MySQLManager().getBankMoney(name), EconomyResponse.ResponseType.SUCCESS, "");
-        } else if (Main.getInstance().isMongoDb()) {
-            return new EconomyResponse((double) Main.getInstance().getBackendManager().getObject("bankname", name, "bank", "eco"), (double) Main.getInstance().getBackendManager().getObject("bankname", name, "bank", "eco"), EconomyResponse.ResponseType.SUCCESS, "");
-        } else {
-            File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
-            FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-            if (!cfg.contains("Banks." + name))
-                return new EconomyResponse(0.0D, 0.0D, EconomyResponse.ResponseType.FAILURE, "Bank doesn't exists!");
-            return new EconomyResponse(cfg.getDouble("Banks." + name + ".balance"), cfg.getDouble("Banks." + name + ".balance"), EconomyResponse.ResponseType.SUCCESS, "");
+        if (Main.getInstance().isSqlStorage()) {
+            return new EconomyResponse(new SQLManager().getBankMoney(name), new SQLManager().getBankMoney(name), EconomyResponse.ResponseType.SUCCESS, "");
         }
+        BackendManager backendManager = mongoBackend();
+        if (backendManager != null) {
+            Object bank = backendManager.getObject("bankname", name, "bank", "eco");
+            if (!(bank instanceof Number))
+                return failure(0.0D, 0.0D, "Bank doesn't exists!");
+            double balance = ((Number) bank).doubleValue();
+            return success(balance, balance);
+        }
+        FileManager fileManager = new FileManager();
+        if (fileManager.hasBank(name)) {
+            double balance = fileManager.getBankBalance(name);
+            return success(balance, balance);
+        }
+        return failure(0.0D, 0.0D, "Bank doesn't exists!");
     }
 
     @Override
     public EconomyResponse bankHas(String name, double amount) {
+        EconomyResponse balance = bankBalance(name);
+        if (!balance.transactionSuccess()) return balance;
         if (amount < 0.0D) {
-            return new EconomyResponse(0.0D, bankBalance(name).amount, EconomyResponse.ResponseType.FAILURE, "Value is less than zero!");
+            return new EconomyResponse(0.0D, balance.amount, EconomyResponse.ResponseType.FAILURE, "Value is less than zero!");
         }
-        if (bankBalance(name).amount < amount) {
-            return new EconomyResponse(amount, bankBalance(name).amount, EconomyResponse.ResponseType.FAILURE, "Not enought Money!");
+        if (balance.amount < amount) {
+            return new EconomyResponse(amount, balance.amount, EconomyResponse.ResponseType.FAILURE, "Not enought Money!");
         }
-        return new EconomyResponse(amount, bankBalance(name).amount, EconomyResponse.ResponseType.SUCCESS, "");
+        return new EconomyResponse(amount, balance.amount, EconomyResponse.ResponseType.SUCCESS, "");
     }
 
     @Override
@@ -289,21 +269,17 @@ public class VaultAPI extends AbstractEconomy {
         if (balance < amount)
             return new EconomyResponse(amount, balance, EconomyResponse.ResponseType.FAILURE, "Not enought Money");
         double newBalance = balance - amount;
-        if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-            new MySQLManager().setBankMoney(name, newBalance);
-        } else if (Main.getInstance().isMongoDb()) {
-            Main.getInstance().getBackendManager().updataData("bankname", name, "bank", newBalance, "eco");
+        if (Main.getInstance().isSqlStorage()) {
+            new SQLManager().setBankMoney(name, newBalance);
         } else {
-            File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
-            FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-            cfg.set("Banks." + name + ".balance", newBalance);
-            try {
-                cfg.save(file);
-            } catch (IOException e) {
-                e.printStackTrace();
+            BackendManager backendManager = mongoBackend();
+            if (backendManager != null) {
+                backendManager.updataData("bankname", name, "bank", newBalance, "eco");
+            } else {
+                new FileManager().setBankBalance(name, newBalance);
             }
         }
-        return new EconomyResponse(amount, newBalance, EconomyResponse.ResponseType.SUCCESS, "");
+        return success(amount, newBalance);
     }
 
     @Override
@@ -314,117 +290,100 @@ public class VaultAPI extends AbstractEconomy {
         if (!bankBalance.transactionSuccess())
             return bankBalance;
         double balance = bankBalance.amount + amount;
-        if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-            new MySQLManager().setBankMoney(name, balance);
-            return new EconomyResponse(amount, balance, EconomyResponse.ResponseType.SUCCESS, "");
-        } else if (Main.getInstance().isMongoDb()) {
-            Main.getInstance().getBackendManager().updataData("bankname", name, "bank", balance, "eco");
-            return new EconomyResponse(amount, balance, EconomyResponse.ResponseType.SUCCESS, "");
-        } else {
-            File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
-            FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-            cfg.set("Banks." + name + ".balance", balance);
-            try {
-                cfg.save(file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return new EconomyResponse(amount, balance, EconomyResponse.ResponseType.SUCCESS, "");
+        if (Main.getInstance().isSqlStorage()) {
+            new SQLManager().setBankMoney(name, balance);
+            return success(amount, balance);
         }
+        BackendManager backendManager = mongoBackend();
+        if (backendManager != null) {
+            backendManager.updataData("bankname", name, "bank", balance, "eco");
+            return success(amount, balance);
+        }
+        new FileManager().setBankBalance(name, balance);
+        return success(amount, balance);
     }
 
     @Override
     public EconomyResponse isBankOwner(String name, String player) {
-        if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-            if (!new MySQLManager().isBankOwner(name, Bukkit.getOfflinePlayer(player)))
-                return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Isn't the Owner");
-        } else if (Main.getInstance().isMongoDb()) {
-            if (!((String) Main.getInstance().getBackendManager().get(Bukkit.getOfflinePlayer(player), "bankowner", "eco")).equalsIgnoreCase(Bukkit.getOfflinePlayer(player).getUniqueId().toString()))
-                return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Isn't the Owner");
+        if (Main.getInstance().isSqlStorage()) {
+            if (!new SQLManager().isBankOwner(name, offlinePlayer(player)))
+                return failure(0.0, 0.0, "Isn't the Owner");
         } else {
-            File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
-            FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-            if (!cfg.contains("Banks." + name + ".Owner"))
-                return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Doesn't Exsits");
-            if (!player.equalsIgnoreCase(cfg.getString("Banks." + name + ".Owner")))
-                return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Isn't the Owner");
+            BackendManager backendManager = mongoBackend();
+            if (backendManager != null) {
+                OfflinePlayer bankPlayer = offlinePlayer(player);
+                Object bankOwner = backendManager.get(bankPlayer, "bankowner", "eco");
+                if (!(bankOwner instanceof String) || !((String) bankOwner).equalsIgnoreCase(bankPlayer.getUniqueId().toString()))
+                    return failure(0.0, 0.0, "Isn't the Owner");
+            } else {
+                FileManager fileManager = new FileManager();
+                if (fileManager.hasBank(name)) {
+                    if (!fileManager.isBankOwner(name, player))
+                        return failure(0.0, 0.0, "Isn't the Owner");
+                    return success(0.0, 0.0);
+                }
+                return failure(0.0, 0.0, "Doesn't Exsits");
+            }
         }
-        return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.SUCCESS, "");
+        return success(0.0, 0.0);
     }
 
     @Override
     public EconomyResponse isBankMember(String name, String player) {
-        if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-            if (!new MySQLManager().isBankMember(name, Bukkit.getOfflinePlayer(player)))
-                return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Isn't a member");
-        } else if (Main.getInstance().isMongoDb()) {
-            if (!Main.getInstance().getVaultManager().getBankMembers(name).contains(player))
-                return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Isn't a member");
+        if (Main.getInstance().isSqlStorage()) {
+            if (!new SQLManager().isBankMember(name, offlinePlayer(player)))
+                return failure(0.0, 0.0, "Isn't a member");
         } else {
-            File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
-            FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-            if (!cfg.contains("Banks." + name + ".members"))
-                return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Doesn't have any Members!");
-            List<String> players = cfg.getStringList("Banks." + name + ".members");
-            if (!players.contains(player))
-                return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.FAILURE, "Isn't a member");
+            BackendManager backendManager = mongoBackend();
+            if (backendManager != null) {
+                if (!Main.getInstance().getVaultManager().getBankMembers(name).contains(player))
+                    return failure(0.0, 0.0, "Isn't a member");
+            } else {
+                FileManager fileManager = new FileManager();
+                if (fileManager.hasBank(name)) {
+                    if (!fileManager.isBankMember(name, player))
+                        return failure(0.0, 0.0, "Isn't a member");
+                    return success(0.0, 0.0);
+                }
+                return failure(0.0, 0.0, "Doesn't have any Members!");
+            }
         }
-        return new EconomyResponse(0.0, 0.0, EconomyResponse.ResponseType.SUCCESS, "");
+        return success(0.0, 0.0);
     }
 
     @Override
     public List<String> getBanks() {
-        if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-            return new MySQLManager().getBanks();
-        } else if (Main.getInstance().isMongoDb()) {
+        if (Main.getInstance().isSqlStorage()) {
+            return new SQLManager().getBanks();
+        }
+        BackendManager backendManager = mongoBackend();
+        if (backendManager != null) {
             List<String> data = new ArrayList<>();
-            for (OfflinePlayer offlinePlayer : Bukkit.getOnlinePlayers()) {
-                if (((String) Main.getInstance().getBackendManager().get(offlinePlayer, "bankowner", "eco")).equalsIgnoreCase(offlinePlayer.getUniqueId().toString()))
-                    data.add((String) Main.getInstance().getBackendManager().get(offlinePlayer, "bankname", "eco"));
-            }
-            return data;
-        } else {
-            File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
-            FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-            List<String> banks = new ArrayList<>();
-            ConfigurationSection cs = cfg.getConfigurationSection("Banks");
-            if (cs != null) {
-                for (String s : cs.getKeys(false)) {
-                    if (s != null) {
-                        banks.add(s);
-                    }
+            for (org.bson.Document document : backendManager.getAllDocuments("eco")) {
+                Object bankName = document.get("bankname");
+                Object bankOwner = document.get("bankowner");
+                if (bankName instanceof String && bankOwner instanceof String
+                        && !((String) bankName).isEmpty()
+                        && !data.contains((String) bankName)) {
+                    data.add((String) bankName);
                 }
             }
-            return banks;
+            return data;
         }
+        return new FileManager().getBanks();
     }
 
     @Override
     public boolean createPlayerAccount(String playerName) {
         if (!hasAccount(playerName)) {
-            File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
-            FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-            if (Bukkit.getServer().getOnlineMode()) {
-                if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-                    new MySQLManager().createAccount(Bukkit.getOfflinePlayer(playerName));
-                } else {
-                    List<String> accounts = cfg.getStringList("accounts");
-                    accounts.add(Bukkit.getOfflinePlayer(playerName).getUniqueId().toString());
-                    cfg.set("accounts", accounts);
+            if (Main.getInstance().isSqlStorage()) {
+                new SQLManager().createAccount(offlinePlayer(playerName));
+            } else if (Main.getInstance().isMongoDb()) {
+                if (Main.getInstance().getBackendManager() != null) {
+                    Main.getInstance().getBackendManager().createUser(offlinePlayer(playerName), "eco");
                 }
             } else {
-                if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-                    new MySQLManager().createAccount(Bukkit.getOfflinePlayer(playerName));
-                } else {
-                    List<String> accounts = cfg.getStringList("accounts");
-                    accounts.add(Bukkit.getOfflinePlayer(playerName).getName());
-                    cfg.set("accounts", accounts);
-                }
-            }
-            try {
-                cfg.save(file);
-            } catch (IOException e) {
-                e.printStackTrace();
+                new FileManager().createAccount(offlinePlayer(playerName));
             }
             return true;
         }
@@ -436,5 +395,35 @@ public class VaultAPI extends AbstractEconomy {
         return createPlayerAccount(playerName);
     }
 
+    private OfflinePlayer offlinePlayer(String value) {
+        return Main.getInstance().resolveOfflinePlayer(value);
+    }
 
+    private void savePlayerBalance(OfflinePlayer player, double balance) {
+        if (Main.getInstance().isSqlStorage()) {
+            new SQLManager().setMoney(player, balance);
+            return;
+        }
+        BackendManager backendManager = mongoBackend();
+        if (backendManager != null && backendManager.exists(player, "money", "eco")) {
+            backendManager.updateUser(player, "money", balance, "eco");
+            return;
+        }
+        new FileManager().setMoney(player, balance);
+    }
+
+    private BackendManager mongoBackend() {
+        if (!Main.getInstance().isMongoDb()) {
+            return null;
+        }
+        return Main.getInstance().getBackendManager();
+    }
+
+    private EconomyResponse success(double amount, double balance) {
+        return new EconomyResponse(amount, balance, EconomyResponse.ResponseType.SUCCESS, "");
+    }
+
+    private EconomyResponse failure(double amount, double balance, String message) {
+        return new EconomyResponse(amount, balance, EconomyResponse.ResponseType.FAILURE, message);
+    }
 }

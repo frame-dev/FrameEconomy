@@ -8,6 +8,7 @@ package frameeconomy.kotlin
  * Project: FrameEconomy
  * Copyrighted by FrameDev
  */
+@Suppress("unused")
 enum class Ticks(val i: Long) {
 
     SECOND(20),
@@ -50,7 +51,7 @@ enum class Ticks(val i: Long) {
         }
 
         fun yearToTicks(year: Long): Long {
-            if (year == 0L) return 0L;
+            if (year == 0L) return 0L
             return year * YEAR.i
         }
     }

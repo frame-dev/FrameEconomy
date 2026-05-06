@@ -3,7 +3,6 @@ package de.framedev.frameeconomy.mysql;
 import de.framedev.frameeconomy.main.Main;
 import de.framedev.frameeconomy.utils.PasswordUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.Serializable;
@@ -13,9 +12,9 @@ import java.sql.SQLException;
 import java.util.concurrent.Executor;
 
 
+@SuppressWarnings("unused")
 public class MySQL {
 
-    private FileConfiguration cfg = Main.getInstance().getConfig();
     public static String MySQLPrefix = "§a[§bMySQL§a]";
     public static String host;
     public static String user;
@@ -23,13 +22,13 @@ public class MySQL {
     public static String database;
     public static String port;
     public static Connection con;
-    static ConsoleCommandSender console = Bukkit.getConsoleSender();
     private static final Executor DIRECT_EXECUTOR = Runnable::run;
 
     /**
      * Register this Class to use it
      */
     public MySQL() {
+        FileConfiguration cfg = Main.getInstance().getConfig();
         host = cfg.getString("MySQL.Host");
         user = cfg.getString("MySQL.User");
         password = cfg.getString("MySQL.Password");
@@ -93,6 +92,13 @@ public class MySQL {
 
     // connect
     public static void connect() {
+        try {
+            if (con != null && !con.isClosed()) {
+                return;
+            }
+        } catch (SQLException e) {
+            Bukkit.getConsoleSender().sendMessage(MySQLPrefix + " §cEin Fehler ist aufgetreten: §a" + e.getMessage());
+        }
         if (con == null) {
             try {
                 con = DriverManager.getConnection(getJdbcUrl(), user, password);
@@ -114,7 +120,12 @@ public class MySQL {
                 con.close();
                 con = null;
             } catch (SQLException e) {
-                e.printStackTrace();
+                Main plugin = Main.getInstance();
+                if (plugin != null) {
+                    plugin.getLogger().warning("Could not close MySQL connection: " + e.getMessage());
+                } else {
+                    Bukkit.getConsoleSender().sendMessage(MySQLPrefix + " §cCould not close MySQL connection: §a" + e.getMessage());
+                }
             }
         }
     }

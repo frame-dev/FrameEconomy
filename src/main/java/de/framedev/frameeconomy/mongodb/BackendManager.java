@@ -3,6 +3,7 @@ package de.framedev.frameeconomy.mongodb;
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.InsertOneOptions;
 import de.framedev.frameeconomy.main.Main;
 import org.bson.Document;
@@ -10,7 +11,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,30 +22,9 @@ import java.util.UUID;
  * Copyrighted by FrameDev
  */
 
+@SuppressWarnings({"deprecation", "unused"})
 public class BackendManager {
     private final Main plugin;
-
-    public enum DATA {
-        NAME("name"),
-        MONEY("money"),
-        BANKNAME("bankname"),
-        BANKMEMBERS("bankmembers"),
-        BANKOWNER("bankowner"),
-        BANK("bank"),
-        CREATEDATE("createDate"),
-        LASTLOGIN("lastLogin"),
-        LASTLOGOUT("lastLogout");
-
-        private final String name;
-
-        DATA(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-    }
 
     public BackendManager(Main plugin) {
         this.plugin = plugin;
@@ -59,7 +38,8 @@ public class BackendManager {
     public void createUser(OfflinePlayer player, String collection) {
         String uuid = player.getUniqueId().toString();
         if (existsCollection(collection)) {
-            MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
+            MongoCollection<Document> collections = getCollectionOrNull(collection);
+            if (collections == null) return;
             Document result = collections.find(new Document("uuid", uuid)).first();
             if (result == null) {
                 Document dc = (new Document("uuid", uuid))
@@ -75,8 +55,8 @@ public class BackendManager {
                 collections.insertOne(dc, (new InsertOneOptions()).bypassDocumentValidation(false));
             }
         } else {
-            this.plugin.getMongoManager().getDatabase().createCollection(collection);
-            MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
+            MongoCollection<Document> collections = getOrCreateCollection(collection);
+            if (collections == null) return;
             Document result = collections.find(new Document("uuid", uuid)).first();
             if (result == null) {
                 Document dc = (new Document("uuid", uuid))
@@ -104,7 +84,8 @@ public class BackendManager {
      */
     public Object getObject(String where, Object data, String selected, String collection) {
         if (existsCollection(collection)) {
-            MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
+            MongoCollection<Document> collections = getCollectionOrNull(collection);
+            if (collections == null) return null;
             Document document = collections.find(new Document(where,data)).first();
             if(document != null) {
                 return document.get(selected);
@@ -115,7 +96,8 @@ public class BackendManager {
 
     public void updataData(String where, Object data, String selected, Object dataSelected, String collection) {
         if (existsCollection(collection)) {
-            MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
+            MongoCollection<Document> collections = getCollectionOrNull(collection);
+            if (collections == null) return;
             Document document = collections.find(new Document(where, data)).first();
             if (document != null) {
                 Document document1 = new Document(selected, dataSelected);
@@ -124,12 +106,15 @@ public class BackendManager {
                     collections.updateOne(document, document2);
                 } else {
                     document.put(selected,dataSelected);
-                    collections.updateOne(collections.find(new Document(where, data)).first(), document);
+                    Document existing = collections.find(new Document(where, data)).first();
+                    if (existing != null) {
+                        collections.updateOne(existing, document);
+                    }
                 }
             }
         } else {
-            this.plugin.getMongoManager().getDatabase().createCollection(collection);
-            MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
+            MongoCollection<Document> collections = getOrCreateCollection(collection);
+            if (collections == null) return;
             Document document = collections.find(new Document(where, data)).first();
             if (document != null) {
                 Document document1 = new Document(selected, dataSelected);
@@ -142,7 +127,8 @@ public class BackendManager {
     public void updateUser(OfflinePlayer player, String where, Object data, String collection) {
         if (existsCollection(collection)) {
             String uuid = player.getUniqueId().toString();
-            MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
+            MongoCollection<Document> collections = getCollectionOrNull(collection);
+            if (collections == null) return;
             Document document = collections.find(new Document("uuid", uuid)).first();
             if (document != null) {
                 Document document1 = new Document(where, data);
@@ -151,13 +137,16 @@ public class BackendManager {
                     collections.updateOne(document, document2);
                 } else {
                     document.put(where,data);
-                    collections.updateOne(collections.find(new Document("uuid", uuid)).first(), document);
+                    Document existing = collections.find(new Document("uuid", uuid)).first();
+                    if (existing != null) {
+                        collections.updateOne(existing, document);
+                    }
                 }
             }
         } else {
             String uuid = player.getUniqueId().toString();
-            this.plugin.getMongoManager().getDatabase().createCollection(collection);
-            MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
+            MongoCollection<Document> collections = getOrCreateCollection(collection);
+            if (collections == null) return;
             Document document = collections.find(new Document("uuid", uuid)).first();
             if (document != null) {
                 Document document1 = new Document(where, data);
@@ -169,7 +158,8 @@ public class BackendManager {
 
     public boolean exists(String where, Object data, String whereSelected, String collection) {
         if (existsCollection(collection)) {
-            MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
+            MongoCollection<Document> collections = getCollectionOrNull(collection);
+            if (collections == null) return false;
             Document document = collections.find(new Document(where, data)).first();
             if (document != null) {
                 return document.get(whereSelected) != null;
@@ -181,7 +171,8 @@ public class BackendManager {
     public boolean exists(OfflinePlayer player, String where, String collection) {
         if (existsCollection(collection)) {
             String uuid = player.getUniqueId().toString();
-            MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
+            MongoCollection<Document> collections = getCollectionOrNull(collection);
+            if (collections == null) return false;
             Document document = collections.find(new Document("uuid", uuid)).first();
             if (document != null) {
                 return document.get(where) != null;
@@ -193,7 +184,8 @@ public class BackendManager {
     public void insertData(OfflinePlayer player, String where, Object data, String collection) {
         if (existsCollection(collection)) {
             String uuid = player.getUniqueId().toString();
-            MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
+            MongoCollection<Document> collections = getCollectionOrNull(collection);
+            if (collections == null) return;
             Document document = collections.find(new Document("uuid", uuid)).first();
             if (document != null) {
                 collections.updateOne(new Document("uuid", uuid),
@@ -204,7 +196,8 @@ public class BackendManager {
 
     public void insertData(String where, Object data, String newKey, Object newValue, String collection) {
         if (existsCollection(collection)) {
-            MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
+            MongoCollection<Document> collections = getCollectionOrNull(collection);
+            if (collections == null) return;
             Document document = collections.find(new Document(where, data)).first();
             if (document != null) {
                 collections.updateOne(new Document(where, data),
@@ -216,15 +209,16 @@ public class BackendManager {
     public void deleteUser(OfflinePlayer player, String collection) {
         if (existsCollection(collection)) {
             String uuid = player.getUniqueId().toString();
-            MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
+            MongoCollection<Document> collections = getCollectionOrNull(collection);
+            if (collections == null) return;
             Document document = collections.find(new Document("uuid", uuid)).first();
             if (document != null) {
                 collections.deleteOne(document);
             }
         } else {
             String uuid = player.getUniqueId().toString();
-            this.plugin.getMongoManager().getDatabase().createCollection(collection);
-            MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
+            MongoCollection<Document> collections = getOrCreateCollection(collection);
+            if (collections == null) return;
             Document document = collections.find(new Document("uuid", uuid)).first();
             if (document != null) {
                 collections.deleteOne(document);
@@ -234,7 +228,8 @@ public class BackendManager {
 
     public Object get(OfflinePlayer player, String where, String collection) {
         if (existsCollection(collection)) {
-            MongoCollection<Document> mongoCollection = this.plugin.getMongoManager().getDatabase().getCollection(collection);
+            MongoCollection<Document> mongoCollection = getCollectionOrNull(collection);
+            if (mongoCollection == null) return null;
             String str = player.getUniqueId().toString();
             Document document1 = mongoCollection.find(new Document("uuid", str)).first();
             if (document1 != null) {
@@ -242,9 +237,8 @@ public class BackendManager {
             }
             return null;
         }
-        if(this.plugin.getMongoManager() == null) return null;
-        this.plugin.getMongoManager().getDatabase().createCollection(collection);
-        MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
+        MongoCollection<Document> collections = getOrCreateCollection(collection);
+        if (collections == null) return null;
         String uuid = player.getUniqueId().toString();
         collections.insertOne(new Document());
         Document document = collections.find(new Document("uuid", uuid)).first();
@@ -256,8 +250,14 @@ public class BackendManager {
 
 
     public boolean existsCollection(String collection) {
-        MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
-        return collections != null;
+        MongoDatabase database = getDatabaseOrNull();
+        if (database == null) return false;
+        for (String name : database.listCollectionNames()) {
+            if (name.equals(collection)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -265,7 +265,8 @@ public class BackendManager {
     public ArrayList<OfflinePlayer> getOfflinePlayers(String collection) {
         ArrayList<OfflinePlayer> players = new ArrayList<>();
         if (existsCollection(collection)) {
-            MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
+            MongoCollection<Document> collections = getCollectionOrNull(collection);
+            if (collections == null) return null;
             collections.find(new Document("offline", true)).forEach((Block<? super Document>) document -> {
                 UUID uuid = UUID.fromString(document.getString("uuid"));
                 players.add(Bukkit.getOfflinePlayer(uuid));
@@ -278,10 +279,9 @@ public class BackendManager {
     public List<Object> getList(String where, Object data, String selected, String collection) {
         ArrayList<Object> objects = new ArrayList<>();
         if (existsCollection(collection)) {
-            MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
-            collections.find(new Document(where,data)).forEach((Block<? super Document>) document -> {
-                objects.add(document.get(selected));
-            });
+            MongoCollection<Document> collections = getCollectionOrNull(collection);
+            if (collections == null) return null;
+            collections.find(new Document(where,data)).forEach((Block<? super Document>) document -> objects.add(document.get(selected)));
             return objects;
         }
         return null;
@@ -290,12 +290,39 @@ public class BackendManager {
     public List<Document> getAllDocuments(String collection) {
         List<Document> list = new ArrayList<>();
         if (existsCollection(collection)) {
-            MongoCollection<Document> collections = this.plugin.getMongoManager().getDatabase().getCollection(collection);
+            MongoCollection<Document> collections = getCollectionOrNull(collection);
+            if (collections == null) return list;
             FindIterable<Document> find = collections.find();
             for (Document document : find) {
                 list.add(document);
             }
         }
         return list;
+    }
+
+    private MongoDatabase getDatabaseOrNull() {
+        MongoManager mongoManager = this.plugin.getMongoManager();
+        return mongoManager == null ? null : mongoManager.getDatabase();
+    }
+
+    private MongoCollection<Document> getCollectionOrNull(String collection) {
+        MongoDatabase database = getDatabaseOrNull();
+        return database == null ? null : database.getCollection(collection);
+    }
+
+    private MongoCollection<Document> getOrCreateCollection(String collection) {
+        MongoDatabase database = getDatabaseOrNull();
+        if (database == null) return null;
+        boolean exists = false;
+        for (String name : database.listCollectionNames()) {
+            if (name.equals(collection)) {
+                exists = true;
+                break;
+            }
+        }
+        if (!exists) {
+            database.createCollection(collection);
+        }
+        return database.getCollection(collection);
     }
 }

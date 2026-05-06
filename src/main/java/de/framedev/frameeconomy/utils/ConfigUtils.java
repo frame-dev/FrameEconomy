@@ -33,15 +33,12 @@ public class ConfigUtils {
         Main.getInstance().getConfig().setDefaults(defConfig);
     }
 
-    private File configFile;
-    private FileConfiguration configCfg;
-
     /**
      * Saves the Default Config Sections from the Config.yml
      */
     public void saveDefaultConfigValues() {
-        configFile = new File(Main.getInstance().getDataFolder(), "config.yml");
-        configCfg = YamlConfiguration.loadConfiguration(configFile);
+        File configFile = new File(Main.getInstance().getDataFolder(), "config.yml");
+        FileConfiguration configCfg = YamlConfiguration.loadConfiguration(configFile);
         //Defaults in jar
         Reader defConfigStream;
         defConfigStream = new InputStreamReader(Objects.requireNonNull(Main.getInstance().getResource("config.yml")), StandardCharsets.UTF_8);

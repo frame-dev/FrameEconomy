@@ -15,6 +15,7 @@ import java.util.List;
  * Copyrighted by FrameDev
  */
 
+@SuppressWarnings("unused")
 public class FrameEconomyAPI {
 
     private final Main plugin;
@@ -95,6 +96,18 @@ public class FrameEconomyAPI {
 
     public boolean isSQL() {
         return plugin.isSQL();
+    }
+
+    public boolean isH2() {
+        return plugin.isH2();
+    }
+
+    public boolean isJsonFileStorage() {
+        return plugin.isJsonFileStorage();
+    }
+
+    public boolean isYamlFileStorage() {
+        return plugin.isYamlFileStorage();
     }
 
     public boolean isMongoDB() {

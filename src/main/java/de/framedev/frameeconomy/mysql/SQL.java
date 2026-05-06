@@ -2,12 +2,15 @@ package de.framedev.frameeconomy.mysql;
 
 import de.framedev.frameeconomy.main.Main;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-
+@SuppressWarnings("unused")
 public class SQL {
 
     /**
@@ -16,429 +19,252 @@ public class SQL {
      * @param tablename TableName der erstellt wird
      * @param columns   Kolumm die erstellt werden
      */
+    @SuppressWarnings("SqlSourceToSinkFlow")
     public static void createTable(String tablename, String... columns) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < columns.length; i++) {
-            stringBuilder.append(columns[i]);
-            if (i < columns.length - 1) {
-                stringBuilder.append(",");
-            }
-        }
-        String builder = stringBuilder.toString();
+        String builder = join(columns);
         try {
+            String sql;
             if (Main.getInstance().isMysql()) {
-                String sql = "CREATE TABLE IF NOT EXISTS " + tablename + " (" + builder + ",Numbers INT AUTO_INCREMENT KEY,created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);";
-                PreparedStatement stmt = MySQL.getConnection().prepareStatement(sql);
-                stmt.executeUpdate();
+                sql = "CREATE TABLE IF NOT EXISTS " + tablename + " (" + builder + ",Numbers INT AUTO_INCREMENT KEY,created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);";
+            } else if (Main.getInstance().isH2()) {
+                sql = "CREATE TABLE IF NOT EXISTS " + tablename + " (ID IDENTITY PRIMARY KEY," + normalizeColumnsForH2(builder) + ",created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);";
             } else if (Main.getInstance().isSQL()) {
-                String sql = "CREATE TABLE IF NOT EXISTS " + tablename + " (ID INTEGER PRIMARY KEY AUTOINCREMENT," + builder + ",created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);";
-                PreparedStatement stmt = SQLite.connect().prepareStatement(sql);
+                sql = "CREATE TABLE IF NOT EXISTS " + tablename + " (ID INTEGER PRIMARY KEY AUTOINCREMENT," + builder + ",created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);";
+            } else {
+                return;
+            }
+            try (PreparedStatement stmt = connection().prepareStatement(sql)) {
                 stmt.executeUpdate();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logSqlException("createTable", sqlPreview(tablename), e);
         } finally {
-            if (Main.getInstance().isMysql()) {
-                MySQL.close();
-            } else if (Main.getInstance().isSQL()) {
-                SQLite.close();
-            }
-        }
-        if (Main.getInstance().isMysql()) {
-            MySQL.close();
-        } else if (Main.getInstance().isSQL()) {
-            SQLite.close();
+            close();
         }
     }
 
     /**
-     *
-     * @param table the Table in the Database
-     * @param data data to set in the Database
+     * @param table   the Table in the Database
+     * @param data    data to set in the Database
      * @param columns the Columns in the Database to add new Data
      */
     public static void insertData(String table, String data, String... columns) {
-        StringBuilder newStringBuilder = new StringBuilder();
-        for (int i = 0; i < columns.length; i++) {
-            newStringBuilder.append(columns[i]);
-            if (i < columns.length - 1) {
-                newStringBuilder.append(",");
-            }
-        }
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("INSERT INTO " + table);
-        stringBuilder.append(" (").append(newStringBuilder.toString()).append(")").append(" VALUES ").append("(").append(data).append(")");
-        String builder2 = stringBuilder.toString();
-        try {
-            if (Main.getInstance().isMysql()) {
-                Statement stmt = MySQL.getConnection().createStatement();
-                stmt.executeUpdate(builder2);
-            } else if (Main.getInstance().isSQL()) {
-                Statement stmt = SQLite.connect().createStatement();
-                stmt.executeUpdate(builder2);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (Main.getInstance().isMysql()) {
-                MySQL.close();
-            } else if (Main.getInstance().isSQL()) {
-                SQLite.close();
-            }
-        }
-        if (Main.getInstance().isMysql()) {
-            MySQL.close();
-        } else if (Main.getInstance().isSQL()) {
-            SQLite.close();
-        }
+        String sql = "INSERT INTO " + table + " (" + join(columns) + ") VALUES (" + data + ")";
+        executeUpdate(sql);
     }
 
     /**
-     *
-     * @param table the Selected Table
+     * @param table    the Selected Table
      * @param selected where you would like to Update data
-     * @param data the new Data
-     * @param where witch row you want do Update
+     * @param data     the new Data
+     * @param where    witch row you want do Update
      */
     public static void updateData(String table, String selected, String data, String where) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("UPDATE " + table + " SET ").append(selected + " = " + data).append(" WHERE " + where);
-        String sql = stringBuilder.toString();
-        try {
-            if (Main.getInstance().isMysql()) {
-                Statement stmt = MySQL.getConnection().createStatement();
-                stmt.executeUpdate(sql);
-            } else if (Main.getInstance().isSQL()) {
-                Statement stmt = SQLite.connect().createStatement();
-                stmt.executeUpdate(sql);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (Main.getInstance().isMysql()) {
-                MySQL.close();
-            } else if (Main.getInstance().isSQL()) {
-                SQLite.close();
-            }
-        }
-        if (Main.getInstance().isMysql()) {
-            MySQL.close();
-        } else if (Main.getInstance().isSQL()) {
-            SQLite.close();
-        }
+        executeUpdate("UPDATE " + table + " SET " + selected + " = " + data + " WHERE " + where);
     }
 
     /**
-     *
      * @param table The Table in the Database
      * @param where where you would like to remove Data
      */
     public static void deleteDataInTable(String table, String where) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("DELETE FROM " + table)
-                .append(" WHERE " + where);
-        String sql = sb.toString();
-        try {
-            if (Main.getInstance().isMysql()) {
-                Statement stmt = MySQL.getConnection().createStatement();
-                stmt.executeUpdate(sql);
-            } else if (Main.getInstance().isSQL()) {
-                Statement stmt = SQLite.connect().createStatement();
-                stmt.executeUpdate(sql);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (Main.getInstance().isMysql()) {
-                MySQL.close();
-            } else if (Main.getInstance().isSQL()) {
-                SQLite.close();
-            }
-        }
-        if (Main.getInstance().isMysql()) {
-            MySQL.close();
-        } else if (Main.getInstance().isSQL()) {
-            SQLite.close();
-        }
+        executeUpdate("DELETE FROM " + table + " WHERE " + where);
     }
 
     /**
-     *
      * @param table the Table in the Database
      * @param where where you want to remove Datas
-     * @param and the same as where
+     * @param and   the same as where
      */
     public static void deleteDataInTable(String table, String where, String and) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("DELETE FROM " + table)
-                .append(" WHERE " + where)
-                .append(" AND " + and + ";");
-        String sql = sb.toString();
-        try {
-            if (Main.getInstance().isMysql()) {
-                Statement stmt = MySQL.getConnection().createStatement();
-                stmt.executeUpdate(sql);
-            } else if (Main.getInstance().isSQL()) {
-                Statement stmt = SQLite.connect().createStatement();
-                stmt.executeUpdate(sql);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (Main.getInstance().isMysql()) {
-                MySQL.close();
-            } else if (Main.getInstance().isSQL()) {
-                SQLite.close();
-            }
-        }
-        if (Main.getInstance().isMysql()) {
-            MySQL.close();
-        } else if (Main.getInstance().isSQL()) {
-            SQLite.close();
-        }
+        executeUpdate("DELETE FROM " + table + " WHERE " + where + " AND " + and + ";");
     }
 
     /**
-     *
-     * @param table the Table in the Database
+     * @param table  the Table in the Database
      * @param column where you would like to search
-     * @param data the data of where
+     * @param data   the data of where
      * @return if the Data exists
      */
     public static boolean exists(String table, String column, String data) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("SELECT * FROM ")
-                .append(table)
-                .append(" WHERE ")
-                .append(column)
-                .append(" = '" + data + "';");
-
-        try {
-            if (Main.getInstance().isMysql()) {
-                Statement statement = MySQL.getConnection().createStatement();
-                String sql = stringBuilder.toString();
-                ResultSet res = statement.executeQuery(sql);
-                if (res.next()) {
-                    if (res.getString(column) == null) {
-                        return false;
-                    } else {
-                        res.close();
-                        statement.close();
-                        return true;
-                    }
-                }
-            } else if (Main.getInstance().isSQL()) {
-                Statement statement = SQLite.connect().createStatement();
-                String sql = stringBuilder.toString();
-                ResultSet res = statement.executeQuery(sql);
-                if (res.next()) {
-                    if (res.getString(column) == null) {
-                        return false;
-                    } else {
-                        res.close();
-                        statement.close();
-                        return true;
-                    }
-                }
-            }
-            return false;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (Main.getInstance().isMysql()) {
-                MySQL.close();
-            } else if (Main.getInstance().isSQL()) {
-                SQLite.close();
-            }
-        }
-        if (Main.getInstance().isMysql()) {
-            MySQL.close();
-        } else if (Main.getInstance().isSQL()) {
-            SQLite.close();
-        }
-        return false;
+        return exists(table, column, data, null);
     }
 
     public static boolean exists(String table, String column, String data, String and) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("SELECT * FROM ")
-                .append(table)
-                .append(" WHERE ")
-                .append(column)
-                .append(" = '" + data + "' AND " + and + ";");
-
-        try {
-            if (Main.getInstance().isMysql()) {
-                Statement statement = MySQL.getConnection().createStatement();
-                String sql = stringBuilder.toString();
-                ResultSet res = statement.executeQuery(sql);
-                if (res.next()) {
-                    return res.getString(column) != null;
-                }
-            } else if (Main.getInstance().isSQL()) {
-                Statement statement = SQLite.connect().createStatement();
-                String sql = stringBuilder.toString();
-                ResultSet res = statement.executeQuery(sql);
-                if (res.next()) {
-                    if (res.getString(column) == null) {
-                        return false;
-                    }
-                    return true;
-                }
-            }
-            return false;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (Main.getInstance().isMysql()) {
-                MySQL.close();
-            } else if (Main.getInstance().isSQL()) {
-                SQLite.close();
-            }
+        String sql = "SELECT 1 FROM " + table + " WHERE " + column + " = ?";
+        if (and != null && !and.trim().isEmpty()) {
+            sql += " AND " + and;
         }
-        if (Main.getInstance().isMysql()) {
-            MySQL.close();
-        } else if (Main.getInstance().isSQL()) {
-            SQLite.close();
+        sql += " LIMIT 1";
+
+        try (PreparedStatement statement = connection().prepareStatement(sql)) {
+            statement.setString(1, data);
+            try (ResultSet res = statement.executeQuery()) {
+                return res.next();
+            }
+        } catch (SQLException e) {
+            logSqlException("exists", sql, e);
+        } finally {
+            close();
         }
         return false;
     }
 
     /**
-     *
-     * @param table the Table in the Database
+     * @param table    the Table in the Database
      * @param selected the Selected Column in the Database
-     * @param column the Column you would like to search
-     * @param data the Data of the where Column
+     * @param column   the Column you would like to search
+     * @param data     the Data of the where Column
      * @return the Data from the Database
      */
+    @SuppressWarnings("SqlSourceToSinkFlow")
     public static Object get(String table, String selected, String column, String data) {
-        Object o = null;
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("SELECT * FROM ")
-                .append(table)
-                .append(" WHERE " + column + " = '")
-                .append(data)
-                .append("'");
-        String sql = stringBuilder.toString();
-        try {
-            if (Main.getInstance().isMysql()) {
-                Statement statement = MySQL.getConnection().createStatement();
-                ResultSet res = statement.executeQuery(sql);
+        String sql = "SELECT " + selected + " FROM " + table + " WHERE " + column + " = ? LIMIT 1";
+        try (PreparedStatement statement = connection().prepareStatement(sql)) {
+            statement.setString(1, data);
+            try (ResultSet res = statement.executeQuery()) {
                 if (res.next()) {
-                    o = res.getObject(selected);
-                    if (o != null) {
-                        return o;
-                    }
-                    return o;
-                }
-            } else if (Main.getInstance().isSQL()) {
-                Statement statement = SQLite.connect().createStatement();
-                ResultSet res = statement.executeQuery(sql);
-                if (res.next()) {
-                    o = res.getObject(selected);
-                    if (o != null) {
-                        return o;
-                    }
-                    return o;
+                    return res.getObject(selected);
                 }
             }
-            return o;
         } catch (SQLException e) {
-            e.printStackTrace();
+            logSqlException("get", sql, e);
         } finally {
-            if (Main.getInstance().isMysql()) {
-                MySQL.close();
-            } else if (Main.getInstance().isSQL()) {
-                SQLite.close();
-            }
+            close();
         }
-        if (Main.getInstance().isMysql()) {
-            MySQL.close();
-        } else if (Main.getInstance().isSQL()) {
-            SQLite.close();
-        }
-        return o;
+        return null;
     }
 
     /**
-     *
      * @param table the Table you would like to Delete
      */
     public static void deleteTable(String table) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("DROP TABLE " + table);
-        String sql = stringBuilder.toString();
-
-        try {
-            if (Main.getInstance().isMysql()) {
-                Statement stmt = MySQL.getConnection().createStatement();
-                stmt.executeUpdate(sql);
-            } else if(Main.getInstance().isSQL()) {
-                Statement stmt = SQLite.connect().createStatement();
-                stmt.executeUpdate(sql);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (Main.getInstance().isMysql()) {
-                MySQL.close();
-            } else if (Main.getInstance().isSQL()) {
-                SQLite.close();
-            }
-        }
-        if (Main.getInstance().isMysql()) {
-            MySQL.close();
-        } else if (Main.getInstance().isSQL()) {
-            SQLite.close();
-        }
+        executeUpdate("DROP TABLE " + table);
     }
 
     /**
-     *
      * @param table the Table do you want to search
      * @return if Table exists or not
      */
     public static boolean isTableExists(String table) {
         try {
-            if(Main.getInstance().isMysql()) {
-                Statement statement = MySQL.getConnection().createStatement();
-                ResultSet rs = statement.executeQuery("SHOW TABLES LIKE '" + table + "'");
-                if (rs.next()) {
-                    return true;
-                }
-            } else if(Main.getInstance().isSQL()) {
-                Statement statement = SQLite.connect().createStatement();
-                ResultSet rs = statement.executeQuery("SELECT \n" +
-                        "    name\n" +
-                        "FROM \n" +
-                        "    sqlite_master \n" +
-                        "WHERE \n" +
-                        "    type ='table' AND \n" +
-                        "    name NOT LIKE 'sqlite_%';");
-                while (rs.next()) {
-                    if(rs.getString("name").equalsIgnoreCase(table))
-                        return true;
-                }
-            }
-            return false;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
             if (Main.getInstance().isMysql()) {
-                MySQL.close();
+                try (PreparedStatement statement = connection().prepareStatement("SHOW TABLES LIKE ?")) {
+                    statement.setString(1, table);
+                    try (ResultSet rs = statement.executeQuery()) {
+                        return rs.next();
+                    }
+                }
+            } else if (Main.getInstance().isH2()) {
+                String sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = CURRENT_SCHEMA() AND UPPER(TABLE_NAME) = UPPER(?)";
+                try (PreparedStatement statement = connection().prepareStatement(sql)) {
+                    statement.setString(1, table);
+                    try (ResultSet rs = statement.executeQuery()) {
+                        return rs.next();
+                    }
+                }
             } else if (Main.getInstance().isSQL()) {
-                SQLite.close();
+                try (PreparedStatement statement = connection().prepareStatement("SELECT name FROM sqlite_master WHERE type='table' AND name = ?")) {
+                    statement.setString(1, table);
+                    try (ResultSet rs = statement.executeQuery()) {
+                        return rs.next();
+                    }
+                }
             }
-        }
-        if (Main.getInstance().isMysql()) {
-            MySQL.close();
-        } else if (Main.getInstance().isSQL()) {
-            SQLite.close();
+        } catch (SQLException e) {
+            logSqlException("isTableExists", "table=" + table, e);
+        } finally {
+            close();
         }
         return false;
     }
+
+    private static void executeUpdate(String sql) {
+        try (Statement stmt = connection().createStatement()) {
+            stmt.executeUpdate(sql);
+        } catch (SQLException e) {
+            logSqlException("executeUpdate", sql, e);
+        } finally {
+            close();
+        }
+    }
+
+    public static Connection connection() throws SQLException {
+        Connection connection;
+        if (Main.getInstance().isMysql()) {
+            connection = MySQL.getConnection();
+        } else if (Main.getInstance().isH2()) {
+            connection = H2.connect();
+        } else if (Main.getInstance().isSQL()) {
+            connection = SQLite.connect();
+        } else {
+            throw new SQLException("No SQL database backend is enabled.");
+        }
+        if (connection == null) {
+            throw new SQLException("Could not open SQL database connection.");
+        }
+        return connection;
+    }
+
+    public static void close() {
+        if (Main.getInstance().isMysql()) {
+            MySQL.close();
+        } else if (Main.getInstance().isH2()) {
+            H2.close();
+        } else if (Main.getInstance().isSQL()) {
+            SQLite.close();
+        }
+    }
+
+    private static String join(String... values) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < values.length; i++) {
+            stringBuilder.append(values[i]);
+            if (i < values.length - 1) {
+                stringBuilder.append(",");
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+    private static String normalizeColumnsForH2(String columns) {
+        return columns.replaceAll("(?i)TEXT\\((\\d+)\\)", "VARCHAR($1)")
+                .replaceAll("(?i)\\bTEXT\\b", "VARCHAR(8192)");
+    }
+
+    private static void logSqlException(String operation, String sql, SQLException exception) {
+        String sqlSnippet = sql == null ? "n/a" : sql;
+        if (sqlSnippet.length() > 300) {
+            sqlSnippet = sqlSnippet.substring(0, 300) + "...";
+        }
+        logger().log(Level.SEVERE,
+                "SQL error during " + operation + " [backend=" + backendName() + ", sql=" + sqlSnippet + "]",
+                exception);
+    }
+
+    private static Logger logger() {
+        Main plugin = Main.getInstance();
+        return plugin != null ? plugin.getLogger() : Logger.getLogger(SQL.class.getName());
+    }
+
+    private static String backendName() {
+        Main plugin = Main.getInstance();
+        if (plugin == null) {
+            return "unknown";
+        }
+        if (plugin.isMysql()) {
+            return "mysql";
+        }
+        if (plugin.isH2()) {
+            return "h2";
+        }
+        if (plugin.isSQL()) {
+            return "sqlite";
+        }
+        return "none";
+    }
+
+    private static String sqlPreview(String tableName) {
+        return "CREATE TABLE" + " on " + tableName;
+    }
 }
-
-

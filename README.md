@@ -1,6 +1,6 @@
 # FrameEconomy
 
-FrameEconomy is a Spigot economy plugin for Minecraft servers. It integrates with Vault, supports player balances and banks, and can store data in local YAML, SQLite, MySQL, or MongoDB.
+FrameEconomy is a Spigot economy plugin for Minecraft servers. It integrates with Vault, supports player balances and banks, and can store data in local YML/JSON files, SQLite, H2, MySQL, or MongoDB.
 
 ## Features
 
@@ -10,14 +10,14 @@ FrameEconomy is a Spigot economy plugin for Minecraft servers. It integrates wit
 - Bank creation, deposits, withdrawals, members, and balance checks
 - Configurable command messages in `config.yml`
 - Async command/storage work for better server-thread performance
-- YAML, SQLite, MySQL, and MongoDB storage options
+- YML, JSON, SQLite, H2, MySQL, and MongoDB storage options
 
 ## Requirements
 
 - Java 8+ target runtime
 - Spigot/Paper API compatible with `1.16.1-R0.1-SNAPSHOT`
 - Vault installed on the server
-- Gradle wrapper included in this repository
+- Gradle wrapper is included in this repository
 
 ## Build
 
@@ -47,6 +47,8 @@ build/libs/FrameEconomy-2.0-RELEASE.jar
 4. Start the server once to generate `config.yml`.
 5. Edit the config and restart or run `/frameeconomy reload`.
 
+`/frameeconomy reload` reloads configuration and message defaults without disabling and re-enabling the plugin. Restart the server after changing storage backend settings.
+
 ## Configuration
 
 Storage is configured in `config.yml`.
@@ -54,8 +56,18 @@ Storage is configured in `config.yml`.
 ```yaml
 MySQL:
   Use: false
+H2:
+  Path: 'plugins/FrameEconomy/money'
+  FileName: 'database'
+  User: 'sa'
+  Password: ''
+  Use: false
 SQLite:
   Use: false
+FileStorage:
+  Type: 'YML'
+  Path: 'plugins/FrameEconomy/money'
+  FileName: 'eco'
 MongoDB:
   Use: false
 Currency:
@@ -63,9 +75,12 @@ Currency:
   Singular: '$'
 Economy:
   MaxBalance: 1000000000
+  MinBalance: 0
 ```
 
-If MySQL, SQLite, and MongoDB are disabled, FrameEconomy uses local YAML storage in `plugins/FrameEconomy/money/eco.yml`.
+Enable only one database backend at a time. If MySQL, H2, SQLite, and MongoDB are disabled, FrameEconomy uses local file storage.
+
+Set `FileStorage.Type` to `YML` for `plugins/FrameEconomy/money/eco.yml` or `JSON` for `plugins/FrameEconomy/money/eco.json`. Restart the server after changing storage backend settings.
 
 ## Messages
 
@@ -93,6 +108,10 @@ Color codes can use `&`. Supported placeholders depend on the message and includ
 | `/economy status` | Show Vault status |
 | `/economy set <amount>` | Set your own balance |
 | `/economy set <amount> <player>` | Set another player's balance |
+| `/economy add <amount>` | Add money to your own balance |
+| `/economy add <amount> <player>` | Add money to another player's balance |
+| `/economy remove <amount>` | Remove money from your own balance |
+| `/economy remove <amount> <player>` | Remove money from another player's balance |
 | `/bank list` | List banks |
 | `/bank create <name>` | Create a bank |
 | `/bank remove <name>` | Remove a bank |
@@ -122,6 +141,10 @@ frameeconomy.pay
 frameeconomy.eco.status
 frameeconomy.eco.set
 frameeconomy.eco.set.others
+frameeconomy.eco.add
+frameeconomy.eco.add.others
+frameeconomy.eco.remove
+frameeconomy.eco.remove.others
 frameeconomy.bank.create
 frameeconomy.bank.remove
 frameeconomy.bank.balance
@@ -140,5 +163,6 @@ frameeconomy.reload
 - Kotlin: `1.9.24`
 - Shadow jar plugin: `8.1.1`
 - Java bytecode target: `1.8`
+- H2 is shaded into the plugin jar for embedded local SQL storage.
 
 FrameEconomy uses a dedicated serialized database worker for plugin-owned economy and storage work. Command handlers, scheduled account updates, payload/interest jobs, and player-join account creation queue their storage operations off the main server thread, then hop back to the server thread for Bukkit-facing messages.

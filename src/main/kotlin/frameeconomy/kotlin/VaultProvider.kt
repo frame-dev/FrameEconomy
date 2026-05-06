@@ -13,6 +13,7 @@ import org.bukkit.scheduler.BukkitRunnable
  * Project: FrameEconomy
  * Copyrighted by FrameDev
  */
+@Suppress("unused")
 open class VaultProvider(val plugin: Main) {
 
     init {
@@ -24,7 +25,7 @@ open class VaultProvider(val plugin: Main) {
      * @return all Banks
      */
     open fun banks(): List<String> {
-        return Main.getInstance().vaultManager.economy.banks;
+        return Main.getInstance().vaultManager.economy.banks
     }
 
     /**
@@ -94,7 +95,7 @@ open class VaultProvider(val plugin: Main) {
     private fun interest(players: Array<OfflinePlayer>) {
         val percent = plugin.config.getDouble("Interest.Percent")
         val amount = plugin.config.getDouble("Interest.Amount")
-        val sum: Double = (amount * percent).toDouble()
+        val sum: Double = (amount * percent)
         for (offlinePlayer in players) {
             plugin.vaultManager.economy.withdrawPlayer(offlinePlayer, sum)
         }

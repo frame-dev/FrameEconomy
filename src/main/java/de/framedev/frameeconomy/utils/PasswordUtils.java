@@ -1,13 +1,5 @@
 package de.framedev.frameeconomy.utils;
 
-/**
- * This Plugin was Created by FrameDev
- * Package : de.framedev.frameeconomy.utils
- * Date: 06.03.21
- * Project: FrameEconomy
- * Copyrighted by FrameDev
- */
-
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -17,6 +9,14 @@ import java.util.Random;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
+/**
+ * This Plugin was Created by FrameDev
+ * Package : de.framedev.frameeconomy.utils
+ * Date: 06.03.21
+ * Project: FrameEconomy
+ * Copyrighted by FrameDev
+ */
+@SuppressWarnings("unused")
 public class PasswordUtils {
 
     private static final Random RANDOM = new SecureRandom();
@@ -44,7 +44,7 @@ public class PasswordUtils {
         }
     }
     public static String generateSecurePassword(String password, String salt) {
-        String returnValue = null;
+        String returnValue;
         byte[] securePassword = hash(password.toCharArray(), salt.getBytes());
 
         returnValue = Base64.getEncoder().encodeToString(securePassword);
@@ -55,7 +55,7 @@ public class PasswordUtils {
     public static boolean verifyUserPassword(String providedPassword,
                                              String securedPassword, String salt)
     {
-        boolean returnValue = false;
+        boolean returnValue;
 
         // Generate New secure password with the same salt
         String newSecurePassword = generateSecurePassword(providedPassword, salt);

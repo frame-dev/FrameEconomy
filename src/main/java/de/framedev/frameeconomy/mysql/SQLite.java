@@ -1,8 +1,12 @@
 package de.framedev.frameeconomy.mysql;
 
+import de.framedev.frameeconomy.main.Main;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This Plugin was Created by FrameDev
@@ -39,7 +43,7 @@ public class SQLite {
             connection = DriverManager.getConnection(url);
             return connection;
         } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+            logger().log(Level.SEVERE, "Could not connect to SQLite database", e);
         }
         return null;
     }
@@ -57,8 +61,13 @@ public class SQLite {
                 connection.close();
                 connection = null;
             } catch (SQLException ex) {
-                ex.printStackTrace();
+                logger().log(Level.WARNING, "Could not close SQLite database connection", ex);
             }
         }
+    }
+
+    private static Logger logger() {
+        Main plugin = Main.getInstance();
+        return plugin != null ? plugin.getLogger() : Logger.getLogger(SQLite.class.getName());
     }
 }

@@ -12,6 +12,17 @@ SQLite:
   Path: 'plugins/FrameEconomy/money'
   FileName: 'database'
   Use: false
+H2:
+  Path: 'plugins/FrameEconomy/money'
+  FileName: 'database'
+  User: 'sa'
+  Password: ''
+  Use: false
+FileStorage:
+  # Available types: YML, JSON
+  Type: 'YML'
+  Path: 'plugins/FrameEconomy/money'
+  FileName: 'eco'
 MongoDB:
   Database: ' '
   User: ' '
@@ -27,6 +38,7 @@ Currency:
   Singular: '$'
 Economy:
   MaxBalance: 1000000000
+  MinBalance: 0
 
 Messages:
   general:
@@ -53,10 +65,15 @@ Messages:
     percent: '&aPercent: &6{amount}'
     failed: '&cThe payment could not be completed.'
   economy:
-    usage: '&cPlease use &6/economy status&c, &6/economy set <Amount>&c, or &6/economy set <Amount> <PlayerName>&c!'
+    usage: '&cPlease use &6/economy status&c, &6/economy set/add/remove <Amount>&c, or &6/economy set/add/remove <Amount> <PlayerName>&c!'
     status: '&aVault Enabled? : &6{enabled}'
     set-own: '&aYour money has been set to &6{amount}{currency}'
     set-other: '&aMoney from &6{player} &ahas been set to &6{amount}{currency}'
+    add-own: '&aYour money increased by &6{amount}{currency}'
+    add-other: '&aMoney from &6{player} &aincreased by &6{amount}{currency}'
+    remove-own: '&aYour money decreased by &6{amount}{currency}'
+    remove-other: '&aMoney from &6{player} &adecreased by &6{amount}{currency}'
+    change-failed: '&cCould not change money for &6{player} &cby &6{amount}{currency}&c.'
   bank:
     usage: '&cPlease use &6/bank create <Name>&c, &6/bank deposit <Name> <Amount>&c, &6/bank withdraw <Name> <Amount>&c, &6/bank addmember <Name> <PlayerName>&c, &6/bank removemember <Name> <PlayerName>&c, &6/bank balance <Name>&c, or &6/bank list&c!'
     list-border: '&6<<<===>>>'

@@ -7,11 +7,14 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This Plugin was Created by FrameDev
@@ -27,12 +30,13 @@ public class PayCMD implements CommandExecutor, TabCompleter {
 
     public PayCMD(Main plugin) {
         this.plugin = plugin;
-        plugin.getCommand("pay").setExecutor(this);
-        plugin.getCommand("pay").setTabCompleter(this);
+        PluginCommand payCommand = Objects.requireNonNull(plugin.getCommand("pay"), "Command 'pay' is not defined in plugin.yml");
+        payCommand.setExecutor(this);
+        payCommand.setTabCompleter(this);
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player)) {
             plugin.sendMessage(sender, "general.only-player");
             return true;
@@ -46,7 +50,7 @@ public class PayCMD implements CommandExecutor, TabCompleter {
         Player player = (Player) sender;
         Double parsedAmount = plugin.parsePositiveAmount(sender, args[0]);
         if (parsedAmount == null) return true;
-        Double parsedPercent = args.length == 3 ? plugin.parsePositiveAmount(sender, args[2]) : 0.0D;
+        Double parsedPercent = args.length == 3 ? plugin.parsePositiveAmount(sender, args[2]) : Double.valueOf(0.0D);
         if (parsedPercent == null) return true;
 
         Player target = Bukkit.getPlayer(args[1]);
@@ -90,7 +94,7 @@ public class PayCMD implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
         if(args.length == 1 && sender instanceof OfflinePlayer) {
             ArrayList<String> empty = new ArrayList<>();
             empty.add(plugin.getVaultManager().getEconomy().getBalance((OfflinePlayer) sender) + "");

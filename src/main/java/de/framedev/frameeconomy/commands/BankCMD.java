@@ -6,6 +6,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * This Plugin was Created by FrameDev
@@ -29,8 +32,9 @@ public class BankCMD implements CommandExecutor, TabCompleter {
 
     public BankCMD(Main plugin) {
         this.plugin = plugin;
-        plugin.getCommand("bank").setExecutor(this);
-        plugin.getCommand("bank").setTabCompleter(this);
+        PluginCommand bankCommand = Objects.requireNonNull(plugin.getCommand("bank"), "Command 'bank' is not defined in plugin.yml");
+        bankCommand.setExecutor(this);
+        bankCommand.setTabCompleter(this);
     }
 
     @Override
@@ -46,121 +50,111 @@ public class BankCMD implements CommandExecutor, TabCompleter {
 
         if (args.length == 2) {
             if (args[0].equalsIgnoreCase("create")) {
-                Player player = CommandHelper.requirePlayerWithPermission(plugin, sender, "frameeconomy.bank.create");
-                if (player == null) return true;
                 String bankName = args[1];
-                plugin.runDatabaseAsync(() -> {
-                    if (plugin.getVaultManager().getEconomy().createBank(bankName, player).transactionSuccess()) {
-                        plugin.sendMessageSync(player, "bank.create-success", "bank", bankName);
-                    } else {
-                        plugin.sendMessageSync(player, "bank.create-error", "bank", bankName);
-                    }
-                });
+                withPermittedPlayer(sender, "frameeconomy.bank.create", player ->
+                        plugin.runDatabaseAsync(() -> {
+                            if (plugin.getVaultManager().getEconomy().createBank(bankName, player).transactionSuccess()) {
+                                plugin.sendMessageSync(player, "bank.create-success", "bank", bankName);
+                            } else {
+                                plugin.sendMessageSync(player, "bank.create-error", "bank", bankName);
+                            }
+                        }));
                 return true;
             }
 
             if (args[0].equalsIgnoreCase("balance")) {
-                Player player = CommandHelper.requirePlayerWithPermission(plugin, sender, "frameeconomy.bank.balance");
-                if (player == null) return true;
                 String bankName = args[1];
                 String currency = plugin.getVaultManager().getEconomy().currencyNamePlural();
-                plugin.runDatabaseAsync(() -> {
-                    if (!ensureBankExists(player, bankName)) return;
-                    if (!ensureBankMember(player, bankName)) return;
-                    plugin.sendMessageSync(player, "bank.balance",
-                            "bank", bankName,
-                            "amount", String.valueOf(plugin.getVaultManager().getEconomy().bankBalance(bankName).balance),
-                            "currency", currency);
-                });
+                withPermittedPlayer(sender, "frameeconomy.bank.balance", player ->
+                        plugin.runDatabaseAsync(() -> {
+                            if (ensureBankMissing(player, bankName)) return;
+                            if (ensureBankNotMember(player, bankName)) return;
+                            plugin.sendMessageSync(player, "bank.balance",
+                                    "bank", bankName,
+                                    "amount", String.valueOf(plugin.getVaultManager().getEconomy().bankBalance(bankName).balance),
+                                    "currency", currency);
+                        }));
                 return true;
             }
 
             if (args[0].equalsIgnoreCase("remove")) {
-                Player player = CommandHelper.requirePlayerWithPermission(plugin, sender, "frameeconomy.bank.remove");
-                if (player == null) return true;
                 String bankName = args[1];
-                plugin.runDatabaseAsync(() -> {
-                    if (!ensureBankExists(player, bankName)) return;
-                    if (!ensureBankOwner(player, bankName)) return;
-                    if (plugin.getVaultManager().getEconomy().deleteBank(bankName).transactionSuccess()) {
-                        plugin.sendMessageSync(player, "bank.remove-success", "bank", bankName);
-                    } else {
-                        plugin.sendMessageSync(player, "bank.remove-error", "bank", bankName);
-                    }
-                });
+                withPermittedPlayer(sender, "frameeconomy.bank.remove", player ->
+                        plugin.runDatabaseAsync(() -> {
+                            if (ensureBankMissing(player, bankName)) return;
+                            if (ensureBankNotOwner(player, bankName)) return;
+                            if (plugin.getVaultManager().getEconomy().deleteBank(bankName).transactionSuccess()) {
+                                plugin.sendMessageSync(player, "bank.remove-success", "bank", bankName);
+                            } else {
+                                plugin.sendMessageSync(player, "bank.remove-error", "bank", bankName);
+                            }
+                        }));
                 return true;
             }
 
             if (args[0].equalsIgnoreCase("listmembers")) {
-                Player player = CommandHelper.requirePlayerWithPermission(plugin, sender, "frameeconomy.bank.listmembers");
-                if (player == null) return true;
                 String bankName = args[1];
-                plugin.runDatabaseAsync(() -> {
-                    if (!ensureBankExists(player, bankName)) return;
-                    if (!ensureBankMember(player, bankName)) return;
-                    List<String> bankMembers = new ArrayList<>(plugin.getVaultManager().getBankMembers(bankName));
-                    plugin.runSync(() -> sendList(player, bankMembers, "bank.members-empty"));
-                });
+                withPermittedPlayer(sender, "frameeconomy.bank.listmembers", player ->
+                        plugin.runDatabaseAsync(() -> {
+                            if (ensureBankMissing(player, bankName)) return;
+                            if (ensureBankNotMember(player, bankName)) return;
+                            List<String> bankMembers = new ArrayList<>(plugin.getVaultManager().getBankMembers(bankName));
+                            plugin.runSync(() -> sendList(player, bankMembers, "bank.members-empty"));
+                        }));
                 return true;
             }
         }
 
         if (args.length == 3) {
             if (args[0].equalsIgnoreCase("deposit")) {
-                Player player = CommandHelper.requirePlayerWithPermission(plugin, sender, "frameeconomy.bank.deposit");
-                if (player == null) return true;
                 String bankName = args[1];
-                Double parsedAmount = plugin.parsePositiveAmount(player, args[2]);
-                if (parsedAmount == null) return true;
-                double amount = parsedAmount;
                 String currency = plugin.getVaultManager().getEconomy().currencyNamePlural();
-                plugin.runDatabaseAsync(() -> {
-                    if (!ensureBankExists(player, bankName)) return;
-                    if (!plugin.getVaultManager().getEconomy().has(player, amount)) {
-                        plugin.sendMessageSync(player, "general.not-enough-money");
-                        return;
-                    }
-                    if (!plugin.getVaultManager().getEconomy().withdrawPlayer(player, amount).transactionSuccess()) {
-                        plugin.sendMessageSync(player, "bank.deposit-error", "bank", bankName);
-                        return;
-                    }
-                    if (plugin.getVaultManager().getEconomy().bankDeposit(bankName, amount).transactionSuccess()) {
-                        plugin.sendMessageSync(player, "bank.deposit-success",
-                                "bank", bankName,
-                                "amount", String.valueOf(amount),
-                                "currency", currency);
-                    } else {
-                        plugin.getVaultManager().getEconomy().depositPlayer(player, amount);
-                        plugin.sendMessageSync(player, "bank.deposit-error", "bank", bankName);
-                    }
+                withPermittedPlayer(sender, "frameeconomy.bank.deposit", player -> {
+                    Double parsedAmount = plugin.parsePositiveAmount(player, args[2]);
+                    if (parsedAmount == null) return;
+                    double amount = parsedAmount;
+                    plugin.runDatabaseAsync(() -> {
+                        if (ensureBankMissing(player, bankName)) return;
+                        if (!plugin.getVaultManager().getEconomy().has(player, amount)) {
+                            plugin.sendMessageSync(player, "general.not-enough-money");
+                            return;
+                        }
+                        if (!plugin.getVaultManager().getEconomy().withdrawPlayer(player, amount).transactionSuccess()) {
+                            plugin.sendMessageSync(player, "bank.deposit-error", "bank", bankName);
+                            return;
+                        }
+                        if (plugin.getVaultManager().getEconomy().bankDeposit(bankName, amount).transactionSuccess()) {
+                            sendBankAmountMessage(player, "bank.deposit-success", bankName, amount, currency);
+                        } else {
+                            plugin.getVaultManager().getEconomy().depositPlayer(player, amount);
+                            plugin.sendMessageSync(player, "bank.deposit-error", "bank", bankName);
+                        }
+                    });
                 });
                 return true;
             }
 
             if (args[0].equalsIgnoreCase("withdraw")) {
-                Player player = CommandHelper.requirePlayerWithPermission(plugin, sender, "frameeconomy.bank.withdraw");
-                if (player == null) return true;
                 String bankName = args[1];
-                Double parsedAmount = plugin.parsePositiveAmount(player, args[2]);
-                if (parsedAmount == null) return true;
-                double amount = parsedAmount;
                 String currency = plugin.getVaultManager().getEconomy().currencyNamePlural();
-                plugin.runDatabaseAsync(() -> {
-                    if (!ensureBankExists(player, bankName)) return;
-                    if (!ensureBankMember(player, bankName)) return;
-                    if (!plugin.getVaultManager().getEconomy().bankHas(bankName, amount).transactionSuccess()) {
-                        plugin.sendMessageSync(player, "bank.not-enough-money");
-                        return;
-                    }
-                    if (plugin.getVaultManager().getEconomy().bankWithdraw(bankName, amount).transactionSuccess()) {
-                        plugin.getVaultManager().getEconomy().depositPlayer(player, amount);
-                        plugin.sendMessageSync(player, "bank.withdraw-success",
-                                "bank", bankName,
-                                "amount", String.valueOf(amount),
-                                "currency", currency);
-                    } else {
-                        plugin.sendMessageSync(player, "bank.withdraw-error", "bank", bankName);
-                    }
+                withPermittedPlayer(sender, "frameeconomy.bank.withdraw", player -> {
+                    Double parsedAmount = plugin.parsePositiveAmount(player, args[2]);
+                    if (parsedAmount == null) return;
+                    double amount = parsedAmount;
+                    plugin.runDatabaseAsync(() -> {
+                        if (ensureBankMissing(player, bankName)) return;
+                        if (ensureBankNotMember(player, bankName)) return;
+                        if (!plugin.getVaultManager().getEconomy().bankHas(bankName, amount).transactionSuccess()) {
+                            plugin.sendMessageSync(player, "bank.not-enough-money");
+                            return;
+                        }
+                        if (plugin.getVaultManager().getEconomy().bankWithdraw(bankName, amount).transactionSuccess()) {
+                            plugin.getVaultManager().getEconomy().depositPlayer(player, amount);
+                            sendBankAmountMessage(player, "bank.withdraw-success", bankName, amount, currency);
+                        } else {
+                            plugin.sendMessageSync(player, "bank.withdraw-error", "bank", bankName);
+                        }
+                    });
                 });
                 return true;
             }
@@ -168,26 +162,25 @@ public class BankCMD implements CommandExecutor, TabCompleter {
             if (args[0].equalsIgnoreCase("addmember") || args[0].equalsIgnoreCase("removemember")) {
                 boolean addMember = args[0].equalsIgnoreCase("addmember");
                 String permission = addMember ? "frameeconomy.bank.addmember" : "frameeconomy.bank.removemember";
-                Player player = CommandHelper.requirePlayerWithPermission(plugin, sender, permission);
-                if (player == null) return true;
                 String bankName = args[1];
-                OfflinePlayer offline = Bukkit.getOfflinePlayer(args[2]);
+                OfflinePlayer offline = plugin.resolveOfflinePlayer(args[2]);
                 String offlineName = offline.getName();
-                plugin.runDatabaseAsync(() -> {
-                    if (!ensureBankExists(player, bankName)) return;
-                    if (!ensureBankOwner(player, bankName)) return;
-                    if (addMember) {
-                        plugin.getVaultManager().addBankMember(bankName, offline);
-                        plugin.sendMessageSync(player, "bank.add-member-success",
-                                "bank", bankName,
-                                "player", offlineName);
-                    } else {
-                        plugin.getVaultManager().removeBankMember(bankName, offline);
-                        plugin.sendMessageSync(player, "bank.remove-member-success",
-                                "bank", bankName,
-                                "player", offlineName);
-                    }
-                });
+                withPermittedPlayer(sender, permission, player ->
+                        plugin.runDatabaseAsync(() -> {
+                            if (ensureBankMissing(player, bankName)) return;
+                            if (ensureBankNotOwner(player, bankName)) return;
+                            if (addMember) {
+                                plugin.getVaultManager().addBankMember(bankName, offline);
+                                plugin.sendMessageSync(player, "bank.add-member-success",
+                                        "bank", bankName,
+                                        "player", offlineName);
+                            } else {
+                                plugin.getVaultManager().removeBankMember(bankName, offline);
+                                plugin.sendMessageSync(player, "bank.remove-member-success",
+                                        "bank", bankName,
+                                        "player", offlineName);
+                            }
+                        }));
                 return true;
             }
         }
@@ -197,9 +190,9 @@ public class BankCMD implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length == 1) {
-            List<String> cmds = new ArrayList<String>(Arrays.asList("remove", "create", "balance", "withdraw", "deposit", "addmember", "removemember", "listmembers", "list"));
+            List<String> cmds = new ArrayList<>(Arrays.asList("remove", "create", "balance", "withdraw", "deposit", "addmember", "removemember", "listmembers", "list"));
             List<String> completions = new ArrayList<>();
             for (String s : cmds) {
                 if (s.toLowerCase().startsWith(args[0].toLowerCase())) {
@@ -226,13 +219,7 @@ public class BankCMD implements CommandExecutor, TabCompleter {
                 return new ArrayList<>();
             if (args[0].equalsIgnoreCase("balance")) return new ArrayList<>();
             if (args[0].equalsIgnoreCase("addmember") || args[0].equalsIgnoreCase("removemember")) {
-                List<String> players = new ArrayList<>();
-                for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
-                    if (offlinePlayer.getName() != null) {
-                        players.add(offlinePlayer.getName());
-                    }
-                }
-                return CommandHelper.matching(players, args[2]);
+                return CommandHelper.matching(offlinePlayerNames(), args[2]);
             }
             if (sender instanceof OfflinePlayer) {
                 return new ArrayList<>(Collections.singletonList(plugin.getVaultManager().getEconomy().getBalance((OfflinePlayer) sender) + ""));
@@ -245,10 +232,10 @@ public class BankCMD implements CommandExecutor, TabCompleter {
         return plugin.getVaultManager().getEconomy().getBanks().contains(bankName);
     }
 
-    private boolean ensureBankExists(Player player, String bankName) {
-        if (bankExists(bankName)) return true;
+    private boolean ensureBankMissing(Player player, String bankName) {
+        if (bankExists(bankName)) return false;
         plugin.sendMessageSync(player, "bank.not-found", "bank", bankName);
-        return false;
+        return true;
     }
 
     private boolean isBankOwnerOrMember(String bankName, OfflinePlayer player) {
@@ -256,16 +243,16 @@ public class BankCMD implements CommandExecutor, TabCompleter {
                 || plugin.getVaultManager().getEconomy().isBankMember(bankName, player).transactionSuccess();
     }
 
-    private boolean ensureBankMember(Player player, String bankName) {
-        if (isBankOwnerOrMember(bankName, player)) return true;
+    private boolean ensureBankNotMember(Player player, String bankName) {
+        if (isBankOwnerOrMember(bankName, player)) return false;
         plugin.sendMessageSync(player, "bank.not-member");
-        return false;
+        return true;
     }
 
-    private boolean ensureBankOwner(Player player, String bankName) {
-        if (plugin.getVaultManager().getEconomy().isBankOwner(bankName, player).transactionSuccess()) return true;
+    private boolean ensureBankNotOwner(Player player, String bankName) {
+        if (plugin.getVaultManager().getEconomy().isBankOwner(bankName, player).transactionSuccess()) return false;
         plugin.sendMessageSync(player, "bank.not-owner");
-        return false;
+        return true;
     }
 
     private void sendList(CommandSender sender, List<String> values, String emptyMessage) {
@@ -276,5 +263,30 @@ public class BankCMD implements CommandExecutor, TabCompleter {
             plugin.sendMessage(sender, "bank.list-values", "values", CommandHelper.join(values));
         }
         plugin.sendMessage(sender, "bank.list-border");
+    }
+
+    private void sendBankAmountMessage(Player player, String path, String bankName, double amount, String currency) {
+        plugin.sendMessageSync(player, path,
+                "bank", bankName,
+                "amount", String.valueOf(amount),
+                "currency", currency);
+    }
+
+    private void withPermittedPlayer(CommandSender sender, String permission, Consumer<Player> action) {
+        Player player = CommandHelper.requirePlayerWithPermission(plugin, sender, permission);
+        if (player == null) {
+            return;
+        }
+        action.accept(player);
+    }
+
+    private List<String> offlinePlayerNames() {
+        List<String> players = new ArrayList<>();
+        for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
+            if (offlinePlayer.getName() != null) {
+                players.add(offlinePlayer.getName());
+            }
+        }
+        return players;
     }
 }

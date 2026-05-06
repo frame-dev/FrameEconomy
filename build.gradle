@@ -36,6 +36,7 @@ dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.16.1-R0.1-SNAPSHOT'
     compileOnly "com.github.MilkBowl:VaultAPI:1.7"
     shadow 'org.jetbrains.kotlin:kotlin-stdlib:1.9.24'
+    shadow 'com.h2database:h2:2.2.224'
     shadow group: 'org.mongodb', name: 'mongo-java-driver', version: '3.12.10'
 }
 

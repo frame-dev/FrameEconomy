@@ -6,13 +6,16 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.logging.Level;
 
@@ -30,13 +33,15 @@ public class BalanceCMD implements CommandExecutor {
 
     public BalanceCMD(Main plugin) {
         this.plugin = plugin;
-        plugin.getCommand("balance").setExecutor(this::onCommand);
-        plugin.getCommand("balancetop").setExecutor(this::onCommand);
+        PluginCommand balanceCommand = Objects.requireNonNull(plugin.getCommand("balance"), "Command 'balance' is not defined in plugin.yml");
+        PluginCommand balanceTopCommand = Objects.requireNonNull(plugin.getCommand("balancetop"), "Command 'balancetop' is not defined in plugin.yml");
+        balanceCommand.setExecutor(this);
+        balanceTopCommand.setExecutor(this);
         plugin.getLogger().log(Level.INFO, "Loaded");
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (command.getName().equalsIgnoreCase("balance")) {
             if (args.length == 0) {
                 Player player = CommandHelper.requirePlayerWithPermission(plugin, sender, "frameeconomy.balance");
@@ -47,7 +52,7 @@ public class BalanceCMD implements CommandExecutor {
                         "currency", currency));
             } else if (args.length == 1) {
                 if (!CommandHelper.requirePermission(plugin, sender, "frameeconomy.balance.others")) return true;
-                OfflinePlayer player = Bukkit.getOfflinePlayer(args[0]);
+                OfflinePlayer player = plugin.resolveOfflinePlayer(args[0]);
                 if (player != null) {
                     String currency = plugin.getVaultManager().getEconomy().currencyNamePlural();
                     String playerName = player.getName();
@@ -110,11 +115,17 @@ public class BalanceCMD implements CommandExecutor {
 
 
         public int compare(String a, String b) {
-            if (base.get(a) >= base.get(b)) {
-                return -1;
-            } else {
-                return 1;
-            } // returning 0 would merge keys
+            if (a.equals(b)) {
+                return 0;
+            }
+            double left = base.getOrDefault(a, 0.0D);
+            double right = base.getOrDefault(b, 0.0D);
+            int byBalanceDesc = Double.compare(right, left);
+            if (byBalanceDesc != 0) {
+                return byBalanceDesc;
+            }
+            // Keep entries distinct and ordering stable when balances are equal.
+            return a.compareToIgnoreCase(b);
         }
     }
 }
