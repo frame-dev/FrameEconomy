@@ -126,7 +126,7 @@ public class MySQLManager {
                 }
             } else {
                 if (SQL.exists(tableName, "Player", player.getName())) {
-                    if (SQL.get(tableName, "BankName", "Player", player.getName()) == null) {
+                    if (SQL.get(tableName, "BankName", "Player", player.getName()) != null) {
                         return false;
                     } else {
                         SQL.updateData(tableName, "BankName", "'" + bankName + "'", "Player = '" + player.getName() + "'");
@@ -145,8 +145,8 @@ public class MySQLManager {
             } else {
                 SQL.insertData(tableName, "'" + player.getName() + "','" + bankName + "','" + player.getName() + "'", "Player", "BankName", "BankOwner");
             }
+            return true;
         }
-        return false;
     }
 
     /**

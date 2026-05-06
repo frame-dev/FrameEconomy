@@ -28,6 +28,57 @@ Currency:
 Economy:
   MaxBalance: 1000000000
 
+Messages:
+  general:
+    no-permission: '&cNo Permissions!'
+    only-player: '&cOnly players can use this command!'
+    player-not-found: '&cThis player is not online! &6{player}'
+    not-enough-money: '&cNot enough money!'
+    invalid-amount: '&cInvalid amount: &6{amount}'
+  update:
+    checking: '&7Checking for updates...'
+    available: '&aA new update is available: version &6{version}'
+    current: '&aYou are running the newest plugin version!'
+    failed: '&cFailed to check for updates on spigotmc.org'
+  reload:
+    success: '&aConfig reloaded!'
+  balance:
+    own: '&aYour money: &6{amount}{currency}'
+    other: '&aMoney from &6{player} &ais &6{amount}{currency}'
+    top-entry: '&a{position}. [&6{player} &b: {amount}&a]'
+  pay:
+    usage: '&cPlease use &6/pay <Amount> <PlayerName> &cor &6/pay <Amount> <PlayerName> <Percent>&c!'
+    sent: '&aYou gave &6{player} {amount}{currency}'
+    received: '&aYou got &6{amount}{currency} &afrom &6{player}'
+    percent: '&aPercent: &6{amount}'
+    failed: '&cThe payment could not be completed.'
+  economy:
+    usage: '&cPlease use &6/economy status&c, &6/economy set <Amount>&c, or &6/economy set <Amount> <PlayerName>&c!'
+    status: '&aVault Enabled? : &6{enabled}'
+    set-own: '&aYour money has been set to &6{amount}{currency}'
+    set-other: '&aMoney from &6{player} &ahas been set to &6{amount}{currency}'
+  bank:
+    usage: '&cPlease use &6/bank create <Name>&c, &6/bank deposit <Name> <Amount>&c, &6/bank withdraw <Name> <Amount>&c, &6/bank addmember <Name> <PlayerName>&c, &6/bank removemember <Name> <PlayerName>&c, &6/bank balance <Name>&c, or &6/bank list&c!'
+    list-border: '&6<<<===>>>'
+    list-values: '&a{values}'
+    list-empty: '&cNo banks found.'
+    members-empty: '&cNo bank members found.'
+    create-success: '&aBank &6{bank} &asuccessfully created!'
+    create-error: '&cError while creating bank &6{bank}&c!'
+    remove-success: '&cBank &6{bank} &csuccessfully deleted!'
+    remove-error: '&cError while deleting bank &6{bank}&c!'
+    balance: '&aThe balance from bank &6{bank} &ais &6{amount}{currency}'
+    not-found: '&cBank &6{bank} &cdoes not exist!'
+    not-member: '&cYou are not a bank member or the owner!'
+    not-owner: '&cYou are not the bank owner!'
+    not-enough-money: '&cThe bank does not have enough money!'
+    deposit-success: '&6{amount}{currency} &awas successfully transferred to bank &6{bank}&a!'
+    deposit-error: '&cError while depositing to bank &6{bank}&c!'
+    withdraw-success: '&aYou successfully withdrew &6{amount}{currency} &afrom bank &6{bank}&a!'
+    withdraw-error: '&cError while withdrawing from bank &6{bank}&c!'
+    add-member-success: '&6{player} &ais now a member of bank &6{bank}&a!'
+    remove-member-success: '&6{player} &ais no longer a member of bank &6{bank}&a!'
+
 # PayLoad send's Money in the Time was set to OfflinePlayer
 PayLoad:
   Sec: 0

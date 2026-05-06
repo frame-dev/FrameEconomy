@@ -3,6 +3,7 @@ package de.framedev.frameeconomy.vault;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -24,7 +25,7 @@ public class VaultManager {
     public VaultManager(Main plugin) {
         this.accounts = new ArrayList<>();
         // Installation of Vault //
-        File fileData = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
+        File fileData = getEcoFile();
         FileConfiguration cfgData = YamlConfiguration.loadConfiguration(fileData);
         if (!fileData.exists()) {
             fileData.getParentFile().mkdirs();
@@ -57,8 +58,8 @@ public class VaultManager {
                 }
             }
         }
-        plugin.getServer().getServicesManager().register(Economy.class, new VaultAPI(), plugin, ServicePriority.High);
         economy = new VaultAPI();
+        plugin.getServer().getServicesManager().register(Economy.class, economy, plugin, ServicePriority.High);
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (!economy.hasAccount(p))
                 economy.createPlayerAccount(p);
@@ -73,9 +74,6 @@ public class VaultManager {
         return accounts;
     }
 
-    File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
-    FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-
     /**
      * Add a User to the Bank
      * @param bankName the Bank name
@@ -86,12 +84,15 @@ public class VaultManager {
             new MySQLManager().addBankMember(bankName, player);
         } else if (Main.getInstance().isMongoDb()) {
             List<String> users = (List<String>) Main.getInstance().getBackendManager().getObject("bankname", bankName, "bankmembers", "eco");
+            if (users == null) users = new ArrayList<>();
             if (!users.contains(player.getName()))
                 users.add(player.getName());
             Main.getInstance().getBackendManager().updateUser(player,"bankname",bankName,"eco");
             Main.getInstance().getBackendManager().updateUser(player,"bankmembers", users,"eco");
             Main.getInstance().getBackendManager().updataData("bankname", bankName, "bankmembers", users, "eco");
         } else {
+            File file = getEcoFile();
+            FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
             try {
                 cfg.load(file);
             } catch (IOException | InvalidConfigurationException e) {
@@ -126,12 +127,15 @@ public class VaultManager {
             new MySQLManager().removeBankMember(bankName, player);
         } else if (Main.getInstance().isMongoDb()) {
             List<String> users = (List<String>) Main.getInstance().getBackendManager().getObject("bankname", bankName, "bankmembers", "eco");
+            if (users == null) users = new ArrayList<>();
             if (users.contains(player.getName())) 
                 users.remove(player.getName());
             Main.getInstance().getBackendManager().updateUser(player,"bankname","","eco");
             Main.getInstance().getBackendManager().updateUser(player,"bankmembers", users,"eco");
             Main.getInstance().getBackendManager().updataData("bankname", bankName, "bankmembers", users, "eco");
         } else {
+            File file = getEcoFile();
+            FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
             try {
                 cfg.load(file);
             } catch (IOException | InvalidConfigurationException e) {
@@ -159,10 +163,14 @@ public class VaultManager {
      */
     public List<String> getBankMembers(String bankName) {
         if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-            return new MySQLManager().getBankMembers(bankName);
+            List<String> members = new MySQLManager().getBankMembers(bankName);
+            return members == null ? Collections.emptyList() : members;
         } else if (Main.getInstance().isMongoDb()) {
-            return (List<String>) Main.getInstance().getBackendManager().getObject("bankname",bankName,"bankmembers","eco");
+            List<String> members = (List<String>) Main.getInstance().getBackendManager().getObject("bankname",bankName,"bankmembers","eco");
+            return members == null ? Collections.emptyList() : members;
         } else {
+            File file = getEcoFile();
+            FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
             return cfg.getStringList("Banks." + bankName + ".members");
         }
     }
@@ -172,5 +180,9 @@ public class VaultManager {
      */
     public Economy getEconomy() {
         return economy;
+    }
+
+    private File getEcoFile() {
+        return new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
     }
 }

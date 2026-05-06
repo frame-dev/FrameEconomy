@@ -39,6 +39,11 @@ permissions:
       frameeconomy.bank.balance: true
       frameeconomy.bank.deposit: true
       frameeconomy.bank.withdraw: true
+      frameeconomy.bank.remove: true
+      frameeconomy.bank.addmember: true
+      frameeconomy.bank.removemember: true
+      frameeconomy.bank.listmembers: true
+      frameeconomy.bank.list: true
       frameeconomy.eco.status: true
       frameeconomy.reload: true
   frameeconomy.balance:
@@ -65,7 +70,17 @@ permissions:
     default: op
   frameeconomy.bank.withdraw:
     default: op
-  frameeconomy.set.status:
+  frameeconomy.bank.remove:
+    default: op
+  frameeconomy.bank.addmember:
+    default: op
+  frameeconomy.bank.removemember:
+    default: op
+  frameeconomy.bank.listmembers:
+    default: op
+  frameeconomy.bank.list:
+    default: op
+  frameeconomy.eco.status:
     default: op
   frameeconomy.reload:
     default: op

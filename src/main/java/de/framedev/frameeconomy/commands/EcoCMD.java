@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,58 +32,69 @@ public class EcoCMD implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (args.length == 0) {
+            plugin.sendMessage(sender, "economy.usage");
+            return true;
+        }
         if (args[0].equalsIgnoreCase("status")) {
-            if (sender.hasPermission("frameeconomy.eco.status")) {
-                sender.sendMessage("§aVault Enabled? : "
-                        + plugin.getServer().getPluginManager().isPluginEnabled("Vault"));
-                return true;
-            } else {
-                sender.sendMessage(plugin.getPrefix() + "§cNo Permissions!");
-                return true;
-            }
+            if (!CommandHelper.requirePermission(plugin, sender, "frameeconomy.eco.status")) return true;
+            plugin.sendMessage(sender, "economy.status",
+                    "enabled", String.valueOf(plugin.getServer().getPluginManager().isPluginEnabled("Vault")));
+            return true;
         }
         if (args[0].equalsIgnoreCase("set")) {
             if (args.length == 2) {
-                if (sender instanceof Player) {
-                    if (sender.hasPermission("frameeconomy.eco.set")) {
-                        Player player = (Player) sender;
-                        double amount = Double.parseDouble(args[1]);
-                        plugin.getVaultManager().getEconomy()
-                                .withdrawPlayer(player, plugin.getVaultManager().getEconomy().getBalance(player));
-                        plugin.getVaultManager().getEconomy().depositPlayer(player, amount);
-                        player.sendMessage("§aYour Money has been set to §6" + amount
-                                + plugin.getVaultManager().getEconomy().currencyNamePlural());
-                    } else {
-                        sender.sendMessage(plugin.getPrefix() + "§cNo Permissions!");
-                    }
-                } else {
-                    sender.sendMessage(plugin.getPrefix() + "§cOnly Player can use this Command!");
-                }
+                Player player = CommandHelper.requirePlayerWithPermission(plugin, sender, "frameeconomy.eco.set");
+                if (player == null) return true;
+                Double parsedAmount = plugin.parsePositiveAmount(sender, args[1]);
+                if (parsedAmount == null) return true;
+                double amount = parsedAmount;
+                String currency = plugin.getVaultManager().getEconomy().currencyNamePlural();
+                plugin.runAsync(() -> {
+                    plugin.setPlayerBalance(player, amount);
+                    plugin.sendMessageSync(player, "economy.set-own",
+                            "amount", String.valueOf(amount),
+                            "currency", currency);
+                });
             } else if (args.length == 3) {
-                if (sender.hasPermission("frameeconomy.eco.set.others")) {
-                    OfflinePlayer player = Bukkit.getOfflinePlayer(args[2]);
-                    double amount = Double.parseDouble(args[1]);
-                    plugin.getVaultManager().getEconomy()
-                            .withdrawPlayer(player, plugin.getVaultManager().getEconomy().getBalance(player));
-                    plugin.getVaultManager().getEconomy().depositPlayer(player, amount);
-                    if (player.isOnline()) {
-                        ((Player) player).sendMessage("§aYour Money has been set to §6" + amount
-                                + plugin.getVaultManager().getEconomy().currencyNamePlural());
-                    }
-                    sender.sendMessage("§aMoney from §6" + player.getName() + " §ahas been set to §6" + amount
-                            + plugin.getVaultManager().getEconomy().currencyNamePlural());
-                } else {
-                    sender.sendMessage(plugin.getPrefix() + "§cNo Permissions!");
-                }
+                if (!CommandHelper.requirePermission(plugin, sender, "frameeconomy.eco.set.others")) return true;
+                OfflinePlayer player = Bukkit.getOfflinePlayer(args[2]);
+                Double parsedAmount = plugin.parsePositiveAmount(sender, args[1]);
+                if (parsedAmount == null) return true;
+                double amount = parsedAmount;
+                String currency = plugin.getVaultManager().getEconomy().currencyNamePlural();
+                String playerName = player.getName();
+                plugin.runAsync(() -> {
+                    plugin.setPlayerBalance(player, amount);
+                    plugin.runSync(() -> {
+                        if (player.isOnline()) {
+                            plugin.sendMessage((Player) player, "economy.set-own",
+                                    "amount", String.valueOf(amount),
+                                    "currency", currency);
+                        }
+                        plugin.sendMessage(sender, "economy.set-other",
+                                "player", playerName,
+                                "amount", String.valueOf(amount),
+                                "currency", currency);
+                    });
+                });
             } else {
-                sender.sendMessage(plugin.getPrefix() + "§cPlease use §6/economy set <Amount> §cor §6/economy set <Amount> <PlayerName> §4§l!");
+                plugin.sendMessage(sender, "economy.usage");
             }
+        } else {
+            plugin.sendMessage(sender, "economy.usage");
         }
-        return false;
+        return true;
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (args.length == 1) {
+            List<String> completions = new ArrayList<>();
+            if ("status".startsWith(args[0].toLowerCase())) completions.add("status");
+            if ("set".startsWith(args[0].toLowerCase())) completions.add("set");
+            return CommandHelper.matching(completions, args[0]);
+        }
         return null;
     }
 }

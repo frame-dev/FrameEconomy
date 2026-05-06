@@ -5,6 +5,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
@@ -39,7 +40,7 @@ public class ConfigUtils {
      * Saves the Default Config Sections from the Config.yml
      */
     public void saveDefaultConfigValues() {
-        configFile = new File(Main.getInstance().getDataFolder() + "config.yml");
+        configFile = new File(Main.getInstance().getDataFolder(), "config.yml");
         configCfg = YamlConfiguration.loadConfiguration(configFile);
         //Defaults in jar
         Reader defConfigStream;
@@ -48,7 +49,11 @@ public class ConfigUtils {
         configCfg.setDefaults(defConfig);
         //Copy default values
         configCfg.options().copyDefaults(true);
-        Main.getInstance().saveConfig();
+        try {
+            configCfg.save(configFile);
+        } catch (IOException e) {
+            Main.getInstance().getLogger().warning("Could not save default config values: " + e.getMessage());
+        }
         //OR use this to copy default values
         //this.saveDefaultConfig();
     }

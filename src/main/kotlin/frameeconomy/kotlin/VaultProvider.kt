@@ -4,7 +4,6 @@ import de.framedev.frameeconomy.main.Main
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.scheduler.BukkitRunnable
-import kotlin.math.roundToLong
 
 /**
  * This Plugin was Created by FrameDev
@@ -49,10 +48,13 @@ open class VaultProvider(val plugin: Main) {
         val hour = Ticks.hourToTicks(plugin.config.getLong("PayLoad.Hour"))
         val day = Ticks.dayToTicks(plugin.config.getLong("PayLoad.Day"))
         val ticks = sec + min + hour + day
-        if (plugin.config.getBoolean("PayLoad.Use"))
+        if (plugin.config.getBoolean("PayLoad.Use") && ticks > 0)
             object : BukkitRunnable() {
                 override fun run() {
-                    payLoad()
+                    val players = Bukkit.getOfflinePlayers()
+                    plugin.runAsync {
+                        payLoad(players)
+                    }
                 }
             }.runTaskTimer(plugin, 0, ticks)
         val secInt = Ticks.secToTicks(plugin.config.getLong("Interest.Sec"))
@@ -60,16 +62,23 @@ open class VaultProvider(val plugin: Main) {
         val hourInt = Ticks.hourToTicks(plugin.config.getLong("Interest.Hour"))
         val dayInt = Ticks.dayToTicks(plugin.config.getLong("Interest.Day"))
         val ticksInt = secInt + minInt + hourInt + dayInt
-        if (plugin.config.getBoolean("Interest.Use"))
+        if (plugin.config.getBoolean("Interest.Use") && ticksInt > 0)
             object : BukkitRunnable() {
                 override fun run() {
-                    interest()
+                    val players = Bukkit.getOfflinePlayers()
+                    plugin.runAsync {
+                        interest(players)
+                    }
                 }
             }.runTaskTimer(plugin, 0, ticksInt)
     }
 
     open fun payLoad() {
-        for (offlinePlayer in Bukkit.getOfflinePlayers()) {
+        payLoad(Bukkit.getOfflinePlayers())
+    }
+
+    private fun payLoad(players: Array<OfflinePlayer>) {
+        for (offlinePlayer in players) {
             plugin.vaultManager.economy.depositPlayer(offlinePlayer, plugin.config.getDouble("PayLoad.Amount"))
         }
     }
@@ -79,10 +88,14 @@ open class VaultProvider(val plugin: Main) {
     }
 
     open fun interest() {
+        interest(Bukkit.getOfflinePlayers())
+    }
+
+    private fun interest(players: Array<OfflinePlayer>) {
         val percent = plugin.config.getDouble("Interest.Percent")
         val amount = plugin.config.getDouble("Interest.Amount")
         val sum: Double = (amount * percent).toDouble()
-        for (offlinePlayer in Bukkit.getOfflinePlayers()) {
+        for (offlinePlayer in players) {
             plugin.vaultManager.economy.withdrawPlayer(offlinePlayer, sum)
         }
     }

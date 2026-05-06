@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Executor;
 
 
 public class MySQL {
@@ -24,6 +24,7 @@ public class MySQL {
     public static String port;
     public static Connection con;
     static ConsoleCommandSender console = Bukkit.getConsoleSender();
+    private static final Executor DIRECT_EXECUTOR = Runnable::run;
 
     /**
      * Register this Class to use it
@@ -77,26 +78,15 @@ public class MySQL {
     }
 
     public static Connection getConnection() {
-        if (con == null) {
-            close();
-            try {
-                con = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database + "?useUnicode=yes&characterEncoding=UTF-8&useSSL=false", user, password);
-                con.setNetworkTimeout(Executors.newFixedThreadPool(100), 1000000);
-                con.createStatement().executeUpdate("SET GLOBAL max_connections=1200;");
+        try {
+            if (con != null && !con.isClosed()) {
                 return con;
-            } catch (SQLException ex) {
-
             }
-        } else {
-            close();
-            try {
-                con = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database + "?useUnicode=yes&characterEncoding=UTF-8&useSSL=false", user, password);
-                con.setNetworkTimeout(Executors.newFixedThreadPool(100), 1000000);
-                con.createStatement().executeUpdate("SET GLOBAL max_connections=1200;");
-                return con;
-            } catch (SQLException ex) {
-
-            }
+            con = DriverManager.getConnection(getJdbcUrl(), user, password);
+            con.setNetworkTimeout(DIRECT_EXECUTOR, 1000000);
+            return con;
+        } catch (SQLException ex) {
+            Bukkit.getConsoleSender().sendMessage(MySQLPrefix + " §cConnection error: §a" + ex.getMessage());
         }
         return con;
     }
@@ -105,9 +95,8 @@ public class MySQL {
     public static void connect() {
         if (con == null) {
             try {
-                con = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database + "?useUnicode=yes&characterEncoding=UTF-8&useSSL=false", user, password);
-                con.setNetworkTimeout(Executors.newFixedThreadPool(100), 1000000);
-                con.createStatement().executeUpdate("SET GLOBAL max_connections=1200;");
+                con = DriverManager.getConnection(getJdbcUrl(), user, password);
+                con.setNetworkTimeout(DIRECT_EXECUTOR, 1000000);
                 Bukkit.getConsoleSender().sendMessage(MySQLPrefix + "-Verbindung wurde aufgebaut!");
             } catch (SQLException e) {
                 Bukkit.getConsoleSender().sendMessage(MySQLPrefix + " §cEin Fehler ist aufgetreten: §a" + e.getMessage());
@@ -118,14 +107,16 @@ public class MySQL {
     public static void close() {
         if (con != null) {
             try {
-                if (con != null) {
-                    con.close();
-                }
                 con.close();
+                con = null;
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    private static String getJdbcUrl() {
+        return "jdbc:mysql://" + host + ":" + port + "/" + database + "?useUnicode=yes&characterEncoding=UTF-8&useSSL=false";
     }
 
     public static class MySQLConnection implements Serializable {

@@ -33,74 +33,65 @@ public class PayCMD implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(args.length == 2) {
-            if(sender instanceof Player) {
-                if(sender.hasPermission("frameeconomy.pay")) {
-                    Player player = (Player) sender;
-                    double amount = Double.parseDouble(args[0]);
-                    amount = Double.parseDouble(String.format("%.4f",amount));
-                    Player target = Bukkit.getPlayer(args[1]);
-                    if (target != null) {
-                        if (plugin.getVaultManager().getEconomy().has(player, amount)) {
-                            boolean[] success = {false,false};
-                            success[0] = plugin.getVaultManager().getEconomy().depositPlayer(target, amount).transactionSuccess();
-                            success[1] = plugin.getVaultManager().getEconomy().withdrawPlayer(player, amount).transactionSuccess();
-                            if(success[0] && success[1]) {
-                                player.sendMessage("§aYou give §6" + target.getName() + " " + amount + plugin.getVaultManager().getEconomy().currencyNamePlural());
-                                target.sendMessage("§aYou got from §6" + player.getName() + " " + amount + plugin.getVaultManager().getEconomy().currencyNamePlural());
-                            }
-                        } else {
-                            player.sendMessage("§cNot enought Money!");
-                        }
-                    } else {
-                        player.sendMessage("§cThis Player isn't Online!");
-                    }
-                } else {
-                    sender.sendMessage("§cNo Permissions!");
-                }
-            } else {
-                sender.sendMessage("§cOnly Player can use this Command!");
-            }
-
-        } else if(args.length == 3) {
-            double betrag;
-            if(sender instanceof Player) {
-                if (sender.hasPermission("frameeconomy.pay")) {
-                    Player player = (Player) sender;
-                    double amount = Double.parseDouble(args[0]);
-                    double percent = Double.parseDouble(args[2]);
-                    betrag = amount;
-                    Player target = Bukkit.getPlayer(args[1]);
-                    double sum = Math.round(betrag * percent);
-                    sum /= 100.0;
-                    if (target != null) {
-                        if (plugin.getVaultManager().getEconomy().has(player, amount)) {
-                            boolean[] success = {false,false};
-                            amount = Double.parseDouble(String.format("%.4f",amount + sum));
-                            success[0] = plugin.getVaultManager().getEconomy().depositPlayer(target, amount).transactionSuccess();
-                            success[1] = plugin.getVaultManager().getEconomy().withdrawPlayer(player, amount).transactionSuccess();
-                            if(success[0] && success[1]) {
-                                player.sendMessage("§aPercent : §6" + sum);
-                                player.sendMessage("§aYou give §6" + target.getName() + " " + amount + plugin.getVaultManager().getEconomy().currencyNamePlural());
-                                target.sendMessage("§aYou got from §6" + player.getName() + " " + amount + plugin.getVaultManager().getEconomy().currencyNamePlural());
-                            }
-                        } else {
-                            player.sendMessage("§cNot enought Money!");
-                        }
-                    } else {
-                        player.sendMessage("§cThis Player isn't Online!");
-                    }
-                } else {
-                    sender.sendMessage("§cNo Permissions!");
-                }
-            }
+        if (!(sender instanceof Player)) {
+            plugin.sendMessage(sender, "general.only-player");
+            return true;
         }
-        return false;
+        if (!CommandHelper.requirePermission(plugin, sender, "frameeconomy.pay")) return true;
+        if (args.length != 2 && args.length != 3) {
+            plugin.sendMessage(sender, "pay.usage");
+            return true;
+        }
+
+        Player player = (Player) sender;
+        Double parsedAmount = plugin.parsePositiveAmount(sender, args[0]);
+        if (parsedAmount == null) return true;
+        Double parsedPercent = args.length == 3 ? plugin.parsePositiveAmount(sender, args[2]) : 0.0D;
+        if (parsedPercent == null) return true;
+
+        Player target = Bukkit.getPlayer(args[1]);
+        if (target == null) {
+            plugin.sendMessage(player, "general.player-not-found", "player", args[1]);
+            return true;
+        }
+
+        double percentBonus = args.length == 3 ? Math.round(parsedAmount * parsedPercent) / 100.0 : 0.0D;
+        double amount = CommandHelper.roundAmount(parsedAmount + percentBonus);
+        String targetName = target.getName();
+        String playerName = player.getName();
+
+        plugin.runAsync(() -> {
+            if (!plugin.getVaultManager().getEconomy().has(player, amount)) {
+                plugin.sendMessageSync(player, "general.not-enough-money");
+                return;
+            }
+            boolean withdrawn = plugin.getVaultManager().getEconomy().withdrawPlayer(player, amount).transactionSuccess();
+            boolean deposited = withdrawn && plugin.getVaultManager().getEconomy().depositPlayer(target, amount).transactionSuccess();
+            if (withdrawn && deposited) {
+                if (args.length == 3) {
+                    plugin.sendMessageSync(player, "pay.percent", "amount", String.valueOf(percentBonus));
+                }
+                plugin.sendMessageSync(player, "pay.sent",
+                        "player", targetName,
+                        "amount", String.valueOf(amount),
+                        "currency", plugin.getVaultManager().getEconomy().currencyNamePlural());
+                plugin.sendMessageSync(target, "pay.received",
+                        "player", playerName,
+                        "amount", String.valueOf(amount),
+                        "currency", plugin.getVaultManager().getEconomy().currencyNamePlural());
+            } else {
+                if (withdrawn) {
+                    plugin.getVaultManager().getEconomy().depositPlayer(player, amount);
+                }
+                plugin.sendMessageSync(player, "pay.failed");
+            }
+        });
+        return true;
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if(args.length == 1) {
+        if(args.length == 1 && sender instanceof OfflinePlayer) {
             ArrayList<String> empty = new ArrayList<>();
             empty.add(plugin.getVaultManager().getEconomy().getBalance((OfflinePlayer) sender) + "");
             Collections.sort(empty);

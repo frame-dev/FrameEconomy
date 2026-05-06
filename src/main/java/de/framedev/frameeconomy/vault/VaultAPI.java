@@ -148,24 +148,25 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public EconomyResponse withdrawPlayer(String playerName, double amount) {
+        if (amount < 0.0D)
+            return new EconomyResponse(0.0D, getBalance(playerName), EconomyResponse.ResponseType.FAILURE, "Value is less than zero!");
         if (!hasAccount(playerName))
             return new EconomyResponse(0.0D, 0.0D, EconomyResponse.ResponseType.FAILURE, "The Player does not have an Account!");
         double balance = getBalance(playerName);
-        if (getBalance(playerName) > Main.getInstance().getConfig().getDouble("Economy.MinBalance")) {
-            balance -= amount;
-            if (balance < Main.getInstance().getConfig().getDouble("Economy.MinBalance"))
-                return new EconomyResponse(0.0D, balance, EconomyResponse.ResponseType.FAILURE, " test ");
-            if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-                new MySQLManager().removeMoney(Bukkit.getOfflinePlayer(playerName), amount);
-            } else if (Main.getInstance().isMongoDb()) {
-                if (Main.getInstance().getBackendManager().exists(Bukkit.getOfflinePlayer(playerName), "money", "eco"))
-                    Main.getInstance().getBackendManager().updateUser(Bukkit.getOfflinePlayer(playerName), "money", amount, "eco");
-            } else {
-                new FileManager().setMoney(Bukkit.getOfflinePlayer(playerName), balance);
-            }
-
+        double minBalance = Main.getInstance().getConfig().getDouble("Economy.MinBalance", 0.0D);
+        double newBalance = balance - amount;
+        if (newBalance < minBalance) {
+            return new EconomyResponse(0.0D, balance, EconomyResponse.ResponseType.FAILURE, "Not enough money!");
         }
-        return new EconomyResponse(amount, balance, EconomyResponse.ResponseType.SUCCESS, "");
+        if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
+            new MySQLManager().setMoney(Bukkit.getOfflinePlayer(playerName), newBalance);
+        } else if (Main.getInstance().isMongoDb()) {
+            if (Main.getInstance().getBackendManager().exists(Bukkit.getOfflinePlayer(playerName), "money", "eco"))
+                Main.getInstance().getBackendManager().updateUser(Bukkit.getOfflinePlayer(playerName), "money", newBalance, "eco");
+        } else {
+            new FileManager().setMoney(Bukkit.getOfflinePlayer(playerName), newBalance);
+        }
+        return new EconomyResponse(amount, newBalance, EconomyResponse.ResponseType.SUCCESS, "");
     }
 
     @Override
@@ -185,14 +186,14 @@ public class VaultAPI extends AbstractEconomy {
             return new EconomyResponse(Main.getInstance().getConfig().getDouble("Economy.MaxBalance"), 0.0D, EconomyResponse.ResponseType.FAILURE, "Bigger");
 
         if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-            new MySQLManager().addMoney(Bukkit.getOfflinePlayer(playerName), amount);
+            new MySQLManager().setMoney(Bukkit.getOfflinePlayer(playerName), balance);
         } else if (Main.getInstance().isMongoDb()) {
             if (Main.getInstance().getBackendManager().exists(Bukkit.getOfflinePlayer(playerName), "money", "eco"))
-                Main.getInstance().getBackendManager().updateUser(Bukkit.getOfflinePlayer(playerName), "money", amount, "eco");
+                Main.getInstance().getBackendManager().updateUser(Bukkit.getOfflinePlayer(playerName), "money", balance, "eco");
         } else {
             new FileManager().setMoney(Bukkit.getOfflinePlayer(playerName), balance);
         }
-        return new EconomyResponse(amount, 0.0D, EconomyResponse.ResponseType.SUCCESS, "");
+        return new EconomyResponse(amount, balance, EconomyResponse.ResponseType.SUCCESS, "");
     }
 
     @Override
@@ -207,8 +208,12 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public EconomyResponse createBank(String name, String player) {
+        if (getBanks().contains(name)) {
+            return new EconomyResponse(0.0D, 0.0D, EconomyResponse.ResponseType.FAILURE, "Bank already exists!");
+        }
         if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-            new MySQLManager().createBank(Bukkit.getOfflinePlayer(player), name);
+            if (!new MySQLManager().createBank(Bukkit.getOfflinePlayer(player), name))
+                return new EconomyResponse(0.0D, 0.0D, EconomyResponse.ResponseType.FAILURE, "Error while Creating Bank!");
         } else if (Main.getInstance().isMongoDb()) {
             Main.getInstance().getBackendManager().updateUser(Bukkit.getOfflinePlayer(player), "bankowner", Bukkit.getOfflinePlayer(player).getUniqueId().toString(), "eco");
             Main.getInstance().getBackendManager().updateUser(Bukkit.getOfflinePlayer(player), "bankname", name, "eco");
@@ -216,6 +221,7 @@ public class VaultAPI extends AbstractEconomy {
             File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
             FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
             cfg.set("Banks." + name + ".Owner", player);
+            cfg.set("Banks." + name + ".balance", 0.0D);
             try {
                 cfg.save(file);
             } catch (IOException e) {
@@ -263,6 +269,9 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public EconomyResponse bankHas(String name, double amount) {
+        if (amount < 0.0D) {
+            return new EconomyResponse(0.0D, bankBalance(name).amount, EconomyResponse.ResponseType.FAILURE, "Value is less than zero!");
+        }
         if (bankBalance(name).amount < amount) {
             return new EconomyResponse(amount, bankBalance(name).amount, EconomyResponse.ResponseType.FAILURE, "Not enought Money!");
         }
@@ -271,50 +280,49 @@ public class VaultAPI extends AbstractEconomy {
 
     @Override
     public EconomyResponse bankWithdraw(String name, double amount) {
-        double balance = bankBalance(name).amount;
+        if (amount < 0.0D)
+            return new EconomyResponse(0.0D, bankBalance(name).amount, EconomyResponse.ResponseType.FAILURE, "Value is less than zero!");
+        EconomyResponse bankBalance = bankBalance(name);
+        if (!bankBalance.transactionSuccess())
+            return bankBalance;
+        double balance = bankBalance.amount;
+        if (balance < amount)
+            return new EconomyResponse(amount, balance, EconomyResponse.ResponseType.FAILURE, "Not enought Money");
+        double newBalance = balance - amount;
         if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-            balance -= amount;
-            if (!bankHas(name, amount).transactionSuccess())
-                return new EconomyResponse(amount, balance, EconomyResponse.ResponseType.FAILURE, "Not enought Money");
-            new MySQLManager().setBankMoney(name, balance);
+            new MySQLManager().setBankMoney(name, newBalance);
         } else if (Main.getInstance().isMongoDb()) {
-            balance -= amount;
-            if (!bankHas(name, amount).transactionSuccess())
-                return new EconomyResponse(amount, balance, EconomyResponse.ResponseType.FAILURE, "Not enought Money");
-            Main.getInstance().getBackendManager().updataData("bankname", name, "bank", balance, "eco");
+            Main.getInstance().getBackendManager().updataData("bankname", name, "bank", newBalance, "eco");
         } else {
             File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
             FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-            if (!bankHas(name, amount).transactionSuccess())
-                return new EconomyResponse(amount, balance, EconomyResponse.ResponseType.FAILURE, "Not enought Money");
-            balance -= amount;
-            cfg.set("Banks." + name + ".balance", balance);
+            cfg.set("Banks." + name + ".balance", newBalance);
             try {
                 cfg.save(file);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        return new EconomyResponse(amount, balance, EconomyResponse.ResponseType.SUCCESS, "");
+        return new EconomyResponse(amount, newBalance, EconomyResponse.ResponseType.SUCCESS, "");
     }
 
     @Override
     public EconomyResponse bankDeposit(String name, double amount) {
+        if (amount < 0.0D)
+            return new EconomyResponse(0.0D, bankBalance(name).amount, EconomyResponse.ResponseType.FAILURE, "Value is less than zero!");
+        EconomyResponse bankBalance = bankBalance(name);
+        if (!bankBalance.transactionSuccess())
+            return bankBalance;
+        double balance = bankBalance.amount + amount;
         if (Main.getInstance().isMysql() || Main.getInstance().isSQL()) {
-            double balance = new MySQLManager().getBankMoney(name);
-            balance += amount;
             new MySQLManager().setBankMoney(name, balance);
             return new EconomyResponse(amount, balance, EconomyResponse.ResponseType.SUCCESS, "");
         } else if (Main.getInstance().isMongoDb()) {
-            double balance = bankBalance(name).balance;
-            balance += amount;
             Main.getInstance().getBackendManager().updataData("bankname", name, "bank", balance, "eco");
             return new EconomyResponse(amount, balance, EconomyResponse.ResponseType.SUCCESS, "");
         } else {
             File file = new File(Main.getInstance().getDataFolder() + "/money", "eco.yml");
             FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-            double balance = bankBalance(name).amount;
-            balance += amount;
             cfg.set("Banks." + name + ".balance", balance);
             try {
                 cfg.save(file);

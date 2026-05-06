@@ -11,6 +11,7 @@ import de.framedev.frameeconomy.utils.RegisterManager;
 import de.framedev.frameeconomy.utils.SchedulerManager;
 import de.framedev.frameeconomy.vault.VaultManager;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
@@ -43,9 +44,6 @@ public final class Main extends JavaPlugin implements Listener {
     //MongoDB Utils
     private MongoDBUtils mongoDBUtils;
 
-    // Prefix will be initialized in the onEnable method
-    private String prefix = null;
-
     @Override
     public void onEnable() {
         instance = this;
@@ -61,9 +59,6 @@ public final class Main extends JavaPlugin implements Listener {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-
-        //init Variable Prefix
-        prefix = getPrefix();
 
         if (isMysql()) {
             new MySQL();
@@ -103,7 +98,7 @@ public final class Main extends JavaPlugin implements Listener {
             }
         }.runTaskLater(this, 120);
 
-        new SchedulerManager().runTaskTimerAsynchronously(this, 20*6, 20*60*5);
+        new SchedulerManager().runTaskTimerAsynchronously(this, 20 * 6, 20 * 60 * 5);
         new FrameEconomyAPI(this);
     }
 
@@ -114,11 +109,13 @@ public final class Main extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        Bukkit.getScheduler().cancelTasks(this);
         getLogger().log(Level.INFO, "Disabled!");
     }
 
     /**
      * This Class is used for Register all classes
+     *
      * @return return the RegisterManager that register all Classes that implements CommandExecutor and other stuff
      */
     public RegisterManager getRegisterManager() {
@@ -129,7 +126,7 @@ public final class Main extends JavaPlugin implements Listener {
      * Checking for Updates in SpigotMC Forum
      */
     public void checkUpdate() {
-        Bukkit.getConsoleSender().sendMessage(prefix + "Checking for updates...");
+        Bukkit.getConsoleSender().sendMessage(getMessage("update.checking"));
         try {
             int resource = 90172;
             URLConnection conn = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + resource).openConnection();
@@ -137,33 +134,145 @@ public final class Main extends JavaPlugin implements Listener {
             String oldVersion = getDescription().getVersion();
             String newVersion = br.readLine();
             if (!newVersion.equalsIgnoreCase(oldVersion)) {
-                Bukkit.getConsoleSender().sendMessage(prefix + "A new update is available: version " + newVersion);
+                Bukkit.getConsoleSender().sendMessage(getMessage("update.available", "version", newVersion));
             } else {
-                Bukkit.getConsoleSender().sendMessage(prefix + "You're running the newest plugin version!");
+                Bukkit.getConsoleSender().sendMessage(getMessage("update.current"));
             }
         } catch (IOException e) {
-            Bukkit.getConsoleSender().sendMessage(prefix + "Failed to check for updates on spigotmc.org");
+            Bukkit.getConsoleSender().sendMessage(getMessage("update.failed"));
         }
     }
 
     /**
      * This can only be changed in Config.yml
      * Implements an Example Prefix if Prefix in Config.yml was Null
+     *
      * @return Prefix of this Plugin
      */
     @NotNull
     public String getPrefix() {
         String prefix = getConfig().getString("Prefix");
         if (prefix == null) return "§6[§aFrame§bEconomy§6] §c» §7";
-        if (prefix.contains("&"))
-            prefix = prefix.replace("&", "§");
-        if (prefix.contains(">>"))
-            prefix = prefix.replace(">>", "»");
-        return Objects.requireNonNull(prefix);
+        return colorize(Objects.requireNonNull(prefix));
+    }
+
+    /**
+     * Reads a player-facing message from config.yml and applies placeholders.
+     *
+     * @param path         path below the Messages section
+     * @param replacements key/value placeholder pairs
+     * @return configured and formatted message
+     */
+    public String getMessage(String path, String... replacements) {
+        return getPrefix() + getMessageWithoutPrefix(path, replacements);
+    }
+
+    /**
+     * Reads a message without adding the plugin prefix.
+     *
+     * @param path         path below the Messages section
+     * @param replacements key/value placeholder pairs
+     * @return configured and formatted message
+     */
+    public String getMessageWithoutPrefix(String path, String... replacements) {
+        String message = getConfig().getString("Messages." + path, "Missing message: " + path);
+        for (int i = 0; i + 1 < replacements.length; i += 2) {
+            message = message.replace("{" + replacements[i] + "}", String.valueOf(replacements[i + 1]));
+        }
+        return colorize(message);
+    }
+
+    /**
+     * Sends a configured message to a command sender.
+     *
+     * @param sender       command sender receiving the message
+     * @param path         path below the Messages section
+     * @param replacements key/value placeholder pairs
+     */
+    public void sendMessage(CommandSender sender, String path, String... replacements) {
+        sender.sendMessage(getMessage(path, replacements));
+    }
+
+    /**
+     * Runs storage-heavy work away from the server thread.
+     *
+     * @param task work to run asynchronously
+     */
+    public void runAsync(Runnable task) {
+        Bukkit.getScheduler().runTaskAsynchronously(this, task);
+    }
+
+    /**
+     * Runs Bukkit-facing work on the server thread.
+     *
+     * @param task work to run synchronously
+     */
+    public void runSync(Runnable task) {
+        Bukkit.getScheduler().runTask(this, task);
+    }
+
+    /**
+     * Sends a configured message from async code by hopping back to the server thread.
+     *
+     * @param sender command sender receiving the message
+     * @param path path below the Messages section
+     * @param replacements key/value placeholder pairs
+     */
+    public void sendMessageSync(CommandSender sender, String path, String... replacements) {
+        runSync(() -> sendMessage(sender, path, replacements));
+    }
+
+    /**
+     * Parses a positive amount from command input and reports invalid values.
+     *
+     * @param sender    command sender to notify on invalid input
+     * @param rawAmount amount text from the command
+     * @return parsed amount, or null when invalid
+     */
+    public Double parsePositiveAmount(CommandSender sender, String rawAmount) {
+        try {
+            double amount = Double.parseDouble(rawAmount);
+            if (amount <= 0) {
+                sendMessage(sender, "general.invalid-amount", "amount", rawAmount);
+                return null;
+            }
+            return amount;
+        } catch (NumberFormatException exception) {
+            sendMessage(sender, "general.invalid-amount", "amount", rawAmount);
+            return null;
+        }
+    }
+
+    /**
+     * Applies legacy Minecraft color code formatting.
+     *
+     * @param message message text
+     * @return colorized message
+     */
+    public String colorize(String message) {
+        if (message == null) return "";
+        return message.replace("&", "§").replace(">>", "»");
+    }
+
+    /**
+     * Sets a player's balance through the active Vault economy provider.
+     *
+     * @param player player account to update
+     * @param amount new balance
+     * @return true if the economy accepted the update
+     */
+    public boolean setPlayerBalance(OfflinePlayer player, double amount) {
+        if (!vaultManager.getEconomy().hasAccount(player)) {
+            vaultManager.getEconomy().createPlayerAccount(player);
+        }
+        double currentBalance = vaultManager.getEconomy().getBalance(player);
+        return vaultManager.getEconomy().withdrawPlayer(player, currentBalance).transactionSuccess()
+                && vaultManager.getEconomy().depositPlayer(player, amount).transactionSuccess();
     }
 
     /**
      * This Class contains Creator / Updater / Inserter for your MongoDB Connection
+     *
      * @return the Util class for MongoDB
      */
     public BackendManager getBackendManager() {
@@ -174,6 +283,7 @@ public final class Main extends JavaPlugin implements Listener {
     /**
      * Used for Connection to your MongoDB Database
      * in this Class MongoDB will connect to your Database
+     *
      * @return the MongoDB util Class
      */
     public MongoManager getMongoManager() {
@@ -197,6 +307,7 @@ public final class Main extends JavaPlugin implements Listener {
     /**
      * VaultManager used for VaultAPI
      * Any change will make Errors
+     *
      * @return the VaultManager
      */
     public VaultManager getVaultManager() {
@@ -236,17 +347,17 @@ public final class Main extends JavaPlugin implements Listener {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if(command.getName().equalsIgnoreCase("frameeconomy")) {
-            if(args.length == 1) {
-                if(args[0].equalsIgnoreCase("reload")) {
-                    if(sender.hasPermission("frameeconomy.reload")) {
+        if (command.getName().equalsIgnoreCase("frameeconomy")) {
+            if (args.length == 1) {
+                if (args[0].equalsIgnoreCase("reload")) {
+                    if (sender.hasPermission("frameeconomy.reload")) {
                         saveConfig();
                         reloadConfig();
                         Bukkit.getPluginManager().disablePlugin(this);
                         Bukkit.getPluginManager().enablePlugin(this);
-                        sender.sendMessage(getPrefix() + "§aConfig Reloaded!");
+                        sendMessage(sender, "reload.success");
                     } else {
-                        sender.sendMessage(getPrefix() + "§cKeine Permissions!");
+                        sendMessage(sender, "general.no-permission");
                     }
                 }
             }
